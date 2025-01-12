@@ -92,12 +92,12 @@ export default function Orb2() {
         setAiResponse(aiResponse)
         
         // Check if we got a promptId for polling
-        if (!imageResponse?.promptId) {
+        if (!imageResponse?.upscaledResult?.promptId) {
           console.error('Invalid ComfyUI response:', imageResponse)
           throw new Error('No promptId received from ComfyUI')
         }
         
-        console.log('Starting to poll with promptId:', imageResponse.promptId)
+        console.log('Starting to poll with promptId:', imageResponse.upscaledResult.promptId)
         
         // Start polling for the image
         const pollInterval = 2000
@@ -109,7 +109,7 @@ export default function Orb2() {
           
           console.log(`Polling attempt ${attempts + 1}/${maxAttempts}...`)
           
-          const statusResponse = await fetch(`/api/comfyui-status?promptId=${imageResponse.promptId}`)
+          const statusResponse = await fetch(`/api/comfyui-status?promptId=${imageResponse.upscaledResult.promptId}`)
           if (!statusResponse.ok) {
             throw new Error('Failed to check image status')
           }
