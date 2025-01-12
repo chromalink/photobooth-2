@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
-import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
+import type { ChatCompletionContentPart } from 'openai/resources/chat/completions';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -40,26 +40,29 @@ export async function POST(request: Request) {
     const prompt = `You are a humorous satirical oracle. Based on the photo, give a funny, witty, and slightly sarcastic reading that playfully pokes fun at their aura or energy. Try to guess their occupation and relationship status in a humorous way. Keep it light-hearted and entertaining. Absolute Maximum response length: 49 words`;
 
     console.log('Sending request to OpenAI...');
-    
-    const messages: ChatCompletionMessageParam[] = [
+
+    const content: ChatCompletionContentPart[] = [
+      { type: "text", text: "What do you see in this photo? Make it funny!" },
       {
-        role: "system",
-        content: prompt
-      },
-      {
-        role: "user",
-        content: {
-          text: "What do you see in this photo? Make it funny!",
-          image_url: {
-            url: processedImageUrl,
-            detail: "low"
-          }
+        type: "image_url",
+        image_url: {
+          url: processedImageUrl,
+          detail: "low"
         }
       }
     ];
 
     const completion = await openai.chat.completions.create({
-      messages,
+      messages: [
+        {
+          role: "system",
+          content: prompt
+        },
+        {
+          role: "user",
+          content
+        }
+      ],
       model: "gpt-4o",
       max_tokens: 500,
       temperature: 0.9
