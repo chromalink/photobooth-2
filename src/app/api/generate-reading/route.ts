@@ -99,7 +99,7 @@ export async function POST(request: Request) {
     
     const completion = await openai.chat.completions.create({
       messages: messages as any, // Type assertion needed for OpenAI API
-      model: "gpt-4-vision-preview",
+      model: "gpt-4o",
       max_tokens: 500,
       temperature: 0.9
     });
