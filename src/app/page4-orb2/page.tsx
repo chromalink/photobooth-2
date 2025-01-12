@@ -56,19 +56,18 @@ export default function Orb2() {
   // Main processing effect
   useEffect(() => {
     // Skip if already processing or missing data
-    if (isProcessing || hasStartedProcessing || !uploadedPhotoUrl || !colorChoice) {
+    if (isProcessing || hasStartedProcessing || !uploadedPhotoUrl) {
       console.log('Skipping processing:', {
         isProcessing,
         hasStartedProcessing,
         hasUploadedPhoto: !!uploadedPhotoUrl,
-        hasColorChoice: !!colorChoice,
         currentProvider: aiModelProvider
       })
       return
     }
 
     let isSubscribed = true
-    const color = colorChoice ? COLORS[colorChoice] : COLORS[1] // Add fallback
+    const color = 'white' // Default to white since we're skipping color pick
 
     const processUserInput = async () => {
       try {
@@ -78,7 +77,7 @@ export default function Orb2() {
         setError('')
 
         console.log('Starting processing with:', {
-          colorChoice,
+          color,
           uploadedPhotoUrl: uploadedPhotoUrl.slice(0, 50) + '...',
           provider: aiModelProvider
         })
@@ -87,7 +86,7 @@ export default function Orb2() {
         setProgress(10)
         console.log('Starting AI processes with color:', color)
 
-        const basePrompt = `${color} palette, beautiful illustration, ornate, colourful ${color} palette, spiritual energy, aura, portrait, fantasy. Happy, uplifting, positive. Oil painting, futuristic, serene, radiant..`
+        const basePrompt = `beautiful illustration, ornate, colourful palette, spiritual energy, aura, portrait, fantasy. Happy, uplifting, positive. Oil painting, futuristic, serene, radiant..`
         
         const selectedRoute = aiModelProvider === 'comfyui' ? '/api/comfyui' : '/api/midjourney-discord'
         console.log('Starting image generation with:', {
@@ -240,7 +239,7 @@ export default function Orb2() {
       isSubscribed = false
       setIsProcessing(false)
     }
-  }, [uploadedPhotoUrl, colorChoice]) // Remove state flags from deps to prevent re-runs
+  }, [uploadedPhotoUrl]) // Remove state flags from deps to prevent re-runs
 
   return (
     <>
