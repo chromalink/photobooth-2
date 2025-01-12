@@ -420,3 +420,29 @@ canvas {
 .ai-model-select select option {
   padding: 0.5rem;
 }
+
+html, 
+body {
+  min-height: 100vh;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+body > div {
+  min-height: 100vh;
+}
+
+.uk-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.uk-heading-medium {
+  word-break: break-word;
+  hyphens: auto;
+  line-height: 1.4 !important;
+  padding-bottom: 0.2em;
+}

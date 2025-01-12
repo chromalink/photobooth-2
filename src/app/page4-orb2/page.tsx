@@ -167,32 +167,45 @@ export default function Orb2() {
   }, [uploadedPhotoUrl, setAiResponse, setAiModelImage, setError, setIsProcessing, setHasStartedProcessing, router])
 
   return (
-    <div className="relative min-h-screen">
-      <OrbAnimation progress={visualProgress} />
+    <div className="uk-height-viewport uk-width-1-1 uk-position-relative">
+      <div className="uk-position-fixed uk-position-top-left uk-width-1-1 uk-height-1-1">
+        <OrbAnimation progress={visualProgress} />
+      </div>
       
       {/* UI Layer */}
-      <div className="relative" style={{ zIndex: 2 }}>
+      <div className="uk-position-relative uk-height-viewport uk-flex uk-flex-column uk-flex-middle uk-flex-center" style={{ zIndex: 2 }}>
         <motion.div
-          className="description-section"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
+          className="uk-text-center"
         >
-          <div className="countdown">
-            {visualProgress}%
+          <div className="uk-margin-medium-bottom">
+            <div className="uk-text-large uk-text-bold uk-light" style={{
+              fontSize: '4rem',
+              background: 'linear-gradient(45deg, #fff, #a8a8a8)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent'
+            }}>
+              {visualProgress}%
+            </div>
           </div>
-          <p className="description-text">
+          <p className="uk-text-large uk-light uk-margin-remove-top uk-margin-medium-bottom" style={{
+            textShadow: '0 2px 4px rgba(0,0,0,0.2)'
+          }}>
             {visualProgress >= 99 ? "Almost there..." : "Processing your aura..."}
           </p>
         </motion.div>
 
         <motion.div
-          className="description-at-button"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
+          className="uk-position-bottom-center uk-position-medium uk-text-center"
         >
-          <p className="medium-text">
+          <p className="uk-text-medium uk-light uk-margin-remove" style={{
+            textShadow: '0 2px 4px rgba(0,0,0,0.2)'
+          }}>
             Creating your unique spiritual reading...
           </p>
         </motion.div>

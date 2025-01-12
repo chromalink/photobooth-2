@@ -12,6 +12,7 @@
     "@cloudinary/url-gen": "^1.14.0",
     "@sendgrid/mail": "^8.1.4",
     "@types/three": "^0.170.0",
+    "@types/uikit": "^3.14.5",
     "clsx": "^2.0.0",
     "form-data": "^4.0.1",
     "framer-motion": "^10.16.16",
@@ -23,6 +24,7 @@
     "resend": "^2.0.0",
     "tailwind-merge": "^2.1.0",
     "three": "^0.171.0",
+    "uikit": "^3.22.0",
     "zustand": "^4.4.7"
   },
   "devDependencies": {

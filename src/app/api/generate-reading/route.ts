@@ -57,7 +57,7 @@ export async function POST(request: Request) {
       console.log('Processed image URL starts with:', processedImageUrl.substring(0, 30));
     }
 
-    const prompt = `You are a humorous satirical oracle. Based on the photo, give a funny, witty, and slightly sarcastic reading that playfully pokes fun at their aura or energy. Try to guess their occupation and relationship status in a humorous way. Keep it light-hearted and entertaining. Absolute Maximum response length: 49 words`;
+    const prompt = `You are a humorous satirical oracle. Based on the photo, identify hypothetical red flags and give a funny, witty, and slightly sarcastic reading that playfully pokes fun at their aura or energy. Try to guess their occupation and relationship status in a humorous way. Keep it light-hearted and entertaining. Absolute Maximum response length: 49 words`;
 
     console.log('Preparing OpenAI request...');
 

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import 'uikit/dist/css/uikit.min.css'
 import { config } from '@/config'
 import { Inter } from 'next/font/google'
 

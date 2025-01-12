@@ -6,6 +6,7 @@ import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { DEFAULT_AI_PROVIDER } from '@/config/ai-route-config'
+import ClientPromptResult from '@/components/ClientPromptResult';
 
 export default function Results() {
   const aiResponse = useSessionStore((state) => state.aiResponse)
@@ -157,107 +158,57 @@ export default function Results() {
   const aura = getAuraTitle(colorChoice)
 
   return (
-    <>
-      <div className="main-container" style={{
-        display: 'flex',
-        flexDirection: 'column',
-        minHeight: '100vh',
-        padding: '2rem'
-      }}>
-        {isLoading ? (
+    <div className="uk-container uk-container-expand uk-height-viewport uk-padding uk-flex uk-flex-column">
+      {isLoading ? (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="uk-flex uk-flex-column uk-flex-middle uk-flex-center uk-height-viewport"
+        >
+          <div className="uk-margin">
+            <div className="uk-spinner" data-uk-spinner="ratio: 2"></div>
+          </div>
+          <p className="uk-text-lead uk-text-center uk-light">
+            Creating your magical portrait...
+          </p>
+        </motion.div>
+      ) : (
+        <>
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="loading-container"
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              height: '100vh',
-              gap: '20px'
-            }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="uk-text-center uk-margin-medium-bottom"
           >
-            <div className="loading-spinner" style={{
-              width: '50px',
-              height: '50px',
-              border: '5px solid #f3f3f3',
-              borderTop: '5px solid #3498db',
-              borderRadius: '50%',
-              animation: 'spin 1s linear infinite'
-            }} />
-            <p className="loading-text" style={{
-              fontSize: '1.2rem',
-              color: '#fff',
-              textAlign: 'center'
-            }}>
-              Creating your magical portrait...
-            </p>
-          </motion.div>
-        ) : (
-          <>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="aura-title-section"
-              style={{
-                marginBottom: '2rem'
-              }}
-            >
+            <h1 className="uk-heading-small">
               You&apos;re a... <span className={aura.className}>{aura.text}</span><i>!</i>
-            </motion.div>
+            </h1>
+          </motion.div>
 
-            <div style={{ 
-              display: 'flex', 
-              flexDirection: 'row', 
-              gap: '2rem',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '100%',
-              padding: '2rem',
-              flex: 1,
-              minHeight: '60vh'
-            }}>
-              {imageUrl && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.5, delay: 0.2 }}
-                  className="aura-photo-section"
-                  style={{ 
-                    width: '50%',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    alignSelf: 'stretch'
-                  }}
-                >
-                  {imageError ? (
-                    <div style={{ color: 'red', textAlign: 'center' }}>
-                      {imageError}
-                      <br />
-                      <button 
-                        onClick={() => window.location.reload()} 
-                        style={{ 
-                          marginTop: '1rem',
-                          padding: '0.5rem 1rem',
-                          backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                          border: 'none',
-                          borderRadius: '0.5rem',
-                          color: 'white',
-                          cursor: 'pointer'
-                        }}
-                      >
-                        Retry
-                      </button>
-                    </div>
-                  ) : (
+          <div className="uk-grid uk-grid-medium uk-flex-middle uk-child-width-1-2@m" data-uk-grid>
+            {imageUrl && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="uk-flex uk-flex-column uk-flex-middle"
+              >
+                {imageError ? (
+                  <div className="uk-text-danger uk-text-center">
+                    <p>{imageError}</p>
+                    <button 
+                      onClick={() => window.location.reload()} 
+                      className="uk-button uk-button-default uk-button-small uk-margin-small-top uk-light"
+                    >
+                      Retry
+                    </button>
+                  </div>
+                ) : (
+                  <div className="uk-inline-clip uk-transition-toggle">
                     <img 
                       src={imageUrl} 
                       alt="Your aura photo" 
-                      className="aura-photo"
+                      className="uk-transition-scale-up uk-transition-opaque"
                       onError={(e) => {
                         console.error('Image load error:', e)
                         setImageError('Failed to load image')
@@ -267,93 +218,70 @@ export default function Results() {
                         setImageError(null)
                       }}
                       style={{ 
-                        maxWidth: '100%',
                         maxHeight: '60vh',
-                        objectFit: 'contain'
+                        width: 'auto'
                       }}
                     />
-                  )}
-                  <div style={{ marginTop: '1rem' }}>
-                    <button 
-                      onClick={handleDownload}
-                      style={{
-                        padding: '0.5rem 1rem',
-                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                        border: 'none',
-                        borderRadius: '0.5rem',
-                        color: 'white',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      Download Image
-                    </button>
                   </div>
-                </motion.div>
-              )}
-
-              <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '2rem',
-                width: '50%',
-                alignSelf: 'center'
-              }}>
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.5, delay: 0.4 }}
-                  className="prompt-result"
-                  style={{
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                    padding: '2rem',
-                    borderRadius: '1rem'
-                  }}
+                )}
+                <button 
+                  onClick={handleDownload}
+                  className="uk-button uk-button-default uk-margin-small-top uk-light"
                 >
-                  <p className="small-text" style={{ textAlign: 'left' }}>
-                    {truncatedResponse || 'No reading available yet...'}
-                  </p>
-                </motion.div>
+                  Download Image
+                </button>
+              </motion.div>
+            )}
 
-                <motion.div
-                  className="button-section"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.5 }}
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '1rem',
-                    alignItems: 'center'
-                  }}
-                >
-                  <button
-                    className="main-button skip-button"
-                    onClick={() => {
-                      resetSession()
-                      setAiModelProvider(DEFAULT_AI_PROVIDER)
-                      router.push('/page1-home')
-                    }}
-                    style={{
-                      padding: '2rem 4rem',
-                      fontSize: '2rem',
-                      width: 'auto'
-                    }}
-                  >
-                    START AGAIN
-                  </button>
-                </motion.div>
+            <div className="uk-flex uk-flex-column uk-flex-middle">
+              <div className="uk-width-1-1">
+                <ClientPromptResult 
+                  reading={aiResponse} 
+                  isVisible={!!aiResponse}
+                />
               </div>
-            </div>
-          </>
-        )}
-      </div>
 
-      <style jsx global>{`
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+                className="uk-margin-medium-top"
+              >
+                <button
+                  onClick={() => {
+                    resetSession()
+                    setAiModelProvider(DEFAULT_AI_PROVIDER)
+                    router.push('/page1-home')
+                  }}
+                  className="uk-button uk-button-primary uk-button-large uk-border-pill uk-box-shadow-large"
+                  style={{
+                    background: 'linear-gradient(to right, rgba(139, 92, 246, 0.8), rgba(76, 29, 149, 0.8))',
+                    padding: '1.5rem 3rem',
+                    fontSize: '1.5rem',
+                    transition: 'all 0.3s ease',
+                  }}
+                >
+                  START AGAIN
+                </button>
+              </motion.div>
+            </div>
+          </div>
+        </>
+      )}
+
+      <style jsx>{`
+        :global(.uk-spinner) {
+          color: rgba(139, 92, 246, 0.8);
+        }
+        :global(.uk-button-primary:hover) {
+          background: linear-gradient(to right, rgba(139, 92, 246, 0.9), rgba(76, 29, 149, 0.9)) !important;
+          transform: translateY(-2px);
+          box-shadow: 0 10px 25px rgba(139, 92, 246, 0.4) !important;
+        }
+        :global(.uk-light) {
+          color: rgba(255, 255, 255, 0.9);
         }
       `}</style>
-    </>
+    </div>
   )
 }

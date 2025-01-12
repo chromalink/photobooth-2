@@ -63,64 +63,132 @@ export default function EmailPage() {
     <>
       <div className="moon-texture" aria-hidden="true" />
       
-      <div className="main-container">
-        <motion.h1
-          className="title-section"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-        >
-          {config.app.name}
-        </motion.h1>
+      <div className="uk-container uk-container-xsmall uk-height-1-1 uk-flex uk-flex-middle uk-flex-center" style={{ minHeight: '100vh', padding: '40px 20px' }}>
+        <div className="uk-width-large uk-text-center">
+          <motion.h1
+            className="uk-heading-medium uk-text-bold uk-margin-large-bottom"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            style={{
+              background: 'linear-gradient(45deg, #fff, #a8a8a8)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              lineHeight: '1.4'
+            }}
+          >
+            {config.app.name}
+          </motion.h1>
 
-        <motion.div
-          className="input-section"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-        >
-          <input
-            type="text"
-            className="input-field"
-            placeholder="Full Name"
-            value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
-          />
-          <input
-            type="email"
-            className="input-field"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          {error && (
-            <div className="error-message" style={{ color: 'red', marginTop: '10px', textAlign: 'center' }}>
-              {error}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="uk-margin-medium-bottom"
+          >
+            <div className="uk-margin-medium-bottom">
+              <input
+                type="text"
+                className="uk-input uk-form-large uk-border-pill uk-text-center"
+                placeholder="Full Name"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                style={{
+                  background: 'rgba(255, 255, 255, 0.1)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  color: 'white',
+                  backdropFilter: 'blur(10px)',
+                }}
+              />
             </div>
-          )}
-        </motion.div>
+            <div className="uk-margin-medium-bottom">
+              <input
+                type="email"
+                className="uk-input uk-form-large uk-border-pill uk-text-center"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                style={{
+                  background: 'rgba(255, 255, 255, 0.1)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  color: 'white',
+                  backdropFilter: 'blur(10px)',
+                }}
+              />
+            </div>
+            {error && (
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="uk-text-danger uk-margin-small-top"
+              >
+                {error}
+              </motion.div>
+            )}
+          </motion.div>
 
-        <motion.div
-          className="button-section"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-        >
-          <button
-            className="main-button"
-            onClick={handleSubmit}
-            disabled={!fullName.trim() || !email.trim() || isSending}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            className="uk-margin-medium-bottom"
           >
-            {isSending ? 'SENDING...' : 'SEND TO EMAIL'}
-          </button>
-          <button
-            className="main-button skip-button"
-            onClick={() => router.push('/page6-results')}
-          >
-            SKIP
-          </button>
-        </motion.div>
+            <button
+              onClick={handleSubmit}
+              disabled={!fullName.trim() || !email.trim() || isSending}
+              className="uk-button uk-button-primary uk-button-large uk-border-pill uk-width-1-1 uk-margin-small-bottom"
+              style={{
+                background: 'linear-gradient(45deg, rgba(139, 92, 246, 0.8), rgba(76, 29, 149, 0.8))',
+                border: 'none',
+                padding: '15px 40px',
+                fontSize: '1.2rem',
+                backdropFilter: 'blur(10px)',
+                transition: 'all 0.3s ease',
+                boxShadow: '0 4px 15px rgba(139, 92, 246, 0.3)',
+              }}
+            >
+              {isSending ? (
+                <div className="uk-flex uk-flex-middle uk-flex-center">
+                  <div data-uk-spinner="ratio: 0.8" className="uk-margin-small-right"></div>
+                  SENDING...
+                </div>
+              ) : (
+                'SEND TO EMAIL'
+              )}
+            </button>
+            <button
+              onClick={() => router.push('/page6-results')}
+              className="uk-button uk-button-default uk-button-large uk-border-pill uk-width-1-1"
+              style={{
+                background: 'rgba(255, 255, 255, 0.1)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                color: 'white',
+                backdropFilter: 'blur(10px)',
+                transition: 'all 0.3s ease',
+              }}
+            >
+              SKIP
+            </button>
+          </motion.div>
+        </div>
       </div>
+
+      <style jsx>{`
+        :global(.uk-button-primary:hover) {
+          background: linear-gradient(45deg, rgba(139, 92, 246, 0.9), rgba(76, 29, 149, 0.9)) !important;
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4) !important;
+        }
+        :global(.uk-button-default:hover) {
+          background: rgba(255, 255, 255, 0.2) !important;
+          border-color: rgba(255, 255, 255, 0.3) !important;
+          transform: translateY(-2px);
+        }
+        :global(.uk-input:focus) {
+          background: rgba(255, 255, 255, 0.15) !important;
+          border-color: rgba(139, 92, 246, 0.5) !important;
+        }
+      `}</style>
     </>
   )
 }

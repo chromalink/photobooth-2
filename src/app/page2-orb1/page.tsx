@@ -212,7 +212,7 @@ export default function Orb1() {
   }, [shouldNavigate, router]);
 
   return (
-    <div className="relative w-full h-full overflow-hidden">
+    <div className="uk-height-viewport uk-width-1-1 uk-overflow-hidden uk-position-relative">
       {/* Camera Preview */}
       <div 
         style={{
@@ -224,7 +224,8 @@ export default function Orb1() {
           height: previewSize,
           overflow: 'visible',
           borderRadius: '50%',
-          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)'
+          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)',
+          zIndex: 1
         }}
       >
         {/* Inner container for feathered mask */}
@@ -264,14 +265,17 @@ export default function Orb1() {
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0, opacity: 0 }}
-          className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-8xl font-bold text-white z-50"
+          className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-8xl font-bold text-white"
+          style={{ zIndex: 2 }}
         >
           {countdown}
         </motion.div>
       )}
 
       {/* Orb Animation */}
-      <OrbAnimation />
+      <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 0 }}>
+        <OrbAnimation />
+      </div>
     </div>
   );
 }
