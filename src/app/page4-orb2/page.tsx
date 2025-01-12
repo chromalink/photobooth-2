@@ -19,12 +19,18 @@ export default function Orb2() {
   const setAiModelImage = useSessionStore((state) => state.setAiModelImage)
   const setError = useSessionStore((state) => state.setError)
   const [visualProgress, setVisualProgress] = useState(1)
+  const processStartedRef = useRef(false)
 
   // Reset processing state when component mounts
   useEffect(() => {
     console.log('Resetting processing state...')
+    setIsProcessing(false)
+    setHasStartedProcessing(false)
     resetProcessingState()
-  }, [resetProcessingState]) 
+    return () => {
+      processStartedRef.current = false
+    }
+  }, [resetProcessingState, setIsProcessing, setHasStartedProcessing]) 
 
   // Visual progress counter
   useEffect(() => {
@@ -36,19 +42,20 @@ export default function Orb2() {
 
   // Main processing effect
   useEffect(() => {
-    if (isProcessing || hasStartedProcessing || !uploadedPhotoUrl) {
+    if (!uploadedPhotoUrl || processStartedRef.current) {
       console.log('Skipping processing:', {
-        isProcessing,
-        hasStartedProcessing,
-        hasUploadedPhoto: !!uploadedPhotoUrl
+        hasUploadedPhoto: !!uploadedPhotoUrl,
+        processStarted: processStartedRef.current
       })
       return
     }
 
     let isSubscribed = true
+    processStartedRef.current = true
 
     const processUserInput = async () => {
       try {
+        console.log('Starting processing...')
         setIsProcessing(true)
         setHasStartedProcessing(true)
         setError('')
@@ -128,6 +135,7 @@ export default function Orb2() {
         setError(error instanceof Error ? error.message : 'An error occurred')
         setIsProcessing(false)
         setHasStartedProcessing(false)
+        processStartedRef.current = false
       }
     }
 
@@ -137,7 +145,7 @@ export default function Orb2() {
       isSubscribed = false
       setIsProcessing(false)
     }
-  }, [uploadedPhotoUrl, isProcessing, hasStartedProcessing, setAiResponse, setAiModelImage, setError, setIsProcessing, setHasStartedProcessing, router, resetProcessingState])
+  }, [uploadedPhotoUrl, setAiResponse, setAiModelImage, setError, setIsProcessing, setHasStartedProcessing, router])
 
   return (
     <div className="relative min-h-screen">
