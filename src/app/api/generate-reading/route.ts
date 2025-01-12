@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
+import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -40,26 +41,25 @@ export async function POST(request: Request) {
 
     console.log('Sending request to OpenAI...');
     
-    const completion = await openai.chat.completions.create({
-      messages: [
-        {
-          role: "system" as const,
-          content: prompt
-        },
-        {
-          role: "user" as const,
-          content: [
-            { type: "text" as const, text: "What do you see in this photo? Make it funny!" },
-            {
-              type: "image_url" as const,
-              image_url: {
-                url: processedImageUrl,
-                detail: "low" as const
-              }
-            }
-          ]
+    const messages: ChatCompletionMessageParam[] = [
+      {
+        role: "system",
+        content: prompt
+      },
+      {
+        role: "user",
+        content: {
+          text: "What do you see in this photo? Make it funny!",
+          image_url: {
+            url: processedImageUrl,
+            detail: "low"
+          }
         }
-      ],
+      }
+    ];
+
+    const completion = await openai.chat.completions.create({
+      messages,
       model: "gpt-4o",
       max_tokens: 500,
       temperature: 0.9
