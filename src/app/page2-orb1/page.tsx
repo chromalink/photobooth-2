@@ -207,7 +207,7 @@ export default function Orb1() {
         });
       }
       
-      router.push('/page3-colorpick');
+      router.push('/page4-orb2');
     }
   }, [shouldNavigate, router]);
 
