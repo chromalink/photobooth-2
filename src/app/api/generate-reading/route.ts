@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
-import type { ChatCompletionContentPart } from 'openai/resources/chat/completions';
+import type { ChatCompletionMessageParam, ChatCompletionSystemMessageParam, ChatCompletionUserMessageParam } from 'openai/resources/chat/completions';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -39,31 +39,46 @@ export async function POST(request: Request) {
 
     const prompt = `You are a humorous satirical oracle. Based on the photo, give a funny, witty, and slightly sarcastic reading that playfully pokes fun at their aura or energy. Try to guess their occupation and relationship status in a humorous way. Keep it light-hearted and entertaining. Absolute Maximum response length: 49 words`;
 
-    console.log('Sending request to OpenAI...');
+    console.log('Preparing OpenAI request...');
 
-    const content: ChatCompletionContentPart[] = [
-      { type: "text", text: "What do you see in this photo? Make it funny!" },
-      {
-        type: "image_url",
-        image_url: {
-          url: processedImageUrl,
-          detail: "low"
-        }
-      }
-    ];
+    const systemMessage: ChatCompletionSystemMessageParam = {
+      role: "system",
+      content: prompt
+    };
 
-    const completion = await openai.chat.completions.create({
-      messages: [
+    const userMessage: ChatCompletionUserMessageParam = {
+      role: "user",
+      content: [
         {
-          role: "system",
-          content: prompt
+          type: "text",
+          text: "What do you see in this photo? Make it funny!"
         },
         {
-          role: "user",
-          content
+          type: "image_url",
+          image_url: {
+            url: processedImageUrl,
+            detail: "low"
+          }
         }
-      ],
-      model: "gpt-4o",
+      ]
+    };
+
+    const messages: ChatCompletionMessageParam[] = [
+      systemMessage,
+      userMessage
+    ];
+
+    console.log('OpenAI request structure:', {
+      messageCount: messages.length,
+      systemMessage: { role: systemMessage.role },
+      userMessage: { role: userMessage.role, contentTypes: userMessage.content.map(c => c.type) }
+    });
+
+    console.log('Sending request to OpenAI...');
+    
+    const completion = await openai.chat.completions.create({
+      messages,
+      model: "gpt-4-vision-preview",  // Updated model name
       max_tokens: 500,
       temperature: 0.9
     });
