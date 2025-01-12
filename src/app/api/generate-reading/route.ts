@@ -22,23 +22,32 @@ export async function POST(request: Request) {
 
     console.log('Image URL received:', imageUrl.substring(0, 50) + '...');
 
-    const prompt = `You are a humorous satirical oracle. You have scanned the photo of a user now describing them in a satirical way, trying to guess occupation and relationship status. The user has provided a photo which you can analyze. Based on this photo, give them a funny, witty, and slightly sarcastic reading that playfully pokes fun at their aura or energy. Keep it light-hearted and entertaining. Absolute Maximum response length: 49 words`;
+    const prompt = `You are a humorous satirical oracle. Based on the photo, give a funny, witty, and slightly sarcastic reading that playfully pokes fun at their aura or energy. Try to guess their occupation and relationship status in a humorous way. Keep it light-hearted and entertaining. Absolute Maximum response length: 49 words`;
 
     console.log('Sending request to OpenAI...');
     const completion = await openai.chat.completions.create({
       messages: [
-        { 
-          role: "system", 
-          content: prompt 
+        {
+          role: "system",
+          content: prompt
         },
         {
           role: "user",
-          content: "Please provide a humorous reading. Make it witty and entertaining!"
+          content: [
+            { type: "text", text: "What do you see in this photo? Make it funny!" },
+            {
+              type: "image_url",
+              image_url: {
+                url: imageUrl,
+                detail: "low"
+              }
+            }
+          ]
         }
       ],
       model: "gpt-4o",
-      temperature: 0.9,
       max_tokens: 500,
+      temperature: 0.9
     });
 
     console.log('OpenAI response received:', completion.choices[0]?.message?.content);
