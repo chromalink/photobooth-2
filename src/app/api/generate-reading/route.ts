@@ -36,7 +36,7 @@ export async function POST(request: Request) {
           content: `The user's photo URL is: ${imageUrl}. Please provide a humorous reading based on their photo.`
         }
       ],
-      model: "gpt-4o",
+      model: "gpt-4",
       temperature: 0.9,
       max_tokens: 500,
     });
