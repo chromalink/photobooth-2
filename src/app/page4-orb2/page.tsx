@@ -72,7 +72,19 @@ export default function Orb2() {
             body: JSON.stringify({
               imageUrl: uploadedPhotoUrl
             })
-          }).then(res => res.json()).then(data => data.response),
+          }).then(async res => {
+            if (!res.ok) {
+              const errorText = await res.text();
+              console.error('Generate reading API error:', errorText);
+              throw new Error('Failed to generate reading: ' + errorText);
+            }
+            const data = await res.json();
+            if (!data.response) {
+              console.error('Invalid generate reading response:', data);
+              throw new Error('Invalid reading response');
+            }
+            return data.response;
+          }),
           fetch('/api/comfyui', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
