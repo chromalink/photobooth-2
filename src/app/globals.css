@@ -1,0 +1,422 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Force dark theme */
+:root {
+  color-scheme: dark;
+}
+
+/* Essential resets */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: linear-gradient(to top, #000000 0%, #0e0e0e 100%);
+  color: white;
+  text-align: center;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Main container */
+.main-container {
+  width: 100%;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Fixed position sections */
+.title-section {
+  position: absolute;
+  top: 10vh;  /* Fixed at 20% of viewport height */
+  left: 0;
+  width: 100%;
+  color: white;
+  font-size: 3.75rem;
+  font-weight: 300;
+  text-align: center;
+}
+
+.description-section {
+  position: absolute;
+  top: 40vh;  /* Center vertically */
+  left: 0;
+  transform: translateY(-50%);  /* Center the element itself */
+  width: 100%;
+  max-width: 100%;
+  padding: 0 2rem;
+  text-align: center;
+  z-index: 10;  /* Ensure it's above the orb */
+}
+
+.description-section-higher {
+  top: 30vh;  /* Moved up 10vh from original 40vh */
+}
+
+.button-section {
+  position: absolute;
+  bottom: 10vh;  /* Fixed at 25% from bottom */
+  left: 0;
+  width: 100%;
+  text-align: center;
+}
+
+.choices-section {
+  position: absolute;
+  bottom: 30vh; /* Fixed at 30% from bottom */
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+}
+
+/* Input styling */
+.input-section {
+  position: absolute;
+  top: 40vh;
+  left: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+}
+
+.input-field {
+  width: 100%;
+  max-width: 400px;
+  padding: 1.5rem 2rem;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 25px;
+  color: white;
+  font-size: 1.2rem;
+  transition: all 0.3s ease;
+}
+
+.input-field::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+}
+
+.input-container {
+  width: 100%;
+  max-width: 300px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.input-box {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  color: white;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.input-box:focus {
+  outline: none;
+  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.input-box::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.error-message {
+  color: #ff6b6b;
+  margin-top: 8px;
+  font-size: 0.9rem;
+}
+
+/* Typography */
+p {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 3rem;
+  line-height: 1.6;
+  /* font-weight: bold; */
+  font-style: italic;
+  text-align: center;
+}
+
+.medium-text {
+  font-size: 2rem;
+}
+
+.small-text {
+  font-size: 1.5rem;
+}
+
+/* Countdown styling */
+.countdown {
+  position: absolute;
+  top: 50vh;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 3rem;
+  line-height: 1.6;
+  font-style: italic;
+  text-align: center;
+  z-index: 10;
+}
+
+.description-at-button {
+  position: absolute;
+  bottom: 20vh;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1rem;
+  line-height: 1.6;
+  font-style: italic;
+}
+
+/* Color choice buttons */
+.color-choice {
+  width: 6rem;
+  height: 6rem;
+  border-radius: 50%;
+  border: none;  
+  font-size: 1.2rem;
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.55);  
+}
+
+.color-choice.red { 
+  background: linear-gradient(-35deg, #ff0000 0%, #ff6600 50%, #ff0000 100%);
+}
+
+.color-choice.cyan { 
+  background: linear-gradient(-35deg, #00FF66 0%, #00ffff 50%, #00FF66 100%);
+}
+
+.color-choice.blue { 
+  background: linear-gradient(-35deg, #00FFFF 0%, #0000ff 50%, #00FFFF 100%);
+}
+
+.color-choice.white { 
+  background: linear-gradient(-35deg, #808080 0%, #ffffff 50%, #808080 100%);
+}
+
+.color-choice.red.selected {
+  box-shadow: 0 0 15px #ff4444,
+              0 0 60px #ff6600;
+}
+
+.color-choice.cyan.selected {
+  box-shadow: 0 0 15px #00ffff,
+              0 0 60px #00FF66;
+}
+
+.color-choice.blue.selected {
+  box-shadow: 0 0 15px #0000ff,
+              0 0 60px #00FFFF;
+}
+
+.color-choice.white.selected {
+  box-shadow: 0 0 15px #ffffff,
+              0 0 60px #808080;
+}
+
+/* Aura title section */
+.aura-title-section {
+  position: absolute;
+  top: 5vh;
+  left: 3vw;
+  width: 100%;
+  text-align: left;
+  font-size: 2rem;
+  /* font-weight: bold; */
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.aura-title-red {
+  background: linear-gradient(45deg, #ff6600 0%, #ff4444 50%, #ff6600 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-style: italic;
+}
+
+.aura-title-cyan {
+  background: linear-gradient(45deg, #00FF66 0%, #00ffff 50%, #00FF66 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-style: italic;
+}
+
+.aura-title-blue {
+  background: linear-gradient(45deg, #00FFFF 0%, #0000ff 50%, #00FFFF 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-style: italic;
+}
+
+.aura-title-white {
+  background: linear-gradient(45deg, #808080 0%, #ffffff 50%, #808080 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-style: italic;
+}
+
+/* Aura photo section */
+.aura-photo-section {
+  position: absolute;
+  left: 0.5vh;
+  top: 35%;
+  transform: translateY(-50%);
+  width: 42.5vh;  /* This will be 50vh * 0.85 to maintain ratio */
+  height: 50vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+
+.aura-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 0 25px 25px 0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Orb animation styles */
+.orb-container {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  display: flex;
+  align-items: center;  /* Center vertically */
+  justify-content: center;  /* Center horizontally */
+}
+
+/* Canvas styles */
+canvas {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+/* Button styling */
+.main-button {
+  background-color: rgba(0, 0, 0, 0.3);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 2rem 4rem;
+  border-radius: 50px;
+  font-size: 2rem;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.8),
+              0 0 60px rgba(255, 255, 255, 0.2);
+}
+
+.main-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.2),
+              0 0 40px rgba(255, 255, 255, 0.1);
+}
+
+.main-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Prompt result */
+.prompt-result {
+  position: absolute;
+  right: 0;
+  top: 55%;
+  transform: translateY(-50%);
+  width: 50%;
+  height: 25vh;
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(10px);
+  border-radius: 25px;
+}
+
+/* Background effects */
+.moon-texture {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100vh;
+  background: radial-gradient(
+    circle at center top,
+    rgba(255, 255, 255, 0.04) 0%,
+    rgba(255, 255, 255, 0.01) 25%,
+    transparent 70%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+.skip-button {
+  composes: main-button;
+  background-color: transparent;
+  margin-left: 3rem;
+}
+
+/* AI Model Selection Dropdown */
+.ai-model-select {
+  margin-top: 1.5rem;
+  width: 100%;
+  max-width: 300px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.ai-model-select select {
+  width: 100%;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 0.7rem center;
+  background-size: 1em;
+  padding-right: 2.5rem;
+}
+
+.ai-model-select select:hover {
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.ai-model-select select option {
+  padding: 0.5rem;
+}
