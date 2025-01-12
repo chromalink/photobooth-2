@@ -1,12 +1,32 @@
 import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
-import type { ChatCompletionMessageParam, ChatCompletionSystemMessageParam, ChatCompletionUserMessageParam } from 'openai/resources/chat/completions';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
 export const maxDuration = 300; // 5 minutes timeout
+
+type Role = "system" | "user" | "assistant";
+
+interface ImageUrl {
+  url: string;
+  detail: "low" | "high" | "auto";
+}
+
+interface ContentPart {
+  type: "text" | "image_url";
+  text?: string;
+  image_url?: {
+    url: string;
+    detail: "low" | "high" | "auto";
+  };
+}
+
+interface Message {
+  role: Role;
+  content: string | ContentPart[];
+}
 
 export async function POST(request: Request) {
   try {
@@ -41,44 +61,45 @@ export async function POST(request: Request) {
 
     console.log('Preparing OpenAI request...');
 
-    const systemMessage: ChatCompletionSystemMessageParam = {
-      role: "system",
-      content: prompt
-    };
-
-    const userMessage: ChatCompletionUserMessageParam = {
-      role: "user",
-      content: [
-        {
-          type: "text",
-          text: "What do you see in this photo? Make it funny!"
-        },
-        {
-          type: "image_url",
-          image_url: {
-            url: processedImageUrl,
-            detail: "low"
+    const messages: Message[] = [
+      {
+        role: "system",
+        content: prompt
+      },
+      {
+        role: "user",
+        content: [
+          {
+            type: "text",
+            text: "What do you see in this photo? Make it funny!"
+          },
+          {
+            type: "image_url",
+            image_url: {
+              url: processedImageUrl,
+              detail: "low"
+            }
           }
-        }
-      ]
-    };
-
-    const messages: ChatCompletionMessageParam[] = [
-      systemMessage,
-      userMessage
+        ]
+      }
     ];
 
     console.log('OpenAI request structure:', {
       messageCount: messages.length,
-      systemMessage: { role: systemMessage.role },
-      userMessage: { role: userMessage.role, contentTypes: userMessage.content.map(c => c.type) }
+      systemMessage: { role: messages[0].role },
+      userMessage: { 
+        role: messages[1].role, 
+        contentTypes: Array.isArray(messages[1].content) 
+          ? messages[1].content.map(c => c.type)
+          : 'string' 
+      }
     });
 
     console.log('Sending request to OpenAI...');
     
     const completion = await openai.chat.completions.create({
-      messages,
-      model: "gpt-4-vision-preview",  // Updated model name
+      messages: messages as any, // Type assertion needed for OpenAI API
+      model: "gpt-4-vision-preview",
       max_tokens: 500,
       temperature: 0.9
     });
