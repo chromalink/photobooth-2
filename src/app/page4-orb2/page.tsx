@@ -66,7 +66,13 @@ export default function Orb2() {
         
         // Start both AI processes in parallel
         const [aiResponse, imageResponse] = await Promise.all([
-          generateSpiritualReading('white'),
+          fetch('/api/generate-reading', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              imageUrl: uploadedPhotoUrl
+            })
+          }).then(res => res.json()).then(data => data.response),
           fetch('/api/comfyui', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
