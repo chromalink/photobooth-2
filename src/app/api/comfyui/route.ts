@@ -323,18 +323,23 @@ export async function POST(request: Request) {
     };
     
     console.log('Sending workflow to ComfyUI:', JSON.stringify(workflow, null, 2));
-    const { prompt_id: promptId } = await queuePrompt(comfyApiEndpoint, workflow, clientId);
-    console.log('Got prompt ID:', promptId);
+    const promptResult = await queuePrompt(comfyApiEndpoint, workflow, clientId);
+    console.log('Raw prompt result:', promptResult);
+    const { prompt_id: promptId } = promptResult;
+    console.log('Extracted prompt ID:', promptId);
     
     // Return immediately with the promptId and status endpoint
-    return NextResponse.json({
+    const response = {
       success: true,
       upscaledResult: {
         imageUrl: null,
         promptId,
         statusEndpoint: `/api/comfyui-status?promptId=${promptId}`
       }
-    }, { headers });
+    };
+    console.log('Sending response:', response);
+    
+    return NextResponse.json(response, { headers });
   } catch (error) {
     console.error('Error in ComfyUI API route:', error);
     return NextResponse.json(
