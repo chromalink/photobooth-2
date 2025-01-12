@@ -15,7 +15,6 @@ export default function Orb2() {
   const hasStartedProcessing = useSessionStore((state) => state.hasStartedProcessing)
   const setHasStartedProcessing = useSessionStore((state) => state.setHasStartedProcessing)
   const resetProcessingState = useSessionStore((state) => state.resetProcessingState)
-  const aiModelProvider = useSessionStore((state) => state.aiModelProvider)
   const setAiResponse = useSessionStore((state) => state.setAiResponse)
   const setAiModelImage = useSessionStore((state) => state.setAiModelImage)
   const setError = useSessionStore((state) => state.setError)
@@ -25,7 +24,7 @@ export default function Orb2() {
   useEffect(() => {
     console.log('Resetting processing state...')
     resetProcessingState()
-  }, []) 
+  }, [resetProcessingState]) 
 
   // Visual progress counter
   useEffect(() => {
@@ -56,12 +55,12 @@ export default function Orb2() {
 
         const basePrompt = `beautiful illustration, ornate, colourful palette, spiritual energy, aura, portrait, fantasy. Happy, uplifting, positive. Oil painting, futuristic, serene, radiant..`
         
-        const selectedRoute = '/api/comfyui'
+        console.log('Starting AI processes...')
         
         // Start both AI processes in parallel
         const [aiResponse, imageResponse] = await Promise.all([
           generateSpiritualReading('white'),
-          fetch(selectedRoute, {
+          fetch('/api/comfyui', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -70,7 +69,9 @@ export default function Orb2() {
             })
           }).then(async response => {
             if (!response.ok) {
-              throw new Error('Failed to generate image: ' + await response.text())
+              const errorText = await response.text()
+              console.error('ComfyUI API error:', errorText)
+              throw new Error('Failed to generate image: ' + errorText)
             }
             return response.json()
           })
@@ -78,33 +79,49 @@ export default function Orb2() {
 
         if (!isSubscribed) return
 
+        console.log('Got responses:', { aiResponse, imageResponse })
+
+        // Set the AI text response
         setAiResponse(aiResponse)
         
-        if (imageResponse.upscaledResult?.promptId) {
-          const statusEndpoint = `/api/comfyui-status?promptId=${imageResponse.upscaledResult.promptId}`
+        // Check if we got a promptId for polling
+        if (!imageResponse?.promptId) {
+          throw new Error('No promptId received from ComfyUI')
+        }
+        
+        console.log('Starting to poll with promptId:', imageResponse.promptId)
+        
+        // Start polling for the image
+        const pollInterval = 2000
+        const maxAttempts = 60
+        let attempts = 0
+        
+        while (attempts < maxAttempts) {
+          if (!isSubscribed) return
           
-          // Start polling for the image
-          const pollInterval = 2000
-          const maxAttempts = 60
-          let attempts = 0
+          console.log(`Polling attempt ${attempts + 1}/${maxAttempts}...`)
           
-          while (attempts < maxAttempts) {
-            const statusResponse = await fetch(statusEndpoint)
-            const statusData = await statusResponse.json()
-            
-            if (statusData.completed && statusData.imageUrl) {
-              setAiModelImage(statusData.imageUrl)
-              router.push('/page5-email')
-              break
-            }
-            
-            if (attempts === maxAttempts - 1) {
-              throw new Error('Image generation timed out')
-            }
-            
-            await new Promise(resolve => setTimeout(resolve, pollInterval))
-            attempts++
+          const statusResponse = await fetch(`/api/comfyui-status?promptId=${imageResponse.promptId}`)
+          if (!statusResponse.ok) {
+            throw new Error('Failed to check image status')
           }
+          
+          const statusData = await statusResponse.json()
+          console.log('Status response:', statusData)
+          
+          if (statusData.completed && statusData.imageUrl) {
+            console.log('Image generation completed:', statusData.imageUrl)
+            setAiModelImage(statusData.imageUrl)
+            router.push('/page5-email')
+            break
+          }
+          
+          if (attempts === maxAttempts - 1) {
+            throw new Error('Image generation timed out')
+          }
+          
+          await new Promise(resolve => setTimeout(resolve, pollInterval))
+          attempts++
         }
       } catch (error) {
         console.error('Error in processing:', error)
@@ -120,7 +137,7 @@ export default function Orb2() {
       isSubscribed = false
       setIsProcessing(false)
     }
-  }, [uploadedPhotoUrl, isProcessing, hasStartedProcessing, aiModelProvider, setAiResponse, setAiModelImage, setError, setIsProcessing, setHasStartedProcessing, router])
+  }, [uploadedPhotoUrl, isProcessing, hasStartedProcessing, setAiResponse, setAiModelImage, setError, setIsProcessing, setHasStartedProcessing, router, resetProcessingState])
 
   return (
     <div className="relative min-h-screen">
