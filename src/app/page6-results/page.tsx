@@ -5,12 +5,15 @@ import { useSessionStore } from '@/store/session'
 import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { DEFAULT_AI_PROVIDER } from '@/config/ai-route-config'
 
 export default function Results() {
   const aiResponse = useSessionStore((state) => state.aiResponse)
   const capturedPhoto = useSessionStore((state) => state.capturedPhoto)
   const aiModelImage = useSessionStore((state) => state.aiModelImage)
   const colorChoice = useSessionStore((state) => state.colorChoice)
+  const resetSession = useSessionStore((state) => state.resetSession)
+  const setAiModelProvider = useSessionStore((state) => state.setAiModelProvider)
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(true)
   const [imageError, setImageError] = useState<string | null>(null)
@@ -325,14 +328,18 @@ export default function Results() {
                 >
                   <button
                     className="main-button skip-button"
-                    onClick={() => router.push('/page7-learnmore')}
+                    onClick={() => {
+                      resetSession()
+                      setAiModelProvider(DEFAULT_AI_PROVIDER)
+                      router.push('/page1-home')
+                    }}
                     style={{
                       padding: '2rem 4rem',
                       fontSize: '2rem',
                       width: 'auto'
                     }}
                   >
-                    LEARN MORE
+                    START AGAIN
                   </button>
                 </motion.div>
               </div>
