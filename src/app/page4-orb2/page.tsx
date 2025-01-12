@@ -232,14 +232,14 @@ export default function Orb2() {
       }
     }
 
-    // Start processing
+    // Call processUserInput immediately
     processUserInput()
 
     return () => {
       isSubscribed = false
       setIsProcessing(false)
     }
-  }, [uploadedPhotoUrl]) // Remove state flags from deps to prevent re-runs
+  }, [uploadedPhotoUrl, isProcessing, hasStartedProcessing, aiModelProvider, setAiResponse, setAiModelImage, setError, setIsProcessing, setHasStartedProcessing]) // Add all required dependencies
 
   return (
     <>
