@@ -33,7 +33,7 @@ export async function POST(request: Request) {
         },
         {
           role: "user",
-          content: `The user's photo URL is: ${imageUrl}. Please provide a humorous reading based on their photo.`
+          content: "Please provide a humorous reading. Make it witty and entertaining!"
         }
       ],
       model: "gpt-4o",
