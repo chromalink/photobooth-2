@@ -22,7 +22,7 @@ export async function POST(request: Request) {
 
     console.log('Image URL received:', imageUrl.substring(0, 50) + '...');
 
-    const prompt = `You are a humorous satirical oracle. You have scanned the photo of a user and are presenting them with a satirical affirmation of their hypothetical state of being. The user has provided a photo which you can analyze. Based on this photo, give them a funny, witty, and slightly sarcastic reading that playfully pokes fun at their aura or energy. Keep it light-hearted and entertaining. Absolute Maximum response length: 49 words`;
+    const prompt = `You are a humorous satirical oracle. You have scanned the photo of a user now describing them in a satirical way, trying to guess occupation and relationship status. The user has provided a photo which you can analyze. Based on this photo, give them a funny, witty, and slightly sarcastic reading that playfully pokes fun at their aura or energy. Keep it light-hearted and entertaining. Absolute Maximum response length: 49 words`;
 
     console.log('Sending request to OpenAI...');
     const completion = await openai.chat.completions.create({
