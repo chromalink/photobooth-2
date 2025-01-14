@@ -1,20 +1,15 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import dynamic from 'next/dynamic';
-
-// Dynamically import UIkit with no SSR
-const UIkit = dynamic(() => import('@/lib/uikit'), { ssr: false });
+import UIkit from '@/lib/uikit';
 
 export function useUIkit() {
-  const [uikit, setUIkit] = useState<any>(null);
+  const [uikit, setUIkit] = useState<typeof UIkit | null>(null);
 
   useEffect(() => {
     // Initialize UIkit on client side only
     if (typeof window !== 'undefined') {
-      import('@/lib/uikit').then((module) => {
-        setUIkit(module.default);
-      });
+      setUIkit(UIkit);
     }
   }, []);
 
@@ -23,7 +18,7 @@ export function useUIkit() {
 
 // Utility functions for common UIkit operations
 export const showNotification = (message: string, status: 'primary' | 'success' | 'warning' | 'danger' = 'primary') => {
-  if (typeof window !== 'undefined' && UIkit) {
+  if (typeof window !== 'undefined' && UIkit && UIkit.notification) {
     UIkit.notification({
       message,
       status,

@@ -236,7 +236,7 @@ export default function Results() {
             <div className="uk-flex uk-flex-column uk-flex-middle">
               <div className="uk-width-1-1">
                 <ClientPromptResult 
-                  reading={aiResponse} 
+                  reading={aiResponse || undefined} 
                   isVisible={!!aiResponse}
                 />
               </div>

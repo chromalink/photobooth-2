@@ -1,7 +1,6 @@
-let UIkit: any;
+import UIkit from 'uikit';
 
 if (typeof window !== 'undefined') {
-  UIkit = require('uikit');
   const Icons = require('uikit/dist/js/uikit-icons');
   // Load UIkit icons
   UIkit.use(Icons);

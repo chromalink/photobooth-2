@@ -16,8 +16,8 @@ export default function PromptResult({ reading, isVisible = true, onClose }: Pro
   useEffect(() => {
     if (isVisible && reading && uikit) {
       const modal = uikit.modal('#prompt-result', {
-        bgClose: false,
-        escClose: false,
+        'bg-close': false,
+        'esc-close': false,
         stack: true
       });
       modal?.show();
