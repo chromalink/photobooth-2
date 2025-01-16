@@ -147,8 +147,8 @@ export async function POST(request: Request) {
     const workflow = {
       "3": {
         "inputs": {
-          "seed": 48,
-          "steps": 20,
+          "seed": 432369108,
+          "steps": 30,
           "cfg": 4.5,
           "sampler_name": "euler",
           "scheduler": "karras",
@@ -174,7 +174,7 @@ export async function POST(request: Request) {
       },
       "6": {
         "inputs": {
-          "text": "1980s pop-culture cheesy corporate person inspired by David LaChapelle, Patrick Nagel: luxury glamourous, person with voluminous hair, glowing skin, wearing a shiny suite, Film grain, ACES colours, rim light, Chromatic aberration details, Scan lines or VHS distortion, computers office in the background, evoking a airbrushed aesthetic with vibrant, nostalgic charm",
+          "text": "1980s pop-culture corporate person inspired by David LaChapelle, Patrick Nagel: luxury, voluminous hair, glowing skin and hair, wearing a shiny suite, Film grain, RCA TK-76, ACES colours, halo rim light, Chromatic aberration details, Scan lines or VHS distortion, computers office in the background, evoking a airbrushed aesthetic with vibrant, nostalgic charm",
           "clip": ["4", 1]
         },
         "class_type": "CLIPTextEncode",
