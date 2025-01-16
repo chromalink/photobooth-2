@@ -147,7 +147,7 @@ export async function POST(request: Request) {
     const workflow = {
       "3": {
         "inputs": {
-          "seed": 432369108,
+          "seed": 176,
           "steps": 30,
           "cfg": 4.5,
           "sampler_name": "euler",

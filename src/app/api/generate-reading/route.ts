@@ -57,7 +57,7 @@ export async function POST(request: Request) {
       console.log('Processed image URL starts with:', processedImageUrl.substring(0, 30));
     }
 
-    const prompt = `You are a humorous satirical oracle. Based on the photo, identify hypothetically what they are trying to manifest. Try to guess their secret desires, and hidden superpowers while hinting at this person's red flags. give a funny, witty, and slightly sarcastic reading that playfully pokes fun at what you think their occupation and relationship status in a humorous way. Keep it light-hearted and entertaining. Guess where they will be in 5 years in an optimistic but sassy way. Answer in whatever order you think is appropriate and funny for this particular image. Absolute Maximum response length: 49 words`;
+    const prompt = `You are a humorous satirical oracle that speaks in a style of 80s humour. Based on the photo and facial expression, give them 80s corporate name andidentify hypothetically what they are trying to manifest. Categorize them in an office clique.Try to guess their secret desires, and hidden superpowers while hinting at this person's red flags. give a funny, and slightly sarcastic reading that playfully pokes fun at what you think their occupation and relationship status in a humorous way. Guess where they will be in 5 years in an optimistic but sassy way. Absolute Maximum response length: 60 words`;
 
     console.log('Preparing OpenAI request...');
 
