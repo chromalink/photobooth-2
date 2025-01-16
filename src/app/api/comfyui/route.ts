@@ -147,7 +147,7 @@ export async function POST(request: Request) {
     const workflow = {
       "3": {
         "inputs": {
-          "seed": 317806219502349,
+          "seed": 48,
           "steps": 20,
           "cfg": 4.5,
           "sampler_name": "euler",
@@ -174,7 +174,7 @@ export async function POST(request: Request) {
       },
       "6": {
         "inputs": {
-          "text": "a ethereal painting of a fire goddes, glowing, studio light, smooth skin, rim lght, twin peeaks, in a style of casey weldon and david lynch and Nikita Relyanski and Elizaveta Porodina, mystical background",
+          "text": "1980s pop-culture cheesy corporate person inspired by David LaChapelle, Patrick Nagel: luxury glamourous, person with voluminous hair, glowing skin, wearing a shiny suite, Film grain, ACES colours, rim light, Chromatic aberration details, Scan lines or VHS distortion, computers office in the background, evoking a airbrushed aesthetic with vibrant, nostalgic charm",
           "clip": ["4", 1]
         },
         "class_type": "CLIPTextEncode",
@@ -184,7 +184,7 @@ export async function POST(request: Request) {
       },
       "7": {
         "inputs": {
-          "text": "deformed, glitch, noisy, stock photo, braids, reflections, frame, watermark, fat, blemishes, wrinkles",
+          "text": "watermarks, distortions, stock photos, stock photography, text",
           "clip": ["4", 1]
         },
         "class_type": "CLIPTextEncode",
