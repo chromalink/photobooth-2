@@ -85,7 +85,9 @@ export default function ColorPick() {
             onClick={handleContinue}
             disabled={selectedColor === null}
           >
-            GET MY SOUL SNAP
+            Raw prompt result: { prompt_id: "..." }
+            Extracted prompt ID: "..."
+            Sending response: { success: true, promptId: "..." }
           </button>
         </motion.div>
       </div>

@@ -1,10 +1,9 @@
 'use client'
 
-import { config } from '@/config'
 import { useSessionStore } from '@/store/session'
-import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { DEFAULT_AI_PROVIDER } from '@/config/ai-route-config'
 
 export default function EmailPage() {
   const [fullName, setFullName] = useState('')
@@ -15,6 +14,8 @@ export default function EmailPage() {
   const setUserName = useSessionStore((state) => state.setUserName)
   const aiResponse = useSessionStore((state) => state.aiResponse)
   const aiModelImage = useSessionStore((state) => state.aiModelImage)
+  const resetSession = useSessionStore((state) => state.resetSession)
+  const setAiModelProvider = useSessionStore((state) => state.setAiModelProvider)
   const router = useRouter()
 
   const handleSubmit = async () => {
@@ -27,7 +28,6 @@ export default function EmailPage() {
     setError('')
 
     try {
-      // Send email
       const response = await fetch('/api/email', {
         method: 'POST',
         headers: {
@@ -39,156 +39,262 @@ export default function EmailPage() {
           aiResponse,
           imageUrl: aiModelImage,
         }),
-      });
+      })
 
       if (!response.ok) {
-        throw new Error('Failed to send email');
+        throw new Error('Failed to send email')
       }
 
-      // Store user info in session
       setUserEmail(email)
       setUserName(fullName)
-
-      // Navigate to results page
       router.push('/page6-results')
     } catch (err) {
       console.error('Error sending email:', err)
-      setError('Failed to send email. Please try again or skip.')
+      setError('Failed to send email. Please try again.')
     } finally {
       setIsSending(false)
     }
   }
 
   return (
-    <>
-      <div className="moon-texture" aria-hidden="true" />
-      
-      <div className="uk-container uk-container-xsmall uk-height-1-1 uk-flex uk-flex-middle uk-flex-center" style={{ minHeight: '100vh', padding: '40px 20px' }}>
-        <div className="uk-width-large uk-text-center">
-          <motion.h1
-            className="uk-heading-medium uk-text-bold uk-margin-large-bottom"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            style={{
-              background: 'linear-gradient(45deg, #fff, #a8a8a8)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              lineHeight: '1.4'
-            }}
-          >
-            {config.app.name}
-          </motion.h1>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="uk-margin-medium-bottom"
-          >
-            <div className="uk-margin-medium-bottom">
-              <input
-                type="text"
-                className="uk-input uk-form-large uk-border-pill uk-text-center"
-                placeholder="Full Name"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                style={{
-                  background: 'rgba(255, 255, 255, 0.1)',
-                  border: '1px solid rgba(255, 255, 255, 0.2)',
-                  color: 'white',
-                  backdropFilter: 'blur(10px)',
-                }}
-              />
-            </div>
-            <div className="uk-margin-medium-bottom">
-              <input
-                type="email"
-                className="uk-input uk-form-large uk-border-pill uk-text-center"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                style={{
-                  background: 'rgba(255, 255, 255, 0.1)',
-                  border: '1px solid rgba(255, 255, 255, 0.2)',
-                  color: 'white',
-                  backdropFilter: 'blur(10px)',
-                }}
-              />
-            </div>
-            {error && (
-              <motion.div 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="uk-text-danger uk-margin-small-top"
-              >
-                {error}
-              </motion.div>
-            )}
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
-            className="uk-margin-medium-bottom"
-          >
-            <button
+    <main className="main">
+      <div className="background" />
+      <div className="container">
+        <h1>PERSONALITY<br/>PHOTOMACHINE</h1>
+        
+        <div className="form">
+          <div className="input-group">
+            <input
+              type="text"
+              placeholder="Saida Saetgar"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+            />
+            <input
+              type="email"
+              placeholder="saesd1694@gmail.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            {error && <div className="error">{error}</div>}
+          </div>
+          <div className="button-group">
+            <button 
               onClick={handleSubmit}
-              disabled={!fullName.trim() || !email.trim() || isSending}
-              className="uk-button uk-button-primary uk-button-large uk-border-pill uk-width-1-1 uk-margin-small-bottom"
-              style={{
-                background: 'linear-gradient(45deg, rgba(139, 92, 246, 0.8), rgba(76, 29, 149, 0.8))',
-                border: 'none',
-                padding: '15px 40px',
-                fontSize: '1.2rem',
-                backdropFilter: 'blur(10px)',
-                transition: 'all 0.3s ease',
-                boxShadow: '0 4px 15px rgba(139, 92, 246, 0.3)',
-              }}
+              disabled={isSending || !fullName.trim() || !email.trim()}
+              className="primary-button"
             >
-              {isSending ? (
-                <div className="uk-flex uk-flex-middle uk-flex-center">
-                  <div data-uk-spinner="ratio: 0.8" className="uk-margin-small-right"></div>
-                  SENDING...
-                </div>
-              ) : (
-                'SEND TO EMAIL'
-              )}
+              {isSending ? 'SENDING...' : 'SEND TO EMAIL'}
             </button>
-            <button
-              onClick={() => router.push('/page6-results')}
-              className="uk-button uk-button-default uk-button-large uk-border-pill uk-width-1-1"
-              style={{
-                background: 'rgba(255, 255, 255, 0.1)',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-                color: 'white',
-                backdropFilter: 'blur(10px)',
-                transition: 'all 0.3s ease',
+            <button 
+              onClick={() => {
+                resetSession()
+                setAiModelProvider(DEFAULT_AI_PROVIDER)
+                router.push('/page1-home')
               }}
+              className="secondary-button"
+              aria-label="Start a new session"
             >
-              SKIP
+              START AGAIN
             </button>
-          </motion.div>
+          </div>
         </div>
       </div>
 
       <style jsx>{`
-        :global(.uk-button-primary:hover) {
-          background: linear-gradient(45deg, rgba(139, 92, 246, 0.9), rgba(76, 29, 149, 0.9)) !important;
-          transform: translateY(-2px);
-          box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4) !important;
+        .main {
+          width: 100vw;
+          height: 100vh;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: black;
+          position: relative;
+          overflow: hidden;
         }
-        :global(.uk-button-default:hover) {
-          background: rgba(255, 255, 255, 0.2) !important;
-          border-color: rgba(255, 255, 255, 0.3) !important;
-          transform: translateY(-2px);
+
+        .background {
+          position: absolute;
+          inset: 0;
+          background-image: url('/optimized_star_backgound.jpg');
+          background-position: center;
+          background-size: cover;
+          opacity: 0.8;
         }
-        :global(.uk-input:focus) {
-          background: rgba(255, 255, 255, 0.15) !important;
-          border-color: rgba(139, 92, 246, 0.5) !important;
+
+        .container {
+          width: 90%;
+          max-width: 460px;
+          position: relative;
+          z-index: 1;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 3.5rem;
+        }
+
+        h1 {
+          font-family: var(--font-aboreto);
+          font-size: min(max(2.5rem, 5vw), 4rem);
+          font-weight: 400;
+          letter-spacing: 0.15em;
+          line-height: 1.2;
+          color: white;
+          text-align: center;
+          margin: 0;
+          text-shadow: 
+            0 0 10px rgba(255, 255, 255, 0.5),
+            0 0 20px rgba(255, 255, 255, 0.3);
+        }
+
+        .form {
+          width: 100%;
+          display: flex;
+          flex-direction: column;
+          gap: 2.5rem;
+        }
+
+        .input-group {
+          display: flex;
+          flex-direction: column;
+          gap: 1.25rem;
+          width: 100%;
+        }
+
+        .button-group {
+          display: flex;
+          flex-direction: column;
+          gap: 1.25rem;
+          width: 100%;
+        }
+
+        input {
+          width: 100%;
+          background: rgba(0, 0, 0, 0.3);
+          border: 2px solid rgba(255, 255, 255, 0.3);
+          border-radius: 50px;
+          padding: min(max(0.8rem, 1.5vh), 1.2rem) min(max(2rem, 4vw), 3.5rem);
+          color: white;
+          font-size: min(max(0.9rem, 1.5vw), 1.1rem);
+          text-align: center;
+          letter-spacing: 0.15em;
+          transition: all 0.3s ease;
+          backdrop-filter: blur(5px);
+          height: auto;
+        }
+
+        input::placeholder {
+          color: rgba(255, 255, 255, 0.5);
+          font-size: min(max(0.9rem, 1.5vw), 1.1rem);
+          letter-spacing: 0.05em;
+        }
+
+        input:focus {
+          outline: none;
+          border-color: white;
+          box-shadow: 
+            0 0 5px rgba(255, 255, 255, 0.5),
+            0 0 15px rgba(255, 255, 255, 0.3);
+        }
+
+        .error {
+          color: #ff6b6b;
+          font-size: min(max(0.8rem, 1.2vw), 0.9rem);
+          text-align: center;
+          margin-top: 0.5rem;
+          letter-spacing: 0.05em;
+        }
+
+        .primary-button,
+        .secondary-button {
+          width: 100%;
+          background: transparent;
+          border: 2px solid white;
+          color: white;
+          font-size: min(max(0.9rem, 1.5vw), 1.1rem);
+          padding: min(max(0.8rem, 1.5vh), 1.2rem) min(max(2rem, 4vw), 3.5rem);
+          border-radius: 50px;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          letter-spacing: 0.15em;
+          font-weight: 400;
+          height: auto;
+          box-shadow: 
+            0 0 5px rgba(255, 255, 255, 0.5),
+            0 0 10px rgba(255, 255, 255, 0.3),
+            0 0 20px rgba(255, 255, 255, 0.2),
+            inset 0 0 5px rgba(255, 255, 255, 0.1);
+          text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+          position: relative;
+        }
+
+        .primary-button:hover,
+        .secondary-button:hover {
+          background: rgba(255, 255, 255, 0.1);
+          box-shadow: 
+            0 0 5px rgba(255, 255, 255, 0.7),
+            0 0 15px rgba(255, 255, 255, 0.5),
+            0 0 30px rgba(255, 255, 255, 0.3),
+            inset 0 0 10px rgba(255, 255, 255, 0.2);
+          text-shadow: 0 0 8px rgba(255, 255, 255, 0.7);
+          transform: scale(1.02);
+        }
+
+        .primary-button:active,
+        .secondary-button:active {
+          transform: scale(0.98);
+        }
+
+        .primary-button:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+          transform: none;
+        }
+
+        .primary-button:disabled:hover {
+          background: transparent;
+          box-shadow: 
+            0 0 5px rgba(255, 255, 255, 0.5),
+            0 0 10px rgba(255, 255, 255, 0.3),
+            0 0 20px rgba(255, 255, 255, 0.2),
+            inset 0 0 5px rgba(255, 255, 255, 0.1);
+          transform: none;
+        }
+
+        @media (max-width: 480px) {
+          .container {
+            gap: 2rem;
+          }
+          
+          h1 {
+            font-size: min(max(2rem, 8vw), 2.5rem);
+          }
+          
+          .form {
+            gap: 1.5rem;
+          }
+          
+          .input-group,
+          .button-group {
+            gap: 1rem;
+          }
+          
+          input {
+            font-size: min(max(0.8rem, 3.5vw), 1rem);
+            padding: min(max(0.7rem, 1.2vh), 1rem) min(max(1.8rem, 3.5vw), 2.5rem);
+          }
+
+          input::placeholder {
+            font-size: min(max(0.8rem, 3.5vw), 1rem);
+          }
+          
+          .primary-button,
+          .secondary-button {
+            font-size: min(max(0.8rem, 3.5vw), 1rem);
+            padding: min(max(0.7rem, 1.2vh), 1rem) min(max(1.8rem, 3.5vw), 2.5rem);
+          }
         }
       `}</style>
-    </>
+    </main>
   )
 }

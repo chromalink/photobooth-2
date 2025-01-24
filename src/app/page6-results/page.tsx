@@ -1,285 +1,270 @@
 'use client'
 
-import { config } from '@/config'
-import { useSessionStore } from '@/store/session'
-import { motion } from 'framer-motion'
+import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
-import { DEFAULT_AI_PROVIDER } from '@/config/ai-route-config'
-import ClientPromptResult from '@/components/ClientPromptResult';
+import { useSessionStore } from '@/store/session'
+import Image from 'next/image'
 
 export default function Results() {
-  const aiResponse = useSessionStore((state) => state.aiResponse)
-  const capturedPhoto = useSessionStore((state) => state.capturedPhoto)
-  const aiModelImage = useSessionStore((state) => state.aiModelImage)
-  const colorChoice = useSessionStore((state) => state.colorChoice)
-  const resetSession = useSessionStore((state) => state.resetSession)
-  const setAiModelProvider = useSessionStore((state) => state.setAiModelProvider)
   const router = useRouter()
-  const [isLoading, setIsLoading] = useState(true)
-  const [imageError, setImageError] = useState<string | null>(null)
-  const [imageUrl, setImageUrl] = useState<string | null>(null)
+  const aiResponse = useSessionStore((state) => state.aiResponse)
+  const aiModelImage = useSessionStore((state) => state.aiModelImage)
 
   useEffect(() => {
-    if (aiModelImage) {
-      // Create proxy URL
-      const proxyUrl = `/api/comfyui-image?url=${encodeURIComponent(aiModelImage)}`;
-      // Convert to absolute URL
-      const url = new URL(proxyUrl, window.location.origin);
-      setImageUrl(url.toString());
-      console.log('Set image URL to:', url.toString());
-    } else {
-      setImageUrl(null);
+    if (!aiModelImage || !aiResponse) {
+      router.push('/page1-home')
     }
-  }, [aiModelImage])
+  }, [aiModelImage, aiResponse, router])
 
-  const handleDownload = async () => {
-    if (imageUrl) {
-      try {
-        // Fetch the image with appropriate mode
-        const response = await fetch(imageUrl, {
-          mode: 'cors',
-          credentials: 'omit'
-        })
-
-        if (!response.ok) {
-          throw new Error(`Failed to fetch image: ${response.statusText}`)
-        }
-
-        const blob = await response.blob()
-        const blobUrl = URL.createObjectURL(blob)
-
-        const link = document.createElement('a')
-        link.href = blobUrl
-        link.download = 'chromalink-aura-photo.png'
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
-        URL.revokeObjectURL(blobUrl)
-      } catch (error) {
-        console.error('Download failed:', error)
-        setImageError('Failed to download image. Please try again.')
-      }
-    }
+  const handleDownload = () => {
+    router.push('/page5-email')
   }
 
-  useEffect(() => {
-    setIsLoading(true)
-    setImageError(null)
-
-    if (imageUrl) {
-      console.log('Loading image from:', imageUrl)
-
-      const img = new Image()
-      img.crossOrigin = 'anonymous'
-
-      img.onload = () => {
-        console.log('Image loaded successfully')
-        setIsLoading(false)
-        setImageError(null)
-      }
-
-      img.onerror = async (e) => {
-        console.error('Image load error:', e)
-        setIsLoading(false)
-        setImageError('Failed to load image. Please try refreshing the page.')
-
-        // Try to diagnose the issue
-        try {
-          const response = await fetch(imageUrl, {
-            mode: 'cors',
-            credentials: 'omit'
-          })
-
-          if (!response.ok) {
-            console.error('Image fetch failed:', response.status, response.statusText)
-          }
-        } catch (error) {
-          console.error('Image fetch error:', error)
-        }
-      }
-
-      img.src = imageUrl
-    } else {
-      setIsLoading(false)
-      setImageError('No image available')
-    }
-  }, [imageUrl])
-
-  // Debug log
-  useEffect(() => {
-    if (aiModelImage) {
-      console.log('Current image URL:', aiModelImage)
-    } else {
-      console.log('No image URL available')
-    }
-  }, [aiModelImage])
-
-  const truncateToWords = (text: string | null, wordCount: number) => {
-    if (!text) return ''
-    const words = text.split(' ')
-    if (words.length <= wordCount) return text
-    return words.slice(0, wordCount).join(' ') + '...'
+  if (!aiModelImage || !aiResponse) {
+    return null
   }
-
-  const truncatedResponse = aiResponse ? truncateToWords(aiResponse, 50) : null
-
-  const getColorFromNumber = (num: number | null): string | null => {
-    switch (num) {
-      case 1:
-        return 'red'
-      case 2:
-        return 'cyan'
-      case 3:
-        return 'blue'
-      case 4:
-        return 'white'
-      default:
-        return null
-    }
-  }
-
-  const getAuraTitle = (colorNum: number | null) => {
-    const color = getColorFromNumber(colorNum)
-    switch (color) {
-      case 'red':
-        return { text: 'fire spark', className: 'aura-title-red' }
-      case 'cyan':
-        return { text: 'crystal current', className: 'aura-title-cyan' }
-      case 'blue':
-        return { text: 'soul tide', className: 'aura-title-blue' }
-      case 'white':
-        return { text: 'luminous whisper', className: 'aura-title-white' }
-      default:
-        return { text: 'mystery', className: 'aura-title-white' }
-    }
-  }
-
-  const aura = getAuraTitle(colorChoice)
 
   return (
-    <div className="uk-container uk-container-expand uk-height-viewport uk-padding uk-flex uk-flex-column">
-      {isLoading ? (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="uk-flex uk-flex-column uk-flex-middle uk-flex-center uk-height-viewport"
-        >
-          <div className="uk-margin">
-            <div className="uk-spinner" data-uk-spinner="ratio: 2"></div>
-          </div>
-          <p className="uk-text-lead uk-text-center uk-light">
-            Creating your magical portrait...
-          </p>
-        </motion.div>
-      ) : (
-        <>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="uk-text-center uk-margin-medium-bottom"
-          >
-            <h1 className="uk-heading-small">
-              You&apos;re a... <span className={aura.className}>{aura.text}</span><i>!</i>
-            </h1>
-          </motion.div>
-
-          <div className="uk-grid uk-grid-medium uk-flex-middle uk-child-width-1-2@m" data-uk-grid>
-            {imageUrl && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-                className="uk-flex uk-flex-column uk-flex-middle"
-              >
-                {imageError ? (
-                  <div className="uk-text-danger uk-text-center">
-                    <p>{imageError}</p>
-                    <button 
-                      onClick={() => window.location.reload()} 
-                      className="uk-button uk-button-default uk-button-small uk-margin-small-top uk-light"
-                    >
-                      Retry
-                    </button>
-                  </div>
-                ) : (
-                  <div className="uk-inline-clip uk-transition-toggle">
-                    <img 
-                      src={imageUrl} 
-                      alt="Your aura photo" 
-                      className="uk-transition-scale-up uk-transition-opaque"
-                      onError={(e) => {
-                        console.error('Image load error:', e)
-                        setImageError('Failed to load image')
-                      }}
-                      onLoad={() => {
-                        console.log('Image loaded successfully')
-                        setImageError(null)
-                      }}
-                      style={{ 
-                        maxHeight: '60vh',
-                        width: 'auto'
-                      }}
-                    />
-                  </div>
-                )}
-                <button 
-                  onClick={handleDownload}
-                  className="uk-button uk-button-default uk-margin-small-top uk-light"
-                >
-                  Download Image
-                </button>
-              </motion.div>
-            )}
-
-            <div className="uk-flex uk-flex-column uk-flex-middle">
-              <div className="uk-width-1-1">
-                <ClientPromptResult 
-                  reading={aiResponse || undefined} 
-                  isVisible={!!aiResponse}
-                />
-              </div>
-
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.5 }}
-                className="uk-margin-medium-top"
-              >
-                <button
-                  onClick={() => {
-                    resetSession()
-                    setAiModelProvider(DEFAULT_AI_PROVIDER)
-                    router.push('/page1-home')
-                  }}
-                  className="uk-button uk-button-primary uk-button-large uk-border-pill uk-box-shadow-large"
-                  style={{
-                    background: 'linear-gradient(to right, rgba(139, 92, 246, 0.8), rgba(76, 29, 149, 0.8))',
-                    padding: '1.5rem 3rem',
-                    fontSize: '1.5rem',
-                    transition: 'all 0.3s ease',
-                  }}
-                >
-                  START AGAIN
-                </button>
-              </motion.div>
+    <div className="container">
+      <div className="background" />
+      
+      <div className="content">
+        <div className="results-grid">
+          <div className="image-section">
+            <div className="image-container">
+              <Image
+                src={aiModelImage}
+                alt="AI Generated Portrait"
+                width={800}
+                height={800}
+                className="result-image"
+                priority
+              />
             </div>
           </div>
-        </>
-      )}
+
+          <div className="reading-section">
+            <h1>YOU&apos;RE A...</h1>
+            <h2 className="highlight">mystery</h2>
+            <div className="reading-container">
+              <p className="reading-text">{aiResponse}</p>
+            </div>
+            <button onClick={handleDownload} className="download-button">
+              DOWNLOAD
+            </button>
+          </div>
+        </div>
+      </div>
 
       <style jsx>{`
-        :global(.uk-spinner) {
-          color: rgba(139, 92, 246, 0.8);
+        .container {
+          width: 100vw;
+          height: 100vh;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: black;
+          position: relative;
+          overflow: hidden;
         }
-        :global(.uk-button-primary:hover) {
-          background: linear-gradient(to right, rgba(139, 92, 246, 0.9), rgba(76, 29, 149, 0.9)) !important;
-          transform: translateY(-2px);
-          box-shadow: 0 10px 25px rgba(139, 92, 246, 0.4) !important;
+
+        .background {
+          position: fixed;
+          inset: 0;
+          background-image: url('/optimized_star_backgound.jpg');
+          background-position: center;
+          background-size: cover;
+          opacity: 0.8;
+          z-index: 0;
         }
-        :global(.uk-light) {
+
+        .content {
+          position: relative;
+          z-index: 1;
+          width: 100%;
+          height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 2rem;
+        }
+
+        .results-grid {
+          display: flex;
+          width: 100%;
+          max-width: 1800px;
+          gap: 8rem;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .image-section {
+          flex: 1;
+          max-width: 800px;
+        }
+
+        .image-container {
+          width: 100%;
+          aspect-ratio: 1;
+          position: relative;
+          border-radius: 2.5rem;
+          overflow: hidden;
+          box-shadow: 
+            0 0 30px rgba(255, 255, 255, 0.2),
+            0 0 60px rgba(255, 255, 255, 0.1);
+        }
+
+        .result-image {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .reading-section {
+          flex: 1;
+          max-width: 600px;
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 0.5rem;
+        }
+
+        h1 {
+          font-family: var(--font-aboreto);
+          font-size: clamp(2rem, 4vw, 3rem);
+          color: rgba(255, 255, 255, 0.95);
+          margin: 0;
+          font-weight: 400;
+          letter-spacing: 0.15em;
+          text-transform: uppercase;
+        }
+
+        .highlight {
+          font-family: var(--font-aboreto);
+          font-size: clamp(2rem, 4vw, 3rem);
+          color: white;
+          margin: 0 0 1rem 0;
+          font-weight: 400;
+          letter-spacing: 0.15em;
+          text-transform: uppercase;
+          text-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+        }
+
+        .reading-container {
+          margin: 0 0 2rem;
+          width: 100%;
+        }
+
+        .reading-text {
+          font-family: var(--font-arapey);
+          font-size: min(max(1.2rem, 2.2vw), 1.8rem);
+          line-height: 1.6;
           color: rgba(255, 255, 255, 0.9);
+          margin: 0;
+          text-align: left;
+          letter-spacing: 0.02em;
+        }
+
+        .download-button {
+          background: rgba(0, 0, 0, 0.4);
+          border: 3px solid white;
+          color: white;
+          font-size: min(max(1.2rem, 2vw), 1.6rem);
+          padding: min(max(1rem, 2vh), 1.5rem) min(max(3rem, 5vw), 5rem);
+          border-radius: 100px;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          letter-spacing: 0.15em;
+          font-weight: 400;
+          box-shadow: 
+            0 0 10px rgba(255, 255, 255, 0.5),
+            0 0 20px rgba(255, 255, 255, 0.3),
+            0 0 40px rgba(255, 255, 255, 0.2),
+            inset 0 0 10px rgba(255, 255, 255, 0.1);
+          text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+          text-transform: uppercase;
+          align-self: flex-start;
+        }
+
+        .download-button:hover {
+          background: rgba(255, 255, 255, 0.1);
+          box-shadow: 
+            0 0 15px rgba(255, 255, 255, 0.7),
+            0 0 30px rgba(255, 255, 255, 0.5),
+            0 0 60px rgba(255, 255, 255, 0.3),
+            inset 0 0 20px rgba(255, 255, 255, 0.2);
+          text-shadow: 0 0 15px rgba(255, 255, 255, 0.7);
+          transform: scale(1.02);
+        }
+
+        .download-button:active {
+          transform: scale(0.98);
+        }
+
+        @media (max-width: 1024px) {
+          .results-grid {
+            flex-direction: column;
+            padding: 1.5rem;
+            gap: 3rem;
+          }
+
+          .image-section {
+            max-width: 600px;
+            width: 100%;
+          }
+
+          .reading-section {
+            max-width: 600px;
+            width: 100%;
+            align-items: center;
+          }
+
+          .reading-text {
+            text-align: center;
+          }
+
+          .download-button {
+            align-self: center;
+          }
+
+          h1 {
+            font-size: clamp(1.8rem, 3.5vw, 2.5rem);
+          }
+
+          .highlight {
+            font-size: clamp(1.8rem, 3.5vw, 2.5rem);
+            margin-bottom: 1.5rem;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .content {
+            padding: 1rem;
+          }
+
+          .results-grid {
+            gap: 2rem;
+          }
+
+          h1 {
+            font-size: min(max(1.8rem, 6vw), 2.2rem);
+          }
+
+          .highlight {
+            font-size: min(max(1.8rem, 6vw), 2.2rem);
+            margin-bottom: 1rem;
+          }
+
+          .reading-text {
+            font-size: min(max(1rem, 4.5vw), 1.3rem);
+          }
+
+          .download-button {
+            font-size: min(max(1rem, 4vw), 1.2rem);
+            padding: min(max(0.8rem, 1.5vh), 1.2rem) min(max(2rem, 4vw), 3rem);
+            border-width: 2px;
+            width: 100%;
+          }
         }
       `}</style>
     </div>

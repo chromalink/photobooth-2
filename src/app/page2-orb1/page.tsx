@@ -1,10 +1,8 @@
 'use client'
 
 import { useSessionStore } from '@/store/session'
-import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
-import OrbAnimation from '../components/OrbAnimation'
 
 export default function Orb1() {
   const router = useRouter()
@@ -22,15 +20,35 @@ export default function Orb1() {
 
   // Calculate preview size based on portrait ratio
   const getPreviewSize = () => {
-    const vw = Math.min(window.innerWidth, window.innerHeight * targetAspectRatio);
-    const previewWidth = 0.5 * vw; // 50% of viewport width
-    const previewHeight = previewWidth / targetAspectRatio;
-    // Use the smaller dimension for the circle
-    const circleDiameter = Math.min(previewWidth, previewHeight);
-    return `${circleDiameter}px`;
+    const vh = window.innerHeight;
+    const vw = window.innerWidth;
+    
+    // On desktop (wider screens), use width as the base for calculations
+    const isWideScreen = vw > vh;
+    
+    if (isWideScreen) {
+      // Use 95% of viewport width for wide screens
+      const maxWidth = 0.95 * vw;
+      // But ensure the height doesn't exceed 75% of viewport height
+      const maxHeight = 0.75 * vh;
+      
+      // For desktop, we'll prioritize width while maintaining minimum height
+      return {
+        width: `${maxWidth}px`,
+        height: `${Math.min(maxWidth / targetAspectRatio, maxHeight)}px`
+      };
+    }
+    
+    // For mobile
+    const previewHeight = 0.6 * vh;
+    const previewWidth = previewHeight * targetAspectRatio;
+    return {
+      width: `${previewWidth}px`,
+      height: `${previewHeight}px`
+    };
   }
 
-  const [previewSize, setPreviewSize] = useState('30vw')
+  const [previewSize, setPreviewSize] = useState(getPreviewSize())
 
   // Update preview size on mount and window resize
   useEffect(() => {
@@ -212,70 +230,160 @@ export default function Orb1() {
   }, [shouldNavigate, router]);
 
   return (
-    <div className="uk-height-viewport uk-width-1-1 uk-overflow-hidden uk-position-relative">
-      {/* Camera Preview */}
-      <div 
-        style={{
-          position: 'fixed',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: previewSize,
-          height: previewSize,
-          overflow: 'visible',
-          borderRadius: '50%',
-          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)',
-          zIndex: 1
+    <div className="flex flex-col items-center justify-between min-h-screen bg-black text-white">
+      {/* Main content container with responsive padding */}
+      <div className="w-full h-full flex flex-col items-center" 
+        style={{ 
+          padding: window.innerWidth > window.innerHeight 
+            ? '4vh 5vw' // Desktop padding
+            : '3vh 4vw'  // Mobile padding
         }}
       >
-        {/* Inner container for feathered mask */}
-        <div style={{
-          position: 'absolute',
-          top: '-10px',
-          left: '-10px',
-          right: '-10px',
-          bottom: '-10px',
-          overflow: 'hidden',
-          WebkitMaskImage: '-webkit-radial-gradient(circle farthest-side, white 0%, white 90%, transparent 100%)',
-          maskImage: 'radial-gradient(circle farthest-side, white 0%, white 80%, transparent 100%)'
-        }}>
-          <video 
-            ref={videoRef} 
-            autoPlay 
-            playsInline 
-            muted 
-            style={{ 
-              width: 'calc(100% + 20px)',
-              height: 'calc(100% + 20px)',
-              objectFit: 'cover',
-              transform: 'scaleX(-1)',
-              marginTop: '-10px',
-              marginLeft: '-10px'
-            }}
-          />
-        </div>
-      </div>
-
-      {/* Hidden canvas for photo capture */}
-      <canvas ref={canvasRef} style={{ display: 'none' }} />
-
-      {/* Countdown Display */}
-      {countdown > 0 && (
-        <motion.div
-          initial={{ scale: 0, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0, opacity: 0 }}
-          className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-8xl font-bold text-white"
-          style={{ zIndex: 2 }}
+        {/* Top text prompt with responsive typography */}
+        <div 
+          className="w-full mb-[3vh] md:mb-[4vh]"
+          style={{
+            height: window.innerWidth > window.innerHeight ? '12vh' : '15vh',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
         >
-          {countdown}
-        </motion.div>
-      )}
+          <div
+            className="text-center leading-tight"
+            style={{
+              fontFamily: 'Arapey, serif',
+              fontStyle: 'italic',
+              fontSize: window.innerWidth > window.innerHeight 
+                ? 'clamp(2rem, 4vw, 3.5rem)' // Desktop font size
+                : 'clamp(1.5rem, 5vw, 2.5rem)', // Mobile font size
+              maxWidth: window.innerWidth > window.innerHeight ? '70%' : '85%',
+              background: 'linear-gradient(180deg, #ffffff 95%, #d9d9d9 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              textShadow: '0 0 15px rgba(255,255,255,0.3)',
+              opacity: countdown < 6 && countdown > 0 ? '0.8' : '1', // Subtle fade during countdown
+              transition: 'opacity 0.3s ease'
+            }}
+          >
+            Pretend like your company just went public
+          </div>
+        </div>
 
-      {/* Orb Animation */}
-      <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 0 }}>
-        <OrbAnimation />
+        {/* Center webcam preview with enhanced container */}
+        <div 
+          className="relative flex items-center justify-center w-full"
+          style={{ 
+            height: window.innerWidth > window.innerHeight ? '75vh' : '60vh',
+            width: '100%',
+            margin: '0 auto',
+            padding: window.innerWidth > window.innerHeight ? '0 2vw' : '0',
+            marginBottom: '8vh' // Space for the overlapping countdown
+          }}
+        >
+          {/* Video container */}
+          <div 
+            className="relative rounded-2xl overflow-hidden w-full h-full"
+            style={{ 
+              width: 'min(90vw, 460px)',
+              height: 'min(90vw, 460px)',
+              boxShadow: countdown < 6 && countdown > 0
+                ? '0 0 30px rgba(255,255,255,0.3), 0 0 80px rgba(255,255,255,0.1)'
+                : '0 0 20px rgba(255,255,255,0.2), 0 0 60px rgba(255,255,255,0.1)',
+              transition: 'box-shadow 0.3s ease'
+            }}
+          >
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted
+              className="object-cover w-full h-full"
+              style={{ 
+                transform: 'scaleX(-1)',
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                objectPosition: 'center'
+              }}
+            />
+            <canvas
+              ref={canvasRef}
+              className="hidden"
+            />
+          </div>
+
+          {/* Countdown circle positioned relative to the preview container */}
+          {countdown < 6 && countdown > 0 && (
+            <div 
+              className="absolute left-1/2 transform -translate-x-1/2 font-bold"
+              style={{ 
+                bottom: '-8vh',
+                width: window.innerWidth > window.innerHeight ? '16vh' : '18vh',
+                height: window.innerWidth > window.innerHeight ? '16vh' : '18vh',
+                borderRadius: '50%',
+                backgroundColor: 'black',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: window.innerWidth > window.innerHeight 
+                  ? 'clamp(3rem, 10vh, 7rem)'
+                  : 'clamp(2.5rem, 12vh, 6rem)',
+                color: 'white',
+                textShadow: '0 0 10px rgba(255,255,255,0.5)',
+                boxShadow: '0 0 30px rgba(255,255,255,0.2), 0 0 80px rgba(255,255,255,0.1)',
+                animation: 'pulse 1s infinite',
+                border: '3px solid rgba(255,255,255,0.15)',
+                zIndex: 10
+              }}
+            >
+              {countdown}
+            </div>
+          )}
+        </div>
+
+        {/* Loading state with enhanced backdrop and animation */}
+        {isUploading && (
+          <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center backdrop-blur-md">
+            <div 
+              className="text-white relative"
+              style={{
+                fontSize: 'clamp(1.5rem, 3vw, 2.5rem)',
+                textShadow: '0 0 15px rgba(255,255,255,0.5)',
+                animation: 'fadeInOut 2s infinite'
+              }}
+            >
+              Processing...
+            </div>
+          </div>
+        )}
       </div>
+      <style jsx>{`
+        h1 {
+          font-size: min(max(2.5rem, 5vw), 4rem);
+          font-weight: 400;
+          font-family: var(--font-aboreto);
+          letter-spacing: 0.15em;
+          line-height: 1.2;
+          color: white;
+          text-align: center;
+          margin: 0 0 min(2rem, 4vh);
+          text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+
+        @keyframes pulse {
+          0% { transform: translate(-50%, 0) scale(1); }
+          50% { transform: translate(-50%, 0) scale(1.05); }
+          100% { transform: translate(-50%, 0) scale(1); }
+        }
+
+        @keyframes fadeInOut {
+          0% { opacity: 0.6; }
+          50% { opacity: 1; }
+          100% { opacity: 0.6; }
+        }
+      `}</style>
     </div>
-  );
+  )
 }

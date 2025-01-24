@@ -138,7 +138,8 @@ export default function Orb2() {
           if (statusData.completed && statusData.imageUrl) {
             console.log('Image generation completed:', statusData.imageUrl)
             setAiModelImage(statusData.imageUrl)
-            router.push('/page5-email')
+            setVisualProgress(100)
+            router.push('/page6-results')
             break
           }
           
@@ -167,49 +168,217 @@ export default function Orb2() {
   }, [uploadedPhotoUrl, setAiResponse, setAiModelImage, setError, setIsProcessing, setHasStartedProcessing, router])
 
   return (
-    <div className="uk-height-viewport uk-width-1-1 uk-position-relative">
-      <div className="uk-position-fixed uk-position-top-left uk-width-1-1 uk-height-1-1">
-        <OrbAnimation progress={visualProgress} />
-      </div>
-      
-      {/* UI Layer */}
-      <div className="uk-position-relative uk-height-viewport uk-flex uk-flex-column uk-flex-middle uk-flex-center" style={{ zIndex: 2 }}>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="uk-text-center"
+    <div className="main">
+      {/* Video Background */}
+      <div className="video-background">
+        <video 
+          autoPlay 
+          loop 
+          muted 
+          playsInline
+          className="background-video"
         >
-          <div className="uk-margin-medium-bottom">
-            <div className="uk-text-large uk-text-bold uk-light" style={{
-              fontSize: '4rem',
-              background: 'linear-gradient(45deg, #fff, #a8a8a8)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent'
-            }}>
-              {visualProgress}%
-            </div>
-          </div>
-          <p className="uk-text-large uk-light uk-margin-remove-top uk-margin-medium-bottom" style={{
-            textShadow: '0 2px 4px rgba(0,0,0,0.2)'
-          }}>
-            {visualProgress >= 99 ? "Almost there..." : "Processing your aura..."}
-          </p>
-        </motion.div>
+          <source src="/Loading_animation_screen.mp4" type="video/mp4" />
+        </video>
+      </div>
 
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-          className="uk-position-bottom-center uk-position-medium uk-text-center"
+      {/* Top Title */}
+      <div className="title">
+        <h1>COMPILING AMBITION.EXE...</h1>
+      </div>
+
+      {/* Bottom Text */}
+      <div className="bottom-text">
+        <p>Sorry, it takes a minute to add all<br/>the zeros to your bank account</p>
+      </div>
+
+      {/* Centered Progress Counter */}
+      <div className="progress-container">
+        <motion.div 
+          className="progress-overlay"
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ 
+            duration: 0.5,
+            ease: "easeOut"
+          }}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: 'radial-gradient(circle at center, rgba(0, 0, 0, 0.3), transparent 70%)',
+            padding: '6rem',
+            borderRadius: '50%',
+            width: '80vw',
+            height: '80vh',
+            maxWidth: '1200px',
+            maxHeight: '1200px'
+          }}
         >
-          <p className="uk-text-medium uk-light uk-margin-remove" style={{
-            textShadow: '0 2px 4px rgba(0,0,0,0.2)'
-          }}>
-            Creating your unique spiritual reading...
-          </p>
+          <motion.div 
+            className="progress-text"
+            animate={{
+              textShadow: [
+                "0 0 20px rgba(255, 255, 255, 0.5), 0 0 40px rgba(255, 255, 255, 0.3), 0 0 60px rgba(255, 255, 255, 0.2)",
+                "0 0 40px rgba(255, 255, 255, 0.6), 0 0 80px rgba(255, 255, 255, 0.4), 0 0 120px rgba(255, 255, 255, 0.3)",
+                "0 0 20px rgba(255, 255, 255, 0.5), 0 0 40px rgba(255, 255, 255, 0.3), 0 0 60px rgba(255, 255, 255, 0.2)"
+              ],
+              opacity: [0.8, 1, 0.8]
+            }}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+            style={{
+              fontFamily: 'var(--font-aboreto)',
+              fontSize: '5vh',
+              color: 'white',
+              fontWeight: 400,
+              letterSpacing: '0.05em',
+              mixBlendMode: 'overlay',
+              WebkitTextStroke: '2px rgba(255, 255, 255, 0.3)',
+              lineHeight: 1,
+              textAlign: 'center',
+              margin: 0,
+              padding: 0
+            }}
+          >
+            {visualProgress}%
+          </motion.div>
         </motion.div>
       </div>
+
+      <style jsx>{`
+        .main {
+          width: 100vw;
+          height: 100vh;
+          position: relative;
+          display: flex;
+          flex-direction: column;
+          background: black;
+          margin: 0;
+          padding: 0;
+          overflow: hidden;
+          box-shadow: 
+            inset 0 0 50px rgba(255, 255, 255, 0.1),
+            inset 0 0 100px rgba(255, 255, 255, 0.05),
+            0 0 50px rgba(255, 255, 255, 0.1),
+            0 0 100px rgba(255, 255, 255, 0.05);
+        }
+
+        .video-background {
+          position: absolute;
+          inset: 0;
+          z-index: 0;
+        }
+
+        .background-video {
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          opacity: 0.8;
+        }
+
+        .title {
+          position: absolute;
+          top: 8vh;
+          left: 0;
+          right: 0;
+          z-index: 1;
+          text-align: center;
+          padding: 0 max(20px, 5vw);
+        }
+
+        .bottom-text {
+          position: absolute;
+          bottom: 15em;
+          left: 0;
+          right: 0;
+          z-index: 1;
+          text-align: center;
+          padding: 0 max(20px, 5vw);
+        }
+
+        h1 {
+          font-size: clamp(1.95rem, 2.9vw, 2.5rem);
+          font-weight: 300;
+          font-family: var(--font-aboreto);
+          letter-spacing: 0.25em;
+          color: white;
+          margin: 0;
+          text-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+          text-transform: uppercase;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          max-width: 90vw;
+          margin: 0 auto;
+        }
+
+        p {
+          font-size: clamp(2.2rem, 2.5vw, 1.8rem);
+          color: white;
+          font-weight: 300;
+          font-family: var(--font-arapey);
+          font-style: italic;
+          line-height: 1.6;
+          opacity: 0.95;
+          letter-spacing: 0.03em;
+          margin: 0;
+          text-shadow: 
+            0 0 10px rgba(255, 255, 255, 0.4),
+            0 0 20px rgba(255, 255, 255, 0.25),
+            0 0 30px rgba(255, 255, 255, 0.15),
+            0 0 40px rgba(255, 255, 255, 0.1);
+          filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.15));
+        }
+
+        .progress-container {
+          position: absolute;
+          inset: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 10;
+          pointer-events: none;
+        }
+
+        @media (max-width: 768px) {
+          .title {
+            top: 13vh;
+            padding: 0 15px;
+          }
+
+          .bottom-text {
+            bottom: 5vh;
+            padding: 0 15px;
+          }
+          
+          h1 {
+            font-size: clamp(1.56rem, 5.2vw, 1.95rem);
+            letter-spacing: 0.2em;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .title {
+            top: 13vh;
+            padding: 0 15px;
+          }
+
+          .bottom-text {
+            bottom: 5vh;
+            padding: 0 15px;
+          }
+          
+          h1 {
+            font-size: clamp(1.56rem, 5.2vw, 1.95rem);
+            letter-spacing: 0.2em;
+          }
+        }
+      `}</style>
     </div>
   )
 }
