@@ -4,11 +4,14 @@ import { useSessionStore } from '@/store/session'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 
+const PHOTO_PROMPT = "Show us a sample of your face"
+
 export default function Orb1() {
   const router = useRouter()
   //Countdown starting number 'useState'
-  const [countdown, setCountdown] = useState(5)
+  const [countdown, setCountdown] = useState(10)
   const [shouldNavigate, setShouldNavigate] = useState(false)
+  const [currentPrompt, setCurrentPrompt] = useState('')
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const setCapturedPhoto = useSessionStore((state) => state.setCapturedPhoto)
@@ -61,6 +64,11 @@ export default function Orb1() {
     return () => window.removeEventListener('resize', updatePreviewSize);
   }, []);
 
+  useEffect(() => {
+    // Set the single prompt when component mounts
+    setCurrentPrompt(PHOTO_PROMPT)
+  }, [])
+
   // Effect for camera setup
   useEffect(() => {
     let stream: MediaStream | null = null;
@@ -70,10 +78,10 @@ export default function Orb1() {
       try {
         stream = await navigator.mediaDevices.getUserMedia({
           video: {
-            width: { ideal: 896 },
-            height: { ideal: 1152 },
+            width: { ideal: 896, min: 896 },
+            height: { ideal: 1152, min: 1152 },
             facingMode: 'user',
-            aspectRatio: { ideal: 896/1152 }
+            aspectRatio: { ideal: 896/1152, min: 896/1152 }
           }
         });
         console.log('Camera access granted:', stream.getVideoTracks()[0].label);
@@ -231,134 +239,123 @@ export default function Orb1() {
 
   return (
     <div className="flex flex-col items-center justify-between min-h-screen bg-black text-white">
-      {/* Main content container with responsive padding */}
-      <div className="w-full h-full flex flex-col items-center" 
+      {/* Center webcam preview with enhanced container */}
+      <div 
+        className="relative flex items-center justify-center w-full"
         style={{ 
-          padding: window.innerWidth > window.innerHeight 
-            ? '4vh 5vw' // Desktop padding
-            : '3vh 4vw'  // Mobile padding
+          height: '100vh',
+          width: '100vw',
+          overflow: 'hidden',
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          zIndex: 0
         }}
       >
-        {/* Top text prompt with responsive typography */}
+        {/* Video container */}
         <div 
-          className="w-full mb-[3vh] md:mb-[4vh]"
-          style={{
-            height: window.innerWidth > window.innerHeight ? '12vh' : '15vh',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
-        >
-          <div
-            className="text-center leading-tight"
-            style={{
-              fontFamily: 'Arapey, serif',
-              fontStyle: 'italic',
-              fontSize: window.innerWidth > window.innerHeight 
-                ? 'clamp(2rem, 4vw, 3.5rem)' // Desktop font size
-                : 'clamp(1.5rem, 5vw, 2.5rem)', // Mobile font size
-              maxWidth: window.innerWidth > window.innerHeight ? '70%' : '85%',
-              background: 'linear-gradient(180deg, #ffffff 95%, #d9d9d9 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-              textShadow: '0 0 15px rgba(255,255,255,0.3)',
-              opacity: countdown < 6 && countdown > 0 ? '0.8' : '1', // Subtle fade during countdown
-              transition: 'opacity 0.3s ease'
-            }}
-          >
-            Pretend like your company just went public
-          </div>
-        </div>
-
-        {/* Center webcam preview with enhanced container */}
-        <div 
-          className="relative flex items-center justify-center w-full"
+          className="relative overflow-hidden"
           style={{ 
-            height: window.innerWidth > window.innerHeight ? '75vh' : '60vh',
-            width: '100%',
-            margin: '0 auto',
-            padding: window.innerWidth > window.innerHeight ? '0 2vw' : '0',
-            marginBottom: '8vh' // Space for the overlapping countdown
+            width: '100vh',
+            height: '128vh', // Maintain 896x1152 ratio (1152/896 ≈ 1.28)
+            position: 'absolute',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            boxShadow: countdown < 6 && countdown > 0
+              ? '0 0 20px rgba(255,255,255,0.2), 0 0 60px rgba(255,255,255,0.1)'
+              : '0 0 20px rgba(255,255,255,0.2), 0 0 60px rgba(255,255,255,0.1)',
+            transition: 'box-shadow 0.3s ease'
           }}
         >
-          {/* Video container */}
-          <div 
-            className="relative rounded-2xl overflow-hidden w-full h-full"
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            muted
+            className="object-cover"
             style={{ 
-              width: 'min(90vw, 460px)',
-              height: 'min(90vw, 460px)',
-              boxShadow: countdown < 6 && countdown > 0
-                ? '0 0 30px rgba(255,255,255,0.3), 0 0 80px rgba(255,255,255,0.1)'
-                : '0 0 20px rgba(255,255,255,0.2), 0 0 60px rgba(255,255,255,0.1)',
-              transition: 'box-shadow 0.3s ease'
+              transform: 'scaleX(-1)',
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              objectPosition: 'center'
             }}
-          >
-            <video
-              ref={videoRef}
-              autoPlay
-              playsInline
-              muted
-              className="object-cover w-full h-full"
-              style={{ 
-                transform: 'scaleX(-1)',
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-                objectPosition: 'center'
-              }}
-            />
-            <canvas
-              ref={canvasRef}
-              className="hidden"
-            />
-          </div>
-
-          {/* Countdown circle positioned relative to the preview container */}
-          {countdown < 6 && countdown > 0 && (
-            <div 
-              className="absolute left-1/2 transform -translate-x-1/2 font-bold"
-              style={{ 
-                bottom: '-8vh',
-                width: window.innerWidth > window.innerHeight ? '16vh' : '18vh',
-                height: window.innerWidth > window.innerHeight ? '16vh' : '18vh',
-                borderRadius: '50%',
-                backgroundColor: 'black',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: window.innerWidth > window.innerHeight 
-                  ? 'clamp(3rem, 10vh, 7rem)'
-                  : 'clamp(2.5rem, 12vh, 6rem)',
-                color: 'white',
-                textShadow: '0 0 10px rgba(255,255,255,0.5)',
-                boxShadow: '0 0 30px rgba(255,255,255,0.2), 0 0 80px rgba(255,255,255,0.1)',
-                animation: 'pulse 1s infinite',
-                border: '3px solid rgba(255,255,255,0.15)',
-                zIndex: 10
-              }}
-            >
-              {countdown}
-            </div>
-          )}
+          />
+          <canvas
+            ref={canvasRef}
+            className="hidden"
+          />
         </div>
 
-        {/* Loading state with enhanced backdrop and animation */}
-        {isUploading && (
-          <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center backdrop-blur-md">
-            <div 
-              className="text-white relative"
-              style={{
-                fontSize: 'clamp(1.5rem, 3vw, 2.5rem)',
-                textShadow: '0 0 15px rgba(255,255,255,0.5)',
-                animation: 'fadeInOut 2s infinite'
-              }}
-            >
-              Processing...
-            </div>
+        {/* Countdown circle positioned relative to the preview container */}
+        {countdown > 0 && (
+          <div 
+            className="absolute left-1/2 transform -translate-x-1/2 font-bold"
+            style={{ 
+              bottom: '5vh',
+              width: '18vh',
+              height: '18vh',
+              borderRadius: '50%',
+              backgroundColor: 'rgba(0,0,0,0.5)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: 'clamp(3rem, 8vh, 7rem)',
+              color: 'white',
+              textShadow: '0 0 10px rgba(255,255,255,0.5)',
+              boxShadow: '0 0 30px rgba(255,255,255,0.2), 0 0 80px rgba(255,255,255,0.1)',
+              animation: 'pulse 1s infinite',
+              border: '3px solid rgba(255,255,255,0.15)',
+              backdropFilter: 'blur(10px)',
+              WebkitBackdropFilter: 'blur(10px)',
+            }}
+          >
+            {countdown}
           </div>
         )}
       </div>
+
+      {/* Top text prompt with responsive typography - moved on top of video */}
+      <div 
+        className="fixed top-0 left-0 w-full z-10"
+        style={{
+          padding: '4vh 5vw',
+          background: 'linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%)'
+        }}
+      >
+        <div
+          className="text-center leading-tight"
+          style={{
+            fontFamily: 'Arapey, serif',
+            fontStyle: 'italic',
+            fontSize: 'clamp(1.8rem, 5vw, 3.5rem)',
+            maxWidth: '85%',
+            margin: '0 auto',
+            color: 'white',
+            textShadow: '0 0 15px rgba(0,0,0,0.5)',
+            opacity: countdown < 6 && countdown > 0 ? '0.8' : '1',
+            transition: 'opacity 0.3s ease'
+          }}
+        >
+          {currentPrompt}
+        </div>
+      </div>
+
+      {/* Loading state with enhanced backdrop and animation */}
+      {isUploading && (
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center backdrop-blur-md">
+          <div 
+            className="text-white relative"
+            style={{
+              fontSize: 'clamp(1.5rem, 3vw, 2.5rem)',
+              textShadow: '0 0 15px rgba(255,255,255,0.5)',
+              animation: 'fadeInOut 2s infinite'
+            }}
+          >
+            Processing...
+          </div>
+        </div>
+      )}
       <style jsx>{`
         h1 {
           font-size: min(max(2.5rem, 5vw), 4rem);
@@ -370,6 +367,16 @@ export default function Orb1() {
           text-align: center;
           margin: 0 0 min(2rem, 4vh);
           text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+
+        .countdown {
+          font-size: clamp(1.5rem, 6vw, 4rem);
+          font-weight: 300;
+          font-family: var(--font-aboreto);
+          letter-spacing: 0.1em;
+          color: white;
+          text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+          margin: 0;
         }
 
         @keyframes pulse {

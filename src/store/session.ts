@@ -11,6 +11,7 @@ interface SessionState {
   colorChoice: number | null
   processedImageUrl: string | null
   aiResponse: string | null
+  aiName: string | null
   comfyUIImage: string | null
   aiModelImage: string | null
   aiModelProvider: string | null
@@ -29,6 +30,7 @@ interface SessionActions {
   setColorChoice: (color: number | null) => void
   setProcessedImage: (url: string | null) => void
   setAiResponse: (response: string | null) => void
+  setAiName: (name: string | null) => void
   setComfyUIImage: (image: string | null) => void
   setAiModelImage: (image: string | null) => void
   setAiModelProvider: (provider: string | null) => void
@@ -50,6 +52,7 @@ const initialState: SessionState = {
   colorChoice: null,
   processedImageUrl: null,
   aiResponse: null,
+  aiName: null,
   comfyUIImage: null,
   aiModelImage: null,
   aiModelProvider: null,
@@ -71,6 +74,7 @@ export const useSessionStore = create<SessionState & SessionActions>()(
       setColorChoice: (color) => set({ colorChoice: color }),
       setProcessedImage: (url) => set({ processedImageUrl: url }),
       setAiResponse: (response) => set({ aiResponse: response }),
+      setAiName: (name) => set({ aiName: name }),
       setComfyUIImage: (image) => set({ comfyUIImage: image }),
       setAiModelImage: (image) => set({ aiModelImage: image }),
       setAiModelProvider: (provider) => set({ aiModelProvider: provider }),
@@ -80,10 +84,16 @@ export const useSessionStore = create<SessionState & SessionActions>()(
       setError: (error) => set({ error }),
       setUploadedPhotoUrl: (url) => set({ uploadedPhotoUrl: url }),
       setHasStartedProcessing: (hasStarted) => set({ hasStartedProcessing: hasStarted }),
-      resetSession: () => set((state) => ({
-        ...initialState,
-        aiModelProvider: state.aiModelProvider
-      })),
+      resetSession: () => {
+        set({
+          ...initialState,
+          sessionId: crypto.randomUUID(),
+          aiResponse: null,
+          aiName: null,
+          aiModelImage: null,
+          aiModelProvider: state => state.aiModelProvider
+        })
+      },
       resetProcessingState: () => set({ 
         hasStartedProcessing: false, 
         isProcessing: false,

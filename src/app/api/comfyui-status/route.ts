@@ -46,15 +46,38 @@ export async function GET(request: Request) {
       
       return NextResponse.json({
         success: true,
-        completed: true,
-        imageUrl: proxyUrl
+        upscaledResult: {
+          completed: true,
+          imageUrl: proxyUrl,
+          promptId: promptId
+        }
       }, { headers });
     }
     
+    // Check if we've seen this image before
+    const imageKey = `${promptId}_${history[promptId]?.outputs?.[10]?.images?.[0]?.filename || ''}`;
+    if (global.lastImageKey === imageKey) {
+      console.log('Image already processed, waiting for new one...');
+      return NextResponse.json({
+        success: true,
+        upscaledResult: {
+          completed: false,
+          message: 'Image still generating',
+          promptId: promptId
+        }
+      }, { headers });
+    }
+    
+    // Update last seen image
+    global.lastImageKey = imageKey;
+    
     return NextResponse.json({
       success: true,
-      completed: false,
-      message: 'Image still generating'
+      upscaledResult: {
+        completed: false,
+        message: 'Image still generating',
+        promptId: promptId
+      }
     }, { headers });
 
   } catch (error) {

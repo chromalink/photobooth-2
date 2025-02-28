@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
+import crypto from 'crypto';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -28,98 +29,305 @@ interface Message {
   content: string | ContentPart[];
 }
 
-export async function POST(request: Request) {
-  try {
-    console.log('Generate reading route: Starting...');
-    const body = await request.json();
-    console.log('Request body:', body);
-    const { imageUrl } = body;
+// Cache that auto-clears every 5 minutes
+class AutoClearingCache<K, V> {
+  private cache = new Map<K, V>();
+  private lastClearTime = Date.now();
+  private readonly clearIntervalMs: number;
 
-    if (!imageUrl) {
-      console.error('No image URL provided in request');
-      return NextResponse.json(
-        { error: 'No image URL provided' },
-        { status: 400 }
-      );
+  constructor(clearIntervalMs: number = 5 * 60 * 1000) { // Default 5 minutes
+    this.clearIntervalMs = clearIntervalMs;
+  }
+
+  set(key: K, value: V): void {
+    this.clearIfNeeded();
+    this.cache.set(key, value);
+  }
+
+  get(key: K): V | undefined {
+    this.clearIfNeeded();
+    return this.cache.get(key);
+  }
+
+  has(key: K): boolean {
+    this.clearIfNeeded();
+    return this.cache.has(key);
+  }
+
+  private clearIfNeeded(): void {
+    const now = Date.now();
+    if (now - this.lastClearTime > this.clearIntervalMs) {
+      this.cache.clear();
+      this.lastClearTime = now;
+      console.log('\nCleared cache');
     }
+  }
+}
 
-    console.log('Image URL received:', imageUrl.substring(0, 50) + '...');
-    console.log('Image URL starts with:', imageUrl.substring(0, 30));
+// Initialize caches with different timeouts
+const requestCache = new AutoClearingCache<string, any>(5 * 60 * 1000); // 5 minutes
+const readingCache = new AutoClearingCache<string, any>(60 * 60 * 1000); // 1 hour
+
+// Track last request time and hash to prevent duplicates
+const requestCacheMap = new Map<string, {
+  timestamp: number;
+  response: any;
+}>();
+
+// Keep track of recent requests to prevent duplicates
+class RequestDeduplicator {
+  private requests = new Map<string, { timestamp: number, reading: any }>();
+  private readonly timeWindowMs = 2000; // 2 second window for deduplication
+
+  add(imageHash: string, reading: any): void {
+    this.cleanup();
+    this.requests.set(imageHash, {
+      timestamp: Date.now(),
+      reading
+    });
+  }
+
+  get(imageHash: string): any | null {
+    this.cleanup();
+    const entry = this.requests.get(imageHash);
+    if (!entry) return null;
+
+    const age = Date.now() - entry.timestamp;
+    if (age < this.timeWindowMs) {
+      return entry.reading;
+    }
+    return null;
+  }
+
+  private cleanup(): void {
+    const now = Date.now();
+    for (const [hash, entry] of this.requests.entries()) {
+      if (now - entry.timestamp > this.timeWindowMs) {
+        this.requests.delete(hash);
+      }
+    }
+  }
+}
+
+const deduplicator = new RequestDeduplicator();
+
+// Request queue to ensure sequential processing
+class RequestQueue {
+  private processing = false;
+  private queue: Array<() => Promise<void>> = [];
+
+  async add<T>(task: () => Promise<T>): Promise<T> {
+    return new Promise((resolve, reject) => {
+      this.queue.push(async () => {
+        try {
+          const result = await task();
+          resolve(result);
+        } catch (error) {
+          reject(error);
+        }
+      });
+      this.processNext();
+    });
+  }
+
+  private async processNext() {
+    if (this.processing || this.queue.length === 0) return;
     
-    let processedImageUrl = imageUrl;
-    // Check if it's a base64 image
-    if (imageUrl.startsWith('data:image')) {
-      console.log('Received base64 image');
-      // Extract the actual base64 data
-      const base64Data = imageUrl.split(',')[1];
-      // Convert to a regular URL that OpenAI can access
-      processedImageUrl = `data:image/jpeg;base64,${base64Data}`;
-      console.log('Processed image URL starts with:', processedImageUrl.substring(0, 30));
+    this.processing = true;
+    const task = this.queue.shift();
+    
+    try {
+      await task?.();
+    } finally {
+      this.processing = false;
+      this.processNext();
     }
+  }
+}
 
-    const prompt = `You are a humorous satirical oracle that speaks in a style of 80s humour. Based on the photo and facial expression, give them 80s corporate name andidentify hypothetically what they are trying to manifest. Categorize them in an office clique.Try to guess their secret desires, and hidden superpowers while hinting at this person's red flags. give a funny, and slightly sarcastic reading that playfully pokes fun at what you think their occupation and relationship status in a humorous way. Guess where they will be in 5 years in an optimistic but sassy way. Absolute Maximum response length: 60 words`;
+const requestQueue = new RequestQueue();
 
-    console.log('Preparing OpenAI request...');
+async function getPersonDescription(imageFile: File): Promise<string> {
+  // Convert File to base64
+  const imageArrayBuffer = await imageFile.arrayBuffer();
+  const imageBase64 = Buffer.from(imageArrayBuffer).toString('base64');
 
-    const messages: Message[] = [
+  const prompt = `You are a satirical oracle in a fictional movie. Based on the photo, identify hypothetical accentuated red flags and give a funny sarcastic reading that pokes fun at their energy (are they The Power Climber,The One Who Never Works, The Office Influencer or Too Efficient to be Human). are they going to be promoted or fired. make red flags section longer than other sections. Try to guess their secret desire, hidden superpower, red flag, and future prediction. give them advice. Keep it entertaining. at the end: What facial expression does she/he/they have? IF they seem neutral facial expression, composed, yawn, boredom, angry, intense,sad = Corporate_Overlord, lively,exciting, wide smile,raised eyebrows = Star_Thought_Leader, relaxed and relaxed smile = Vacation_CEO; confused/ any other expression = The_Productivity_Cyborg? are they female/male/non-binary? keep it 150 words"  `;
+
+  const descriptionResponse = await openai.chat.completions.create({
+    messages: [
+      {
+        role: "system",
+        content: "You are a corporate seer with a gift for decoding workplace energy and drama. Describe their Facial Expression, Body Language, Clothing, and Hair Style with a satirical playful dramatic conversational tone—each in 15 words or fewer. Identify their most alarming red flags (potential for drama) and accentuated corporate personality in each point. Then, indirectly assign them exactly one of these archetypes: Synergy Specialist (“You call every meeting a ‘touch base’ and genuinely believe in the power of icebreakers.” Detected If: Big, open smile, animated hands, light/bright clothing, soft/voluminous hair). Workflow Wizard (“You have a color-coded spreadsheet for everything. People fear your pivot tables.” Detected If: Mildly serious, still posture, neutral tones, tidy hair). Executive Oracle (“You don’t take meetings, you take ‘alignments.’” Detected If: Intense gaze, upright stance, dark colors, sleek hair, big phone). Middle Manager (“Knows Just Enough to Be Dangerous” Detected If: Slightly strained smile, neutral stance, muted blues/khakis, convenient haircut).  Engagement Risk (“Your enthusiasm levels are dangerously low.” Detected If: No smile, arms crossed, dark/slightly disheveled clothing, messy hair). The Intern (“Eager, Overwhelmed, and Underpaid” Detected If: Nervous smile, wide eyes, overdressed/underdressed, slightly off hair). Then tell me: are they male or female? Keep the reading exactly 200 words"
+      },
+      {
+        role: "user",
+        content: [
+          {
+            type: "image_url",
+            image_url: {
+              url: `data:image/jpeg;base64,${imageBase64}`,
+              detail: "low"
+            }
+          }
+        ]
+      }
+    ],
+    model: "gpt-4o",
+    max_tokens: 400,
+    temperature: 0.7
+  });
+
+  const description = descriptionResponse.choices[0].message.content?.trim() || "";
+  return description;
+}
+
+async function generateOracleReading(personDescription: string): Promise<string> {
+  const prompt = `Based on this description, analyze the corporate personality and output in EXACTLY this format:
+
+Archetype: [one of: Synergy Specialist, Workflow Wizard, Executive Oracle, Middle Manager, Engagement Risk, The Intern]
+General impression: [your 25-word summary]
+HR memo: [your 15-word memo]
+Final verdict: [your 15-word verdict]
+
+IMPORTANT: The response MUST start with "Archetype:" followed by exactly one of the listed names.`;
+
+  const oracleResponse = await openai.chat.completions.create({
+    messages: [
       {
         role: "system",
         content: prompt
       },
       {
         role: "user",
-        content: [
-          {
-            type: "text",
-            text: "What do you see in this photo? Make it funny!"
-          },
-          {
-            type: "image_url",
-            image_url: {
-              url: processedImageUrl,
-              detail: "low"
-            }
-          }
-        ]
+        content: personDescription
       }
-    ];
+    ],
+    model: "gpt-4",
+    max_tokens: 300,
+    temperature: 0.9
+  });
 
-    console.log('OpenAI request structure:', {
-      messageCount: messages.length,
-      systemMessage: { role: messages[0].role },
-      userMessage: { 
-        role: messages[1].role, 
-        contentTypes: Array.isArray(messages[1].content) 
-          ? messages[1].content.map(c => c.type)
-          : 'string' 
-      }
-    });
+  const response = oracleResponse.choices[0].message.content?.trim() || "";
+  console.log('Raw OpenAI response:', response); // Debug log
+  return response;
+}
 
-    console.log('Sending request to OpenAI...');
-    
-    const completion = await openai.chat.completions.create({
-      messages: messages as any, // Type assertion needed for OpenAI API
-      model: "gpt-4o",
-      max_tokens: 500,
-      temperature: 0.9
-    });
+function extractCategory(oracleReading: string): string | null {
+  console.log('Extracting category from:', oracleReading); // Debug log
 
-    console.log('OpenAI response received:', completion.choices[0]?.message?.content);
+  // Map of valid archetypes and their normalized versions
+  const archetypeMap = {
+    'synergy specialist': 'synergy_specialist',
+    'workflow wizard': 'workflow_wizard',
+    'executive oracle': 'executive_oracle',
+    'middle manager': 'middle_manager',
+    'engagement risk': 'engagement_risk',
+    'the intern': 'the_intern'
+  };
 
-    return NextResponse.json({ 
-      response: completion.choices[0]?.message?.content || 'Unable to generate reading'
-    });
-  } catch (error) {
-    console.error('Error in generate-reading route:', error);
-    if (error instanceof Error) {
-      console.error('Error details:', {
-        message: error.message,
-        stack: error.stack,
-        name: error.name
-      });
+  // Extract everything after "Archetype:" until newline or end
+  const archetypeMatch = oracleReading?.match(/^Archetype:\s*(.+?)(?=\n|$)/im);
+  const rawArchetype = archetypeMatch?.[1]?.trim() || "";
+  console.log('Raw extracted archetype:', rawArchetype);
+
+  // Normalize the extracted archetype
+  const normalizedInput = rawArchetype.toLowerCase().replace(/[™]/g, '').trim();
+  console.log('Normalized input:', normalizedInput);
+
+  // Look up the normalized version
+  const mappedArchetype = archetypeMap[normalizedInput];
+  console.log('Mapped archetype:', mappedArchetype || 'not found');
+
+  if (mappedArchetype) {
+    return mappedArchetype;
+  }
+
+  console.log('No valid match found, defaulting to middle_manager');
+  return 'middle_manager';
+}
+
+function extractName(oracleReading: string): string {
+  return "Corporate Entity #" + Math.floor(Math.random() * 9000 + 1000);
+}
+
+function extractReading(oracleReading: string): string {
+  // Remove the archetype line
+  const withoutArchetype = oracleReading.replace(/^Archetype:.*?\n/, '').trim();
+  return withoutArchetype || "No reading available";
+}
+
+// Global request lock to prevent parallel processing
+let isProcessing = false;
+let lastRequest: {
+  hash: string;
+  timestamp: number;
+  response?: any;
+} | null = null;
+
+export async function POST(req: Request) {
+  try {
+    console.log('Generate reading route: POST request received');
+    console.log('Content-Type:', req.headers.get('content-type'));
+
+    const data = await req.json();
+    const { image, hash } = data;
+
+    if (!image || !hash) {
+      return NextResponse.json(
+        { error: 'Missing required fields' },
+        { status: 400 }
+      );
     }
+
+    // Check if this is a duplicate request within 10 seconds
+    if (lastRequest && 
+        lastRequest.hash === hash && 
+        Date.now() - lastRequest.timestamp < 10000) {
+      console.log('Returning cached response for recent request');
+      return NextResponse.json(lastRequest.response || { error: 'Processing' });
+    }
+
+    // Check if we're already processing a request
+    if (isProcessing) {
+      console.log('Already processing a request, returning busy status');
+      return NextResponse.json({ error: 'Processing' }, { status: 429 });
+    }
+
+    try {
+      isProcessing = true;
+      lastRequest = { hash, timestamp: Date.now() };
+
+      console.log('Getting person description...');
+      const personDescription = await getPersonDescription(
+        new File([Buffer.from(image, 'base64')], 'image.jpg', { type: 'image/jpeg' })
+      );
+      console.log('Person description:', personDescription);
+
+      console.log('Generating oracle reading...');
+      const oracleReading = await generateOracleReading(personDescription);
+      console.log('Oracle reading:', oracleReading);
+
+      const response = {
+        success: true,
+        category: extractCategory(oracleReading),
+        name: extractName(oracleReading),
+        reading: extractReading(oracleReading),
+        description: personDescription || '' // Ensure we always send the description
+      };
+
+      // Cache the successful response
+      lastRequest.response = response;
+
+      return NextResponse.json(response);
+    } finally {
+      // Always release the lock
+      isProcessing = false;
+    }
+  } catch (error) {
+    console.error('Error in generate-reading:', error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Failed to generate satirical reading' },
+      { error: 'Failed to generate reading' },
       { status: 500 }
     );
   }

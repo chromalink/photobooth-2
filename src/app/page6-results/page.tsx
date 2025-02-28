@@ -8,6 +8,7 @@ import Image from 'next/image'
 export default function Results() {
   const router = useRouter()
   const aiResponse = useSessionStore((state) => state.aiResponse)
+  const aiName = useSessionStore((state) => state.aiName)
   const aiModelImage = useSessionStore((state) => state.aiModelImage)
 
   useEffect(() => {
@@ -44,10 +45,14 @@ export default function Results() {
           </div>
 
           <div className="reading-section">
-            <h1>YOU&apos;RE A...</h1>
-            <h2 className="highlight">mystery</h2>
-            <div className="reading-container">
-              <p className="reading-text">{aiResponse}</p>
+            <div className="text-content">
+              <div className="title-container">
+                <h1 className="title-text">THEY CALL YOU...</h1>
+                <h2 className="title-text highlight">{aiName || 'Mystery Person'}</h2>
+              </div>
+              <div className="reading-container">
+                <pre className="reading-text">{aiResponse}</pre>
+              </div>
             </div>
             <button onClick={handleDownload} className="download-button">
               DOWNLOAD
@@ -122,32 +127,43 @@ export default function Results() {
 
         .reading-section {
           flex: 1;
-          max-width: 600px;
+          display: flex;
+          flex-direction: column;
+          gap: 2rem;
+          color: white;
+          max-width: min(55vw, 600px);
+        }
+
+        .text-content {
           display: flex;
           flex-direction: column;
           align-items: flex-start;
-          gap: 0.5rem;
+          gap: 2rem;
         }
 
-        h1 {
-          font-family: var(--font-aboreto);
-          font-size: clamp(2rem, 4vw, 3rem);
-          color: rgba(255, 255, 255, 0.95);
-          margin: 0;
-          font-weight: 400;
-          letter-spacing: 0.15em;
-          text-transform: uppercase;
+        .title-container {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 0;
         }
 
-        .highlight {
+        .title-text {
           font-family: var(--font-aboreto);
-          font-size: clamp(2rem, 4vw, 3rem);
+          font-size: 2.45rem;
           color: white;
-          margin: 0 0 1rem 0;
           font-weight: 400;
           letter-spacing: 0.15em;
           text-transform: uppercase;
-          text-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+          margin: 0;
+          line-height: 1.3;
+          padding: 0;
+          text-align: left;
+        }
+
+        .title-text.highlight {
+          color: white;
+          font-size: 2.45rem;
         }
 
         .reading-container {
@@ -156,13 +172,28 @@ export default function Results() {
         }
 
         .reading-text {
-          font-family: var(--font-arapey);
-          font-size: min(max(1.2rem, 2.2vw), 1.8rem);
+          font-family: var(--font-work-sans);
+          font-size: 1.56rem;
+          font-weight: 400;
           line-height: 1.6;
           color: rgba(255, 255, 255, 0.9);
-          margin: 0;
           text-align: left;
           letter-spacing: 0.02em;
+          white-space: pre-line;
+          margin: 0;
+          background: transparent;
+        }
+
+        @media (max-width: 1024px) {
+          .reading-text {
+            font-size: 1.56rem;
+          }
+        }
+
+        @media (max-width: 768px) {
+          .reading-text {
+            font-size: 1.56rem;
+          }
         }
 
         .download-button {
@@ -202,48 +233,32 @@ export default function Results() {
         }
 
         @media (max-width: 1024px) {
-          .results-grid {
-            flex-direction: column;
-            padding: 1.5rem;
-            gap: 3rem;
-          }
-
-          .image-section {
-            max-width: 600px;
-            width: 100%;
-          }
-
-          .reading-section {
-            max-width: 600px;
-            width: 100%;
-            align-items: center;
-          }
-
-          .reading-text {
-            text-align: center;
-          }
-
-          .download-button {
-            align-self: center;
-          }
-
-          h1 {
-            font-size: clamp(1.8rem, 3.5vw, 2.5rem);
-          }
-
-          .highlight {
-            font-size: clamp(1.8rem, 3.5vw, 2.5rem);
-            margin-bottom: 1.5rem;
+          .title-text {
+            font-size: 2.45rem;
           }
         }
 
-        @media (max-width: 480px) {
-          .content {
-            padding: 1rem;
+        @media (max-width: 768px) {
+          .title-text {
+            font-size: 2.45rem;
+          }
+
+          .text-content {
+            gap: 0;
+          }
+
+          .reading-text {
+            text-align: left;
+            padding: 1rem 0;
           }
 
           .results-grid {
+            flex-direction: column;
             gap: 2rem;
+          }
+
+          .content {
+            padding: 1rem;
           }
 
           h1 {

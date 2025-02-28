@@ -32,24 +32,33 @@ export default function Home() {
   return (
     <main className="main">
       <div className="content">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-        >
-          <h1>PERSONALITY<br />PHOTOMACHINE</h1>
-          <p>Ever wondered what's your true essence<br />and a path to success?</p>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3 }}
-        >
-          <button onClick={handleStart}>
-            FIND OUT
-          </button>
-        </motion.div>
+        <div className="responsiveContainer">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="titleWrapper"
+          >
+            <h1>FACE AUDIT™</h1>
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="textWrapper"
+            style={{ marginBottom: '1.1rem' }}
+          >
+            <p>The future of professional<br />expression</p>
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6 }}
+            className="buttonWrapper"
+          >
+            <button onClick={handleStart}>FIND OUT</button>
+          </motion.div>
+        </div>
       </div>
 
       <style jsx>{`
@@ -70,7 +79,7 @@ export default function Home() {
           content: '';
           position: absolute;
           inset: 0;
-          background-image: url('/optimized_main_screen.jpg');
+          background-image: url('/optimized_home_screen.jpg');
           background-position: center;
           background-repeat: no-repeat;
           background-size: cover;
@@ -79,88 +88,138 @@ export default function Home() {
 
         .content {
           position: relative;
-          z-index: 1;
-          text-align: center;
+          display: flex;
+          justify-content: center;
+          align-items: center;
           padding: 0 max(20px, 5vw);
           width: min(100%, 1200px);
           margin: 0 auto;
+          height: 100vh;
+        }
+
+        .responsiveContainer {
+          position: relative;
+          width: min(90%, 800px);
+          height: min(60vh, 600px);
+          display: flex;
+          flex-direction: column;
+          justify-content: flex-start;
+          align-items: center;
+          transform-origin: center;
+          transition: transform 0.3s ease;
+          gap: 1rem;
+          margin-top: 3vh;
+        }
+
+        .titleWrapper {
+          width: 100%;
+          max-width: min(100%, 600px);
+          text-align: center;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          transform-origin: center top;
+          padding: 0 1rem;
+        }
+
+        .textWrapper {
+          width: 100%;
+          max-width: min(100%, 500px);
+          text-align: center;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          padding: 0 1rem;
+        }
+
+        .buttonWrapper {
+          width: 100%;
+          max-width: min(100%, 500px);
+          text-align: center;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          padding: 0 1rem;
         }
 
         h1 {
-          font-size: min(max(2.5rem, 5vw), 4rem);
+          width: 100%;
+          font-size: clamp(3.0rem, 5vw, 2.8rem);
           font-weight: 400;
-          font-family: var(--font-aboreto);
-          letter-spacing: 0.15em;
+          font-family: var(--font-michroma);
+          letter-spacing: 0.1em;
           line-height: 1.1em;
-          color: white;
-          margin: 0 0 min(1.5rem, 3vh);
-          text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+          color: #FFB048;
+          margin: 0;
+          padding: 0;
         }
 
         p {
-          font-size: min(max(1rem, 1.8vw), 1.25rem);
-          color: white;
-          font-weight: 300;
-          font-family: var(--font-arapey);
-          font-style: italic;
-          line-height: 1.6;
-          opacity: 0.9;
-          letter-spacing: 0.02em;
-          margin: 0 0 min(2rem, 4vh);
+          font-size: clamp(1.6rem, 2vw, 1.2rem);
+          font-family: var(--font-b612-mono);
+          font-weight: 400;
+          font-style: normal;
+          letter-spacing: 0.1em;
+          line-height: 1.5;
+          color: #FFC578;
+          margin: 0;
+          padding: 0;
         }
 
         button {
           background: transparent;
-          border: 2px solid white;
-          color: white;
-          font-size: min(max(0.9rem, 1.5vw), 1.1rem);
-          padding: min(max(0.8rem, 1.5vh), 1.2rem) min(max(2rem, 4vw), 3.5rem);
-          border-radius: 50px;
+          border: 2px solid #FFE7C8;
+          color: #FFE7C8;
+          font-family: var(--font-b612-mono);
+          font-size: clamp(1.5rem, 1.5vw, 1.2rem);
+          font-weight: 400;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          padding: 1.2rem 3.5rem;
+          border-radius: 25px;
           cursor: pointer;
           transition: all 0.3s ease;
-          letter-spacing: 0.15em;
-          font-weight: 400;
           box-shadow: 
-            0 0 5px rgba(255, 255, 255, 0.5),
-            0 0 10px rgba(255, 255, 255, 0.3),
-            0 0 20px rgba(255, 255, 255, 0.2),
-            inset 0 0 5px rgba(255, 255, 255, 0.1);
-          text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
-          position: relative;
+            0 0 5px rgba(255, 231, 200, 0.5),
+            0 0 10px rgba(255, 231, 200, 0.3),
+            0 0 15px rgba(255, 231, 200, 0.2);
         }
 
         button:hover {
-          background: rgba(255, 255, 255, 0.1);
+          background: rgba(255, 231, 200, 0.1);
           box-shadow: 
-            0 0 5px rgba(255, 255, 255, 0.7),
-            0 0 15px rgba(255, 255, 255, 0.5),
-            0 0 30px rgba(255, 255, 255, 0.3),
-            inset 0 0 10px rgba(255, 255, 255, 0.2);
-          text-shadow: 0 0 8px rgba(255, 255, 255, 0.7);
-          transform: scale(1.02);
+            0 0 10px rgba(255, 231, 200, 0.6),
+            0 0 20px rgba(255, 231, 200, 0.4),
+            0 0 30px rgba(255, 231, 200, 0.2);
         }
 
         button:active {
           transform: scale(0.98);
         }
 
-        @media (max-width: 480px) {
-          .content {
-            padding: 0 15px;
+        @media screen and (width: 1920px) and (height: 1080px) {
+          .responsiveContainer {
+            transform: scale(0.97);
           }
-          
-          h1 {
-            font-size: min(max(2rem, 8vw), 2.5rem);
+        }
+
+        @media screen and (width: 1440px) and (height: 900px) {
+          .responsiveContainer {
+            transform: scale(0.85);
           }
-          
-          p {
-            font-size: min(max(0.9rem, 4vw), 1.1rem);
-            margin-bottom: 4vh;
+        }
+
+        @media screen and (width: 1366px) and (height: 768px) {
+          .responsiveContainer {
+            transform: scale(0.75);
           }
-          
-          button {
-            font-size: min(max(0.8rem, 3.5vw), 1rem);
-            padding: min(max(0.7rem, 1.2vh), 1rem) min(max(1.8rem, 3.5vw), 2.5rem);
+        }
+
+        @media screen and (min-width: 2560px) {
+          .responsiveContainer {
+            transform: scale(1.3);
+            width: min(85%, 1000px);
+            height: min(65vh, 800px);
           }
         }
       `}</style>
