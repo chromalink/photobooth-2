@@ -76,7 +76,7 @@ export default function Results() {
         .background {
           position: fixed;
           inset: 0;
-          background-image: url('/optimized_star_backgound.jpg');
+          background-image: url('/grid_2.jpg');
           background-position: center;
           background-size: cover;
           opacity: 0.8;

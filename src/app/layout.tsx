@@ -32,7 +32,7 @@ const michroma = Michroma({
 })
 
 const b612Mono = B612_Mono({
-  weight: '400',
+  weight: ['400', '700'],
   subsets: ['latin'],
   display: 'swap',
   variable: '--font-b612-mono'

@@ -78,10 +78,9 @@ export default function Orb1() {
       try {
         stream = await navigator.mediaDevices.getUserMedia({
           video: {
-            width: { ideal: 896, min: 896 },
-            height: { ideal: 1152, min: 1152 },
             facingMode: 'user',
-            aspectRatio: { ideal: 896/1152, min: 896/1152 }
+            width: { ideal: 896 },
+            height: { ideal: 1152 }
           }
         });
         console.log('Camera access granted:', stream.getVideoTracks()[0].label);
