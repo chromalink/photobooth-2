@@ -6,6 +6,14 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useSessionStore } from '@/store/session'
 import { generateSpiritualReading } from '@/utils/openai'
 import OrbAnimation from '../components/OrbAnimation'
+import { B612_Mono } from 'next/font/google'
+
+// Load B612 Mono font
+const b612Mono = B612_Mono({
+  weight: ['400', '700'],
+  subsets: ['latin'],
+  display: 'swap',
+})
 
 // Mutex locks
 let isPolling = false;
@@ -24,6 +32,8 @@ export default function Orb2() {
   const extractDisplaySections = (text: string) => {
     if (!text) return {};
     
+    console.log('Raw text to extract from:', text);
+    
     const sections = {
       'Facial Expression': '',
       'Body Language': '',
@@ -31,16 +41,56 @@ export default function Orb2() {
       'Hair Style': ''
     };
 
-    Object.keys(sections).forEach(section => {
-      const regex = new RegExp(`${section}:([^\\n.!?]*[.!?])`);
-      const match = text.match(regex);
-      if (match && match[1]) {
-        sections[section] = match[1].trim();
+    // Map of alternative section names
+    const alternativeSectionNames = {};
+
+    // Extract each section
+    Object.keys(sections).forEach(sectionName => {
+      // Try the exact section name first
+      let sectionContent = extractSection(text, sectionName);
+      
+      // If not found, try alternative names
+      if (!sectionContent && alternativeSectionNames[sectionName]) {
+        for (const altName of alternativeSectionNames[sectionName]) {
+          sectionContent = extractSection(text, altName);
+          if (sectionContent) {
+            console.log(`Found section with alt name: ${altName}`);
+            break;
+          }
+        }
+      }
+      
+      // Store the content if found
+      if (sectionContent) {
+        sections[sectionName] = sectionContent;
+        console.log(`Found section: ${sectionName} with content: ${sectionContent}`);
+      } else {
+        console.log(`Section not found: ${sectionName}`);
       }
     });
-
-    console.log('Extracted sections:', sections); // Debug log
+    
+    console.log('Extracted sections:', sections);
     return sections;
+  };
+
+  // Helper function to extract a section by name
+  const extractSection = (text, sectionName) => {
+    // Try with both "**Name**:" and "**Name:**" formats
+    const patterns = [
+      new RegExp(`\\*\\*${sectionName}\\*\\*:\\s*(.+?)(?=\\n\\n|\\n\\*\\*|$)`, 's'),
+      new RegExp(`\\*\\*${sectionName}:\\*\\*\\s*(.+?)(?=\\n\\n|\\n\\*\\*|$)`, 's'),
+      // New pattern for plain text format with section name followed by colon
+      new RegExp(`${sectionName}:\\s*(.+?)(?=\\n\\n[A-Za-z][A-Za-z\\s]+:|$)`, 's')
+    ];
+    
+    for (const pattern of patterns) {
+      const match = text.match(pattern);
+      if (match && match[1]) {
+        return match[1].trim();
+      }
+    }
+    
+    return null;
   };
 
   useEffect(() => {
@@ -69,6 +119,34 @@ export default function Orb2() {
     }
   }, [setIsProcessing, setHasStartedProcessing]) 
 
+  useEffect(() => {
+    const testSections = {
+      'Facial Expression': 'Analyzing...',
+      'Body Language': 'Analyzing...',
+      'Clothing': 'Analyzing...',
+      'Hair Style': 'Analyzing...'
+    };
+    
+    console.log('Setting initial test sections:', testSections);
+    setDisplaySections(testSections);
+    setIsProcessing(true);
+    setVisualProgress(75); // Set to 75% complete
+    
+    const testText = `I don't know who this is, but let's dive into the corporate crystal ball:
+
+**Facial Expression**: Expressionless with a hint of existential dread, like an unenthusiastic participant in a team-building exercise.
+
+**Body Language**: Slightly slouched, the posture of someone who's just learned they have another meeting.
+
+**Clothing**: Dark, understated top; the fabric of choice for those navigating the shadows of office life.
+
+**Hair Style**: Long, slightly unkempt, like a rebellious spirit caught in the corporate machine.`;
+
+    const extractedSections = extractDisplaySections(testText);
+    console.log('Test extraction result:', extractedSections);
+    
+  }, []);
+
   const handlePhotoCapture = useCallback(async () => {
     if (!uploadedPhotoUrl || isProcessingPhoto) {
       console.log('Skipping photo capture - no photo or already processing');
@@ -78,19 +156,16 @@ export default function Orb2() {
     try {
       isProcessingPhoto = true;
       
-      // Reset states
       setVisualProgress(0);
       setIsProcessing(true);
       setHasStartedProcessing(true);
-      setError('');
+      setError(''); // Clear any previous error
       setDisplaySections({});
       
       console.log('Starting AI processes...');
       
-      // Add timestamp to prevent duplicate requests
       const requestHash = Date.now().toString();
       
-      // Try to get reading with retries
       let readingData = null;
       let readingAttempts = 0;
       const MAX_READING_ATTEMPTS = 5;
@@ -121,11 +196,21 @@ export default function Orb2() {
         readingData = await generateReadingResponse.json();
         console.log('Received reading data:', readingData); // Debug log
         
-        // Extract and store the display sections from the description
         if (readingData.description) {
           console.log('Processing description:', readingData.description); // Debug log
           const sections = extractDisplaySections(readingData.description);
-          setDisplaySections(sections);
+          
+          if (Object.values(sections).some(value => value)) {
+            setDisplaySections(sections);
+          } else {
+            console.log('No sections extracted, using fallback data');
+            setDisplaySections({
+              'Facial Expression': 'Analyzing...',
+              'Body Language': 'Analyzing...',
+              'Clothing': 'Analyzing...',
+              'Hair Style': 'Analyzing...'
+            });
+          }
         } else {
           console.log('No description in reading data'); // Debug log
         }
@@ -148,14 +233,11 @@ export default function Orb2() {
         throw new Error('Failed to get reading after multiple attempts');
       }
 
-      // Store name and reading
       setAiName(readingData.name);
       setAiResponse(readingData.reading);
 
-      // Add small delay before ComfyUI request to prevent race conditions
       await new Promise(resolve => setTimeout(resolve, 1000));
 
-      // Now send to ComfyUI with the category
       const comfyResponse = await fetch('/api/comfyui', {
         method: 'POST',
         headers: { 
@@ -177,13 +259,11 @@ export default function Orb2() {
       const imageResponse = await comfyResponse.json();
       console.log('Got responses:', { readingData, imageResponse });
 
-      // Check if we got a promptId for polling
       if (!imageResponse?.upscaledResult?.promptId) {
         console.error('Invalid ComfyUI response:', imageResponse);
         throw new Error('No promptId received from ComfyUI');
       }
 
-      // Check if polling is already in progress
       if (isPolling) {
         console.log('Polling already in progress, skipping...');
         return;
@@ -192,7 +272,6 @@ export default function Orb2() {
       try {
         isPolling = true;
 
-        // Start polling for the image
         const POLL_INTERVAL = 2000;
         const MAX_POLL_ATTEMPTS = 60;
         let pollAttempts = 0;
@@ -210,7 +289,6 @@ export default function Orb2() {
           console.log('Status response:', statusData);
           
           if (statusData.upscaledResult.completed && statusData.upscaledResult.imageUrl) {
-            // Check if this is a new image
             if (statusData.upscaledResult.imageUrl !== lastImageUrl) {
               console.log('Image generation completed:', statusData.upscaledResult.imageUrl);
               setAiModelImage(statusData.upscaledResult.imageUrl);
@@ -224,22 +302,19 @@ export default function Orb2() {
             throw new Error('Image generation timed out');
           }
           
-          // Update last seen image URL
           lastImageUrl = statusData.upscaledResult.imageUrl || lastImageUrl;
           
           await new Promise(resolve => setTimeout(resolve, POLL_INTERVAL));
           pollAttempts++;
         }
       } finally {
-        // Always release the polling lock
         isPolling = false;
       }
     } catch (error) {
       console.error('Error in processing:', error);
       setError(error instanceof Error ? error.message : 'An unknown error occurred');
-      setIsProcessing(false);
+      // Don't set isProcessing to false to keep the UI showing the analysis
     } finally {
-      // Always release the processing lock
       isProcessingPhoto = false;
     }
   }, [uploadedPhotoUrl, router]);
@@ -252,56 +327,72 @@ export default function Orb2() {
 
   return (
     <div className="main">
-      {/* Background Image */}
       <div className="background-container">
         <div className="background-image" />
       </div>
 
+      {/* Title */}
+      <div className="title-container">
+        <h1 className="page-title">Conducting a Q4 audit<br />of your facial ROI……</h1>
+      </div>
+
       {/* Display Sections and Photo */}
       <div className="content-container">
-        <div className="photo-container">
-          {uploadedPhotoUrl && (
-            <div className="photo-box">
-              <img 
-                src={uploadedPhotoUrl} 
-                alt="Captured photo" 
-                className="captured-photo"
-              />
-            </div>
-          )}
-        </div>
-        {Object.keys(displaySections).length > 0 && (
-          <div className="description-container">
-            <div className="description-box">
-              <div className="description-content">
-                {Object.entries(displaySections).map(([section, text]) => (
-                  text && (
-                    <div key={section} className="section">
-                      <span className="section-title">{section}:</span>
-                      <span className="section-text">{text}</span>
-                    </div>
-                  )
-                ))}
+        <div className="media-section">
+          <div className="media-grid">
+            {uploadedPhotoUrl && (
+              <div className="photo-box">
+                <img 
+                  src={uploadedPhotoUrl} 
+                  alt="Captured photo" 
+                  className="captured-photo"
+                />
+              </div>
+            )}
+            <div className="scan-box">
+              <div className="scan-box-content">
+                <div className="scan-title">
+                  <p className="scan-progress">{visualProgress}%</p>
+                </div>
+                <video 
+                  className="face-scan-video" 
+                  autoPlay 
+                  loop 
+                  muted
+                >
+                  <source src="/face_scan.mp4" type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
               </div>
             </div>
           </div>
-        )}
-      </div>
+        </div>
 
-      {/* Centered Progress Counter */}
-      <div className="progress-container">
-        <div className="progress-inner">
-          <motion.div 
-            className="progress-box"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ 
-              duration: 0.5,
-              ease: "easeOut"
-            }}
-          >
-            <p className="progress-text">{visualProgress}%</p>
-          </motion.div>
+        <div className="description-container">
+          <div className="description-box">
+            <div className="description-content">
+              <div className="section-header">
+                <h2 className={`machine-title ${b612Mono.className}`}>MACHINE OBSERVES...</h2>
+              </div>
+              {Object.keys(displaySections).length > 0 ? (
+                Object.entries(displaySections).map(([section, text]) => (
+                  <div key={section} className="section">
+                    <div className={`section-label ${b612Mono.className}`}>{section}</div>
+                    <div className="section-text-container">
+                      <p className={`section-text ${b612Mono.className}`}>{text}</p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="section">
+                  <div className={`section-label ${b612Mono.className}`}>ANALYZING</div>
+                  <div className="section-text-container">
+                    <p className={`section-text ${b612Mono.className}`}>Processing your corporate persona...</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -335,37 +426,208 @@ export default function Orb2() {
           background-repeat: no-repeat;
         }
 
+        .title-container {
+          position: absolute;
+          top: 5%;
+          left: 50%;
+          transform: translateX(-50%);
+          z-index: 10;
+          text-align: center;
+          width: 100%;
+          max-width: 1200px;
+          padding: 0 20px;
+          margin-bottom: 1.5rem; /* Reduced from 3rem */
+          min-height: 50px; /* Reduced from 100px */
+        }
+
+        .page-title {
+          font-family: var(--font-michroma);
+          font-size: clamp(1.5rem, 3vw, 2.5rem);
+          color: white;
+          font-weight: 400;
+          letter-spacing: 0.05em;
+          line-height: 1.3;
+          text-align: center;
+          margin: 0;
+          padding: 0;
+          text-shadow: 0 0 20px rgba(255, 255, 255, 0.5),
+                      0 0 40px rgba(255, 255, 255, 0.3),
+                      0 0 60px rgba(255, 255, 255, 0.2);
+          white-space: normal;
+          display: inline-block;
+        }
+
+        /* Responsive styles for different device sizes */
+        @media (max-width: 480px) {
+          /* Mobile phones */
+          .page-title {
+            font-size: clamp(1.2rem, 5vw, 1.8rem);
+          }
+        }
+
+        @media (min-width: 481px) and (max-width: 767px) {
+          /* Large phones and small tablets */
+          .page-title {
+            font-size: clamp(1.5rem, 5vw, 2rem);
+          }
+        }
+
+        @media (min-width: 768px) and (max-width: 1024px) {
+          /* Tablets and small laptops */
+          .title-container {
+            max-width: 1400px;
+          }
+          
+          .page-title {
+            font-size: clamp(2rem, 4vw, 2.5rem);
+          }
+        }
+
+        @media (min-width: 1025px) {
+          /* Desktops and large screens */
+          .page-title {
+            font-size: clamp(2.2rem, 3vw, 2.5rem);
+          }
+        }
+
+        .title {
+          font-family: var(--font-michroma);
+          font-size: 1.5rem;
+          color: white;
+          font-weight: 400;
+          letter-spacing: 0.05em;
+          line-height: 1.2;
+          margin-bottom: 1rem;
+          text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+
         .content-container {
           position: absolute;
-          top: 10%;
+          top: 17%; /* Reduced from 20% */
           left: 50%;
           transform: translateX(-50%);
           z-index: 10;
           width: 90%;
           max-width: 1200px;
           display: flex;
+          flex-direction: column;
           gap: 2rem;
-          align-items: flex-start;
+          align-items: center;
         }
 
-        .photo-container {
-          flex: 1;
-          max-width: 400px;
+        /* Responsive adjustments for different screen sizes */
+        @media (max-width: 768px) {
+          .content-container {
+            top: 20%; /* Reduced from 25% */
+          }
+        }
+
+        .media-section {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: flex-start;
+          width: 100%;
+          max-width: 800px !important; /* Force this to override any other styles */
+        }
+
+        @media (min-width: 768px) {
+          .media-section {
+            max-width: 800px !important;
+          }
+        }
+
+        @media (min-width: 1024px) {
+          .media-section {
+            max-width: 800px !important;
+          }
+        }
+
+        .media-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 1rem;
+          width: 100%;
         }
 
         .photo-box {
           background: rgba(0, 0, 0, 0.7);
           border: 2px solid rgba(255, 255, 255, 0.15);
-          border-radius: 16px;
-          padding: 1rem;
+          border-radius: clamp(16px, 2vw, 24px);
+          padding: 0;
+          box-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
           backdrop-filter: blur(10px);
+          width: 100%;
+          height: 0;
+          padding-bottom: 100%; /* Creates a square aspect ratio */
+          position: relative;
+          overflow: hidden;
         }
 
         .captured-photo {
+          position: absolute;
+          top: 0;
+          left: 0;
           width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+        }
+
+        .scan-box {
+          background: rgba(0, 0, 0, 0.7);
+          border: 2px solid rgba(255, 255, 255, 0.15);
+          border-radius: clamp(16px, 2vw, 24px);
+          padding: 0;
+          box-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
+          backdrop-filter: blur(10px);
+          width: 100%;
+          height: 0;
+          padding-bottom: 100%; /* Creates a square aspect ratio */
+          position: relative;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .scan-box-content {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          padding: clamp(1rem, 2vw, 1.5rem);
+        }
+
+        .face-scan-video {
+          width: 100%;
+          max-width: 100%;
           height: auto;
+          max-height: 70%;
           border-radius: 8px;
           display: block;
+        }
+
+        .scan-title {
+          margin-bottom: 1rem;
+        }
+
+        .scan-progress {
+          font-family: var(--font-aboreto);
+          font-size: 1.5rem;
+          color: white;
+          font-weight: 400;
+          letter-spacing: 0.05em;
+          line-height: 1;
+          text-align: center;
+          margin: 0;
+          padding: 0;
+          text-shadow: 0 0 20px rgba(255, 255, 255, 0.5),
+                      0 0 40px rgba(255, 255, 255, 0.3),
+                      0 0 60px rgba(255, 255, 255, 0.2);
         }
 
         .description-container {
@@ -377,49 +639,64 @@ export default function Orb2() {
           background: rgba(0, 0, 0, 0.7);
           border: 2px solid rgba(255, 255, 255, 0.15);
           border-radius: 16px;
-          padding: 2rem;
+          padding: 1.5rem;
           backdrop-filter: blur(10px);
+          max-height: 400px;
+          overflow: hidden;
         }
 
         .description-content {
           display: flex;
           flex-direction: column;
-          gap: 1rem;
+          gap: 0.8rem;
+          max-height: 100%;
+          overflow-y: auto;
+          text-align: left;
+        }
+
+        .machine-title {
+          font-weight: 700;
+          font-size: 0.9rem;
+          color: #F0A500;
+          letter-spacing: 0.05em;
+          text-transform: uppercase;
+          margin-bottom: 1rem;
+          text-shadow: 0 0 10px rgba(240, 165, 0, 0.3);
+          text-align: left;
         }
 
         .section {
+          display: flex;
+          margin-bottom: 1rem;
           color: white;
-          font-family: var(--font-arapey);
-          font-size: clamp(1rem, 2vw, 1.2rem);
-          line-height: 1.6;
+          line-height: 1.4;
+          text-align: left;
         }
 
-        .section-title {
-          color: #FFD700;
-          font-weight: 600;
-          margin-right: 0.5rem;
+        .section-label {
+          font-weight: 700;
+          font-size: 0.9rem;
+          color: #F0A500;
+          letter-spacing: 0.05em;
+          text-transform: uppercase;
+          width: 120px;
+          padding-right: 0.5rem;
+          text-shadow: 0 0 10px rgba(240, 165, 0, 0.3);
+          text-align: left;
+        }
+
+        .section-text-container {
+          flex: 1;
+          text-align: left;
         }
 
         .section-text {
-          text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
-        }
-
-        .progress-container {
-          position: relative;
-          width: 100%;
-          height: 100%;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-        }
-
-        .progress-inner {
-          position: relative;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          transform: scale(0.6);
+          margin: 0;
+          color: white;
+          font-size: 0.9rem; /* 80% smaller than 1.8rem */
+          font-weight: 400;
+          font-style: normal;
+          text-align: left;
         }
 
         @media screen and (max-width: 1024px) {
@@ -429,7 +706,7 @@ export default function Orb2() {
             gap: 1rem;
           }
 
-          .photo-container {
+          .media-section {
             width: 100%;
             max-width: 300px;
           }
@@ -441,25 +718,20 @@ export default function Orb2() {
 
         @media screen and (max-width: 768px) {
           .content-container {
-            top: 5%;
+            top: 10%;
           }
 
-          .photo-container {
+          .media-section {
             max-width: 250px;
-          }
-
-          .progress-inner {
-            transform: scale(0.55);
-            margin-top: -18vh;
           }
         }
 
         @media screen and (max-width: 480px) {
           .content-container {
-            top: 5%;
+            top: 10%;
           }
 
-          .photo-container {
+          .media-section {
             max-width: 200px;
           }
 
@@ -468,40 +740,14 @@ export default function Orb2() {
           }
         }
 
-        /* 4K and larger screens */
-        @media screen and (min-width: 2560px) {
-          .progress-inner {
-            transform: scale(0.7);
-            margin-top: -22vh;
+        @media (min-width: 768px) and (max-width: 1024px) {
+          .title-container {
+            max-width: 1400px;
           }
-        }
-
-        .progress-box {
-          background: rgba(0, 0, 0, 0.7);
-          border: 2px solid rgba(255, 255, 255, 0.15);
-          border-radius: clamp(16px, 2vw, 24px);
-          padding: clamp(1.5rem, 3vw, 2.5rem);
-          box-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
-          backdrop-filter: blur(10px);
-          width: clamp(140px, 25vw, 240px);
-          height: clamp(140px, 25vw, 240px);
-          display: grid;
-          place-items: center;
-        }
-
-        .progress-text {
-          font-family: var(--font-aboreto);
-          font-size: clamp(2.5rem, 8vw, 4rem);
-          color: white;
-          font-weight: 400;
-          letter-spacing: 0.05em;
-          line-height: 1;
-          text-align: center;
-          margin: 0;
-          padding: 0;
-          text-shadow: 0 0 20px rgba(255, 255, 255, 0.5),
-                      0 0 40px rgba(255, 255, 255, 0.3),
-                      0 0 60px rgba(255, 255, 255, 0.2);
+          
+          .page-title {
+            font-size: clamp(2.5rem, 4vw, 4.5rem);
+          }
         }
       `}</style>
     </div>
