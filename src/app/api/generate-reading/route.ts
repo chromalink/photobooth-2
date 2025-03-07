@@ -154,36 +154,81 @@ async function getPersonDescription(imageFile: File): Promise<string> {
 
   const prompt = `You are a satirical oracle in a fictional movie. Based on the photo, identify hypothetical accentuated red flags and give a funny sarcastic reading that pokes fun at their energy (are they The Power Climber,The One Who Never Works, The Office Influencer or Too Efficient to be Human). are they going to be promoted or fired. make red flags section longer than other sections. Try to guess their secret desire, hidden superpower, red flag, and future prediction. give them advice. Keep it entertaining. at the end: What facial expression does she/he/they have? IF they seem neutral facial expression, composed, yawn, boredom, angry, intense,sad = Corporate_Overlord, lively,exciting, wide smile,raised eyebrows = Star_Thought_Leader, relaxed and relaxed smile = Vacation_CEO; confused/ any other expression = The_Productivity_Cyborg? are they female/male/non-binary? keep it 150 words"  `;
 
-  const descriptionResponse = await openai.chat.completions.create({
-    messages: [
-      {
-        role: "system",
-        content: "You are a corporate seer with a gift for decoding workplace energy and drama. Describe their Facial Expression, Body Language, Clothing, and Hair Style with a satirical playful dramatic conversational tone—each in 15 words or fewer. Identify their most alarming red flags (potential for drama) and accentuated corporate personality in each point. Then, indirectly assign them exactly one of these archetypes: Synergy Specialist (“You call every meeting a ‘touch base’ and genuinely believe in the power of icebreakers.” Detected If: Big, open smile, animated hands, light/bright clothing, soft/voluminous hair). Workflow Wizard (“You have a color-coded spreadsheet for everything. People fear your pivot tables.” Detected If: Mildly serious, still posture, neutral tones, tidy hair). Executive Oracle (“You don’t take meetings, you take ‘alignments.’” Detected If: Intense gaze, upright stance, dark colors, sleek hair, big phone). Middle Manager (“Knows Just Enough to Be Dangerous” Detected If: Slightly strained smile, neutral stance, muted blues/khakis, convenient haircut).  Engagement Risk (“Your enthusiasm levels are dangerously low.” Detected If: No smile, arms crossed, dark/slightly disheveled clothing, messy hair). The Intern (“Eager, Overwhelmed, and Underpaid” Detected If: Nervous smile, wide eyes, overdressed/underdressed, slightly off hair). Then tell me: are they male or female? Keep the reading exactly 200 words"
-      },
-      {
-        role: "user",
-        content: [
+  // Add retry logic
+  const maxRetries = 3;
+  let retryCount = 0;
+  let description = "";
+  
+  while (retryCount < maxRetries) {
+    try {
+      console.log(`Attempt ${retryCount + 1} to get person description...`);
+      
+      const descriptionResponse = await openai.chat.completions.create({
+        messages: [
           {
-            type: "image_url",
-            image_url: {
-              url: `data:image/jpeg;base64,${imageBase64}`,
-              detail: "low"
-            }
+            role: "system",
+            content: `You are an unhinged satirical oracle with a gift for decoding workplace energy and drama. Describe their Facial Expression, Body Language, Clothing, and Hair Style with a satirical playful dramatic conversational tone—each in 15 words or fewer. Identify their most alarming red flags (potential for drama) and accentuated corporate personality in each point. Then, indirectly assign them exactly one of these archetypes: Synergy Specialist ("You call every meeting a 'touch base' and genuinely believe in the power of icebreakers." Detected If: Big, open smile, animated hands, light/bright clothing, soft/voluminous hair). Workflow Wizard ("You have a color-coded spreadsheet for everything. People fear your pivot tables." Detected If: Mildly serious, still posture, neutral tones, tidy hair). Executive Oracle ("You don't take meetings, you take 'alignments.'" Detected If: Intense gaze, upright stance, dark colors, sleek hair, big phone). Middle Manager ("Knows Just Enough to Be Dangerous" Detected If: Slightly strained smile, neutral stance, muted blues/khakis, convenient haircut).  Engagement Risk ("Your enthusiasm levels are dangerously low." Detected If: No smile, arms crossed, dark/slightly disheveled clothing, messy hair). The Intern ("Eager, Overwhelmed, and Underpaid" Detected If: Nervous smile, wide eyes, overdressed/underdressed, slightly off hair). Then tell me: are they male or female? Keep the reading exactly 200 words`
+          },
+          {
+            role: "user",
+            content: [
+              {
+                type: "image_url",
+                image_url: {
+                  url: `data:image/jpeg;base64,${imageBase64}`,
+                  detail: "low"
+                }
+              }
+            ]
           }
-        ]
+        ],
+        model: "gpt-4o",
+        max_tokens: 400,
+        temperature: 0.7
+      });
+      
+      description = descriptionResponse.choices[0].message.content?.trim() || "";
+      
+      // Check if the response contains facial expression, body language, etc.
+      const hasRequiredContent = 
+        description.toLowerCase().includes("facial expression") && 
+        description.toLowerCase().includes("body language") &&
+        !description.toLowerCase().includes("can't be analyzed") &&
+        description.length > 50; // Arbitrary minimum length for a valid response
+      
+      if (hasRequiredContent) {
+        console.log("Valid person description received");
+        break; // Exit the retry loop if we got a valid response
+      } else {
+        console.warn("Invalid or incomplete person description received, retrying...");
+        retryCount++;
+        
+        if (retryCount >= maxRetries) {
+          console.error("Maximum retries reached for person description");
+        } else {
+          // Wait a bit before retrying (exponential backoff)
+          await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, retryCount)));
+        }
       }
-    ],
-    model: "gpt-4o",
-    max_tokens: 400,
-    temperature: 0.7
-  });
-
-  const description = descriptionResponse.choices[0].message.content?.trim() || "";
+    } catch (error) {
+      console.error("Error getting person description:", error);
+      retryCount++;
+      
+      if (retryCount >= maxRetries) {
+        console.error("Maximum retries reached after error");
+        throw error; // Re-throw the error after max retries
+      } else {
+        // Wait a bit before retrying (exponential backoff)
+        await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, retryCount)));
+      }
+    }
+  }
+  
   return description;
 }
 
 async function generateOracleReading(personDescription: string): Promise<string> {
-  const prompt = `Based on this description, analyze the corporate personality and output in EXACTLY this format:
+  const prompt = `Based on this description, analyze the corporate personality and output in EXACTLY this format, in dramatic satirical tone:
 
 Archetype: [one of: Synergy Specialist, Workflow Wizard, Executive Oracle, Middle Manager, Engagement Risk, The Intern]
 General impression: [your 25-word summary]
@@ -192,24 +237,77 @@ Final verdict: [your 15-word verdict]
 
 IMPORTANT: The response MUST start with "Archetype:" followed by exactly one of the listed names.`;
 
-  const oracleResponse = await openai.chat.completions.create({
-    messages: [
-      {
-        role: "system",
-        content: prompt
-      },
-      {
-        role: "user",
-        content: personDescription
+  // Add retry logic
+  const maxRetries = 3;
+  let retryCount = 0;
+  let response = "";
+  
+  while (retryCount < maxRetries) {
+    try {
+      console.log(`Attempt ${retryCount + 1} to generate oracle reading...`);
+      
+      const oracleResponse = await openai.chat.completions.create({
+        messages: [
+          {
+            role: "system",
+            content: prompt
+          },
+          {
+            role: "user",
+            content: personDescription
+          }
+        ],
+        model: "gpt-4",
+        max_tokens: 300,
+        temperature: 0.9
+      });
+      
+      response = oracleResponse.choices[0].message.content?.trim() || "";
+      console.log('Raw OpenAI response:', response); // Debug log
+      
+      // Check if the response starts with "Archetype:" and contains one of the valid archetypes
+      const validArchetypes = [
+        "Synergy Specialist", 
+        "Workflow Wizard", 
+        "Executive Oracle", 
+        "Middle Manager", 
+        "Engagement Risk", 
+        "The Intern"
+      ];
+      
+      const hasValidFormat = response.startsWith("Archetype:") && 
+        validArchetypes.some(archetype => 
+          response.toLowerCase().includes(archetype.toLowerCase())
+        );
+      
+      if (hasValidFormat) {
+        console.log("Valid oracle reading received");
+        break; // Exit the retry loop if we got a valid response
+      } else {
+        console.warn("Invalid or incomplete oracle reading received, retrying...");
+        retryCount++;
+        
+        if (retryCount >= maxRetries) {
+          console.error("Maximum retries reached for oracle reading");
+        } else {
+          // Wait a bit before retrying (exponential backoff)
+          await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, retryCount)));
+        }
       }
-    ],
-    model: "gpt-4",
-    max_tokens: 300,
-    temperature: 0.9
-  });
-
-  const response = oracleResponse.choices[0].message.content?.trim() || "";
-  console.log('Raw OpenAI response:', response); // Debug log
+    } catch (error) {
+      console.error("Error generating oracle reading:", error);
+      retryCount++;
+      
+      if (retryCount >= maxRetries) {
+        console.error("Maximum retries reached after error");
+        throw error; // Re-throw the error after max retries
+      } else {
+        // Wait a bit before retrying (exponential backoff)
+        await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, retryCount)));
+      }
+    }
+  }
+  
   return response;
 }
 
@@ -303,14 +401,46 @@ export async function POST(req: Request) {
         new File([Buffer.from(image, 'base64')], 'image.jpg', { type: 'image/jpeg' })
       );
       console.log('Person description:', personDescription);
+      
+      // Check if we got a valid person description
+      if (!personDescription || 
+          personDescription.length < 50 || 
+          personDescription.toLowerCase().includes("can't be analyzed")) {
+        console.error('Invalid person description received');
+        return NextResponse.json(
+          { error: 'Failed to analyze image. Please try again.' },
+          { status: 422 }
+        );
+      }
 
       console.log('Generating oracle reading...');
       const oracleReading = await generateOracleReading(personDescription);
       console.log('Oracle reading:', oracleReading);
+      
+      // Check if we got a valid oracle reading
+      if (!oracleReading || 
+          !oracleReading.startsWith("Archetype:")) {
+        console.error('Invalid oracle reading received');
+        return NextResponse.json(
+          { error: 'Failed to generate reading. Please try again.' },
+          { status: 422 }
+        );
+      }
+
+      const category = extractCategory(oracleReading);
+      
+      // If category extraction failed, return an error
+      if (!category) {
+        console.error('Failed to extract category from oracle reading');
+        return NextResponse.json(
+          { error: 'Failed to process reading. Please try again.' },
+          { status: 422 }
+        );
+      }
 
       const response = {
         success: true,
-        category: extractCategory(oracleReading),
+        category,
         name: extractName(oracleReading),
         reading: extractReading(oracleReading),
         description: personDescription || '' // Ensure we always send the description
