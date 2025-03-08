@@ -27,7 +27,7 @@ export default function Orb2() {
   const [visualProgress, setVisualProgress] = useState(0)
   const processStartedRef = useRef(false)
   const [displaySections, setDisplaySections] = useState<{[key: string]: string}>({})
-  const { uploadedPhotoUrl, setAiResponse, setAiModelImage, setAiName } = useSessionStore()
+  const { uploadedPhotoUrl, setAiResponse, setAiModelImage, setAiName, setAiModelProvider } = useSessionStore()
 
   const extractDisplaySections = (text: string) => {
     if (!text) return {};
@@ -235,6 +235,7 @@ export default function Orb2() {
 
       setAiName(readingData.name);
       setAiResponse(readingData.reading);
+      setAiModelProvider(readingData.category);
 
       await new Promise(resolve => setTimeout(resolve, 1000));
 
@@ -443,16 +444,16 @@ export default function Orb2() {
         .page-title {
           font-family: var(--font-michroma);
           font-size: clamp(1.5rem, 3vw, 2.5rem);
-          color: white;
+          color: #F0A500;
           font-weight: 400;
           letter-spacing: 0.05em;
           line-height: 1.3;
           text-align: center;
           margin: 0;
           padding: 0;
-          text-shadow: 0 0 20px rgba(255, 255, 255, 0.5),
-                      0 0 40px rgba(255, 255, 255, 0.3),
-                      0 0 60px rgba(255, 255, 255, 0.2);
+          text-shadow: 0 0 20px rgba(240, 165, 0, 0.5),
+                      0 0 40px rgba(240, 165, 0, 0.3),
+                      0 0 60px rgba(240, 165, 0, 0.2);
           white-space: normal;
           display: inline-block;
         }
@@ -462,6 +463,7 @@ export default function Orb2() {
           /* Mobile phones */
           .page-title {
             font-size: clamp(1.2rem, 5vw, 1.8rem);
+            color: #F0A500;
           }
         }
 
@@ -469,6 +471,7 @@ export default function Orb2() {
           /* Large phones and small tablets */
           .page-title {
             font-size: clamp(1.5rem, 5vw, 2rem);
+            color: #F0A500;
           }
         }
 
@@ -480,6 +483,7 @@ export default function Orb2() {
           
           .page-title {
             font-size: clamp(2rem, 4vw, 2.5rem);
+            color: #F0A500;
           }
         }
 
@@ -487,6 +491,7 @@ export default function Orb2() {
           /* Desktops and large screens */
           .page-title {
             font-size: clamp(2.2rem, 3vw, 2.5rem);
+            color: #F0A500;
           }
         }
 
@@ -747,6 +752,7 @@ export default function Orb2() {
           
           .page-title {
             font-size: clamp(2.5rem, 4vw, 4.5rem);
+            color: #F0A500;
           }
         }
       `}</style>

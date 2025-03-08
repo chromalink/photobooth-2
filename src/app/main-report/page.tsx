@@ -5,14 +5,14 @@ import { useRouter } from 'next/navigation'
 import { useSessionStore } from '@/store/session'
 import Image from 'next/image'
 
-export default function Results() {
+export default function MainReport() {
   const router = useRouter()
   const aiResponse = useSessionStore((state) => state.aiResponse)
   const aiName = useSessionStore((state) => state.aiName)
   const aiModelImage = useSessionStore((state) => state.aiModelImage)
   const aiCategory = useSessionStore((state) => state.aiModelProvider)
 
-  console.log('Page 6 - Category:', aiCategory) // Debug log
+  console.log('Main Report - Category:', aiCategory) // Debug log
 
   // Format category name for display
   const formatCategoryName = (category: string | null) => {
@@ -32,7 +32,7 @@ export default function Results() {
   }, [aiModelImage, aiResponse, router])
 
   const handleDownload = () => {
-    router.push('/main-report')
+    router.push('/page5-email')
   }
 
   if (!aiModelImage || !aiResponse) {
@@ -64,15 +64,18 @@ export default function Results() {
                 <h1 className="title-text">CONGRATULATIONS! YOU ARE...</h1>
                 <h2 className="title-text highlight">{formatCategoryName(aiCategory)}</h2>
               </div>
+              <div className="reading-container">
+                <pre className="reading-text">{aiResponse}</pre>
+              </div>
             </div>
             <button onClick={handleDownload} className="download-button">
-              READ FACE AUDIT
+              DOWNLOAD
             </button>
           </div>
         </div>
       </div>
 
-      <style jsx>{`
+      <style jsx global>{`
         .container {
           width: 100vw;
           height: 100vh;
@@ -177,6 +180,92 @@ export default function Results() {
           font-size: 2.45rem;
         }
 
+        .reading-container {
+          margin: 0 0 2rem;
+          width: 100%;
+        }
+
+        .reading-text {
+          font-family: var(--font-work-sans);
+          font-size: 1.56rem;
+          font-weight: 400;
+          line-height: 1.6;
+          color: rgba(255, 255, 255, 0.9);
+          text-align: left;
+          letter-spacing: 0.02em;
+          white-space: pre-line;
+          margin: 0;
+          background: transparent;
+        }
+
+        @media (max-width: 1024px) {
+          .reading-text {
+            font-size: 1.56rem;
+          }
+        }
+
+        @media (max-width: 768px) {
+          .reading-text {
+            font-size: 1.56rem;
+          }
+
+          .results-grid {
+            flex-direction: column;
+            gap: 2rem;
+          }
+
+          .reading-section {
+            max-width: 100%;
+          }
+
+          .title-text {
+            font-size: 2rem;
+            text-align: center;
+          }
+
+          .title-text.highlight {
+            font-size: 2rem;
+          }
+
+          .title-container {
+            align-items: center;
+            width: 100%;
+          }
+
+          .text-content {
+            gap: 0;
+          }
+
+          .reading-text {
+            text-align: left;
+            padding: 1rem 0;
+          }
+
+          .content {
+            padding: 1rem;
+          }
+
+          h1 {
+            font-size: min(max(1.8rem, 6vw), 2.2rem);
+          }
+
+          .highlight {
+            font-size: min(max(1.8rem, 6vw), 2.2rem);
+            margin-bottom: 1rem;
+          }
+
+          .reading-text {
+            font-size: min(max(1rem, 4.5vw), 1.3rem);
+          }
+
+          .download-button {
+            font-size: min(max(1rem, 4vw), 1.2rem);
+            padding: min(max(0.8rem, 1.5vh), 1.2rem) min(max(2rem, 4vw), 3rem);
+            border-width: 2px;
+            width: 100%;
+          }
+        }
+
         .download-button {
           background: rgba(0, 0, 0, 0.4);
           border: 3px solid white;
@@ -211,116 +300,6 @@ export default function Results() {
 
         .download-button:active {
           transform: scale(0.98);
-        }
-
-        @media (min-width: 768px) and (max-width: 1024px) {
-          .container {
-            background: black;
-          }
-
-          .background {
-            display: none;
-          }
-
-          .results-grid {
-            flex-direction: column;
-            gap: 2rem;
-            max-width: 100%;
-            padding: 2rem;
-          }
-
-          .image-section {
-            max-width: 100%;
-          }
-
-          .image-container {
-            max-width: 600px;
-            margin: 0 auto;
-          }
-
-          .reading-section {
-            max-width: 100%;
-            align-items: center;
-            text-align: center;
-          }
-
-          .title-container {
-            align-items: center;
-            text-align: center;
-            margin-bottom: 1rem;
-          }
-
-          .title-text {
-            text-align: center;
-            font-size: 2.8rem;
-            white-space: nowrap;
-          }
-
-          .title-text.highlight {
-            font-size: 2.8rem;
-            margin-top: 0.5rem;
-          }
-
-          .download-button {
-            align-self: center;
-            font-size: 1.4rem;
-            padding: 1rem 3rem;
-            background: transparent;
-            border: 2px solid white;
-            box-shadow: 
-              0 0 20px rgba(255, 255, 255, 0.3),
-              0 0 40px rgba(255, 255, 255, 0.2),
-              inset 0 0 10px rgba(255, 255, 255, 0.1);
-          }
-        }
-
-        @media (max-width: 768px) {
-          .results-grid {
-            flex-direction: column;
-            gap: 2rem;
-          }
-
-          .reading-section {
-            max-width: 100%;
-          }
-
-          .title-text {
-            font-size: 2rem;
-            text-align: center;
-          }
-
-          .title-text.highlight {
-            font-size: 2rem;
-          }
-
-          .title-container {
-            align-items: center;
-            width: 100%;
-          }
-
-          .text-content {
-            gap: 0;
-          }
-
-          .content {
-            padding: 1rem;
-          }
-
-          h1 {
-            font-size: min(max(1.8rem, 6vw), 2.2rem);
-          }
-
-          .highlight {
-            font-size: min(max(1.8rem, 6vw), 2.2rem);
-            margin-bottom: 1rem;
-          }
-
-          .download-button {
-            font-size: min(max(1rem, 4vw), 1.2rem);
-            padding: min(max(0.8rem, 1.5vh), 1.2rem) min(max(2rem, 4vw), 3rem);
-            border-width: 2px;
-            width: 100%;
-          }
         }
 
         @media (max-width: 1024px) {
