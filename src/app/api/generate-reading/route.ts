@@ -101,11 +101,12 @@ class RequestDeduplicator {
 
   private cleanup(): void {
     const now = Date.now();
-    for (const [hash, entry] of this.requests.entries()) {
+    // Convert Map.entries() to Array to avoid TypeScript iteration issues
+    Array.from(this.requests.entries()).forEach(([hash, entry]) => {
       if (now - entry.timestamp > this.timeWindowMs) {
         this.requests.delete(hash);
       }
-    }
+    });
   }
 }
 
@@ -315,7 +316,7 @@ function extractCategory(oracleReading: string): string | null {
   console.log('Extracting category from:', oracleReading); // Debug log
 
   // Map of valid archetypes and their normalized versions
-  const archetypeMap = {
+  const archetypeMap: Record<string, string> = {
     'synergy specialist': 'synergy_specialist',
     'workflow wizard': 'workflow_wizard',
     'executive oracle': 'executive_oracle',
@@ -334,7 +335,7 @@ function extractCategory(oracleReading: string): string | null {
   console.log('Normalized input:', normalizedInput);
 
   // Look up the normalized version
-  const mappedArchetype = archetypeMap[normalizedInput];
+  const mappedArchetype = archetypeMap[normalizedInput] as string | undefined;
   console.log('Mapped archetype:', mappedArchetype || 'not found');
 
   if (mappedArchetype) {

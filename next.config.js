@@ -44,9 +44,21 @@ const nextConfig = {
         hostname: 'localhost',
         port: '4000',
         pathname: '/api/**',
+      },
+      {
+        protocol: 'http',
+        hostname: '*',
+        port: '*',
+        pathname: '/**',
       }
     ],
   },
+  // Disable static generation for API routes
+  output: 'standalone',
+  experimental: {
+    // This setting ensures API routes are not statically generated
+    serverComponentsExternalPackages: ['@sendgrid/mail']
+  }
 }
 
 module.exports = nextConfig

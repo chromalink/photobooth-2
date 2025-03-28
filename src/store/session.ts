@@ -85,14 +85,14 @@ export const useSessionStore = create<SessionState & SessionActions>()(
       setUploadedPhotoUrl: (url) => set({ uploadedPhotoUrl: url }),
       setHasStartedProcessing: (hasStarted) => set({ hasStartedProcessing: hasStarted }),
       resetSession: () => {
-        set({
+        set((state) => ({
           ...initialState,
           sessionId: crypto.randomUUID(),
           aiResponse: null,
           aiName: null,
           aiModelImage: null,
-          aiModelProvider: state => state.aiModelProvider
-        })
+          aiModelProvider: state.aiModelProvider
+        }))
       },
       resetProcessingState: () => set({ 
         hasStartedProcessing: false, 

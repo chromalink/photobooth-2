@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { config } from '@/config';
 import { getBaseUrl, createUrl } from '@/utils/url';
 
@@ -10,7 +10,7 @@ const corsHeaders = {
 };
 
 // Handle CORS preflight requests
-export async function OPTIONS(request: Request) {
+export async function OPTIONS(request: NextRequest) {
   return new NextResponse(null, {
     status: 200,
     headers: corsHeaders,
@@ -23,7 +23,7 @@ async function queuePrompt(apiEndpoint: string, prompt: any, clientId: string) {
     method: 'POST',
     headers: { 
       'Content-Type': 'application/json',
-      'Origin': config.api.origin || 'http://localhost:4000'
+      'Origin': getBaseUrl() || 'http://localhost:4000'
     },
     body: JSON.stringify({ 
       prompt: prompt,
@@ -70,7 +70,7 @@ async function getHistory(apiEndpoint: string, promptId: string) {
   console.log('Getting history from ComfyUI at:', `${apiEndpoint}/api/history/${promptId}`);
   const response = await fetch(`${apiEndpoint}/api/history/${promptId}`, {
     headers: {
-      'Origin': config.api.origin || 'http://localhost:4000'
+      'Origin': getBaseUrl() || 'http://localhost:4000'
     }
   });
   
@@ -166,7 +166,7 @@ async function uploadImageToComfyUI(apiEndpoint: string, imageData: Buffer): Pro
   return data.name;
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   console.log('ComfyUI API route: POST request received');
   
   try {

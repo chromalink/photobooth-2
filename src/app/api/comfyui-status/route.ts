@@ -1,7 +1,12 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { config } from '@/config';
 
 export const maxDuration = 300; // Set maximum duration to 5 minutes
+
+// Define a global type for our custom properties
+declare global {
+  var lastImageKey: string | undefined;
+}
 
 async function getHistory(apiEndpoint: string, promptId: string) {
   const response = await fetch(`${apiEndpoint}/api/history/${promptId}`);
@@ -11,7 +16,7 @@ async function getHistory(apiEndpoint: string, promptId: string) {
   return response.json();
 }
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, OPTIONS',
@@ -19,8 +24,8 @@ export async function GET(request: Request) {
   };
 
   try {
-    const { searchParams } = new URL(request.url);
-    const promptId = searchParams.get('promptId');
+    // Use NextRequest which has the searchParams property
+    const promptId = request.nextUrl.searchParams.get('promptId');
     
     if (!promptId) {
       return NextResponse.json({ error: 'Missing promptId parameter' }, { status: 400, headers });

@@ -85,9 +85,10 @@ export default function ColorPick() {
             onClick={handleContinue}
             disabled={selectedColor === null}
           >
-            Raw prompt result: { prompt_id: "..." }
-            Extracted prompt ID: "..."
-            Sending response: { success: true, promptId: "..." }
+            {/* Raw prompt result: { prompt_id: "..." } */}
+            {/* Extracted prompt ID: "..." */}
+            {/* Sending response: { success: true, promptId: "..." } */}
+            Continue
           </button>
         </motion.div>
       </div>

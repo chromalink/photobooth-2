@@ -42,7 +42,7 @@ export default function Orb2() {
     };
 
     // Map of alternative section names
-    const alternativeSectionNames = {};
+    const alternativeSectionNames: Record<string, string[]> = {};
 
     // Extract each section
     Object.keys(sections).forEach(sectionName => {
@@ -62,7 +62,7 @@ export default function Orb2() {
       
       // Store the content if found
       if (sectionContent) {
-        sections[sectionName] = sectionContent;
+        sections[sectionName as keyof typeof sections] = sectionContent;
         console.log(`Found section: ${sectionName} with content: ${sectionContent}`);
       } else {
         console.log(`Section not found: ${sectionName}`);
@@ -73,8 +73,8 @@ export default function Orb2() {
     return sections;
   };
 
-  // Helper function to extract a section by name
-  const extractSection = (text, sectionName) => {
+  // Helper function to extract a section from the text
+  const extractSection = (text: string, sectionName: string): string | null => {
     // Try with both "**Name**:" and "**Name:**" formats
     const patterns = [
       new RegExp(`\\*\\*${sectionName}\\*\\*:\\s*(.+?)(?=\\n\\n|\\n\\*\\*|$)`, 's'),

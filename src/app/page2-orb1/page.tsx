@@ -23,6 +23,14 @@ export default function Orb1() {
 
   // Calculate preview size based on portrait ratio
   const getPreviewSize = () => {
+    // Check if window is defined (client-side only)
+    if (typeof window === 'undefined') {
+      return {
+        width: '100%',
+        height: '100%'
+      };
+    }
+    
     const vh = window.innerHeight;
     const vw = window.innerWidth;
     
