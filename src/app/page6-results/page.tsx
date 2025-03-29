@@ -1,9 +1,10 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSessionStore } from '@/store/session'
 import Image from 'next/image'
+import { createUrl } from '@/utils/url'
 
 export default function Results() {
   const router = useRouter()
@@ -11,6 +12,7 @@ export default function Results() {
   const aiName = useSessionStore((state) => state.aiName)
   const aiModelImage = useSessionStore((state) => state.aiModelImage)
   const aiCategory = useSessionStore((state) => state.aiModelProvider)
+  const [imageLoaded, setImageLoaded] = useState(false)
 
   console.log('Page 6 - Category:', aiCategory) // Debug log
 
@@ -24,6 +26,15 @@ export default function Results() {
       .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
       .join(' ');
   }
+
+  // Preload the image
+  useEffect(() => {
+    if (aiModelImage && typeof window !== 'undefined') {
+      const img = new window.Image();
+      img.src = aiModelImage;
+      img.onload = () => setImageLoaded(true);
+    }
+  }, [aiModelImage]);
 
   useEffect(() => {
     if (!aiModelImage || !aiResponse) {
@@ -47,13 +58,21 @@ export default function Results() {
         <div className="results-grid">
           <div className="image-section">
             <div className="image-container">
+              {!imageLoaded && (
+                <div className="image-loading">
+                  <div className="spinner"></div>
+                  <p>Loading your corporate persona...</p>
+                </div>
+              )}
               <Image
                 src={aiModelImage}
                 alt="AI Generated Portrait"
                 width={800}
                 height={800}
-                className="result-image"
+                className={`result-image ${imageLoaded ? 'loaded' : 'loading'}`}
                 priority
+                onLoad={() => setImageLoaded(true)}
+                unoptimized={true} // Skip Next.js image optimization for this dynamic image
               />
             </div>
           </div>
@@ -87,7 +106,7 @@ export default function Results() {
         .background {
           position: fixed;
           inset: 0;
-          background-image: url('/grid_2.jpg');
+          background-image: url('${createUrl('/grid_2.jpg')}');
           background-position: center;
           background-size: cover;
           opacity: 0.8;
@@ -127,13 +146,53 @@ export default function Results() {
           overflow: hidden;
           box-shadow: 
             0 0 30px rgba(255, 255, 255, 0.2),
-            0 0 60px rgba(255, 255, 255, 0.1);
+            0 0 60px rgba(255, 255, 255, 0.1),
+            0 0 40px rgba(255, 255, 255, 0.2),
+            inset 0 0 10px rgba(255, 255, 255, 0.1);
+        }
+
+        .image-loading {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          background: rgba(0, 0, 0, 0.7);
+          color: white;
+          z-index: 2;
+        }
+
+        .spinner {
+          width: 50px;
+          height: 50px;
+          border: 5px solid rgba(255, 255, 255, 0.3);
+          border-radius: 50%;
+          border-top-color: white;
+          animation: spin 1s ease-in-out infinite;
+          margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+          to { transform: rotate(360deg); }
         }
 
         .result-image {
           width: 100%;
           height: 100%;
           object-fit: cover;
+          transition: opacity 0.5s ease;
+        }
+
+        .result-image.loading {
+          opacity: 0;
+        }
+
+        .result-image.loaded {
+          opacity: 1;
         }
 
         .reading-section {

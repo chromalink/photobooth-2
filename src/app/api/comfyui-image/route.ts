@@ -1,13 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getBaseUrl } from '@/utils/url';
 
+export const revalidate = 0; // Don't cache this API route
+
 export async function GET(request: NextRequest) {
   // Add CORS headers
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    'Cache-Control': 'public, max-age=31536000'
+    'Cache-Control': 'public, max-age=31536000, immutable',
+    'Surrogate-Control': 'public, max-age=31536000, immutable',
+    'CDN-Cache-Control': 'public, max-age=31536000, immutable'
   };
 
   try {
@@ -44,12 +48,15 @@ export async function GET(request: NextRequest) {
     const appUrl = getBaseUrl();
     console.log('Using app URL for Origin:', appUrl);
 
-    // Fetch with no-cors mode and appropriate headers
+    // Fetch with appropriate headers and cache: 'force-cache' for better performance
     const response = await fetch(targetUrl, {
       headers: {
         'Accept': 'image/*, */*',
-        'User-Agent': 'next-server'
-      }
+        'User-Agent': 'next-server',
+        'Origin': appUrl || 'http://localhost:4000'
+      },
+      cache: 'force-cache',
+      next: { revalidate: 31536000 } // Cache for a year
     });
     
     if (!response.ok) {

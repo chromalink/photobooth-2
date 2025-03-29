@@ -293,9 +293,34 @@ export default function Orb2() {
           if (statusData.upscaledResult.completed && statusData.upscaledResult.imageUrl) {
             if (statusData.upscaledResult.imageUrl !== lastImageUrl) {
               console.log('Image generation completed:', statusData.upscaledResult.imageUrl);
-              setAiModelImage(statusData.upscaledResult.imageUrl);
-              setVisualProgress(100);
-              router.push('/page6-results');
+              
+              // Preload the image before navigating
+              const imageUrl = statusData.upscaledResult.imageUrl;
+              
+              if (typeof window !== 'undefined') {
+                const preloadImage = new window.Image();
+                preloadImage.src = imageUrl;
+                
+                preloadImage.onload = () => {
+                  console.log('Image preloaded successfully');
+                  setAiModelImage(imageUrl);
+                  setVisualProgress(100);
+                  router.push('/page6-results');
+                };
+                
+                preloadImage.onerror = () => {
+                  console.error('Failed to preload image');
+                  setAiModelImage(imageUrl);
+                  setVisualProgress(100);
+                  router.push('/page6-results');
+                };
+              } else {
+                // Fallback for server-side rendering
+                setAiModelImage(imageUrl);
+                setVisualProgress(100);
+                router.push('/page6-results');
+              }
+              
               break;
             }
           }
