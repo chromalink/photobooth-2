@@ -50,6 +50,26 @@ export default function CommunityGrid() {
   const [loading, setLoading] = useState<boolean>(false);
   const observer = useRef<IntersectionObserver | null>(null);
   
+  // State for modal
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [modalOpen, setModalOpen] = useState<boolean>(false);
+  
+  // Function to open modal with selected image
+  const openModal = (imageUrl: string) => {
+    setSelectedImage(imageUrl);
+    setModalOpen(true);
+    // Prevent scrolling when modal is open
+    document.body.style.overflow = 'hidden';
+  };
+  
+  // Function to close modal
+  const closeModal = () => {
+    setModalOpen(false);
+    setSelectedImage(null);
+    // Re-enable scrolling
+    document.body.style.overflow = 'auto';
+  };
+  
   // Reference for the last grid item element
   const lastGridItemRef = useCallback((node: HTMLDivElement | null) => {
     if (loading) return;
@@ -160,6 +180,7 @@ export default function CommunityGrid() {
                 key={item.key} 
                 className={`grid-item ${item.isPlaceholder ? 'placeholder' : ''}`}
                 ref={isLastItem ? lastGridItemRef : null}
+                onClick={() => !item.isPlaceholder && openModal(imageSrc)}
               >
                 <div className="image-container">
                   <Image 
@@ -172,7 +193,7 @@ export default function CommunityGrid() {
                   />
                 </div>
                 <div className="grid-item-content">
-                  <span className="grid-item-number">{index + 1}</span>
+                  {/* Removed the number span */}
                 </div>
               </div>
             );
@@ -190,6 +211,27 @@ export default function CommunityGrid() {
       <div className="bottom-button-container">
         <button onClick={handleStartAgain} className="start-again-button">START AGAIN</button>
       </div>
+      
+      {/* Modal for displaying larger images */}
+      {modalOpen && selectedImage && (
+        <div className="modal-overlay" onClick={closeModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={closeModal}>&times;</button>
+            <div className="modal-image-container">
+              <div className="square-container">
+                <Image 
+                  src={selectedImage}
+                  alt="Enlarged corporate persona"
+                  fill
+                  sizes="(max-width: 768px) 90vw, 80vw"
+                  className="modal-image"
+                  priority
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <style jsx>{`
         .main {
@@ -353,10 +395,6 @@ export default function CommunityGrid() {
             padding: 0.5rem;
           }
 
-          .grid-item-number {
-            font-size: 1.2rem;
-          }
-
           .start-again-button {
             padding: 1rem 2.5rem;
             font-size: 1.2rem;
@@ -387,10 +425,6 @@ export default function CommunityGrid() {
 
           .grid-item {
             border-radius: 8px;
-          }
-
-          .grid-item-number {
-            font-size: 1rem;
           }
 
           .start-again-button {
@@ -474,13 +508,6 @@ export default function CommunityGrid() {
           opacity: 1;
         }
 
-        .grid-item-number {
-          font-family: var(--font-michroma);
-          color: white;
-          font-size: 1.5rem;
-          text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-        }
-        
         .loading-indicator {
           grid-column: 1 / -1;
           display: flex;
@@ -568,6 +595,96 @@ export default function CommunityGrid() {
           .grid-item:hover {
             transform: scale(1.05);
             z-index: 2;
+          }
+        }
+        
+        /* Modal styles */
+        .modal-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background-color: rgba(0, 0, 0, 0.85);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          z-index: 1000;
+          backdrop-filter: blur(5px);
+        }
+        
+        .modal-content {
+          position: relative;
+          width: min(80vw, 80vh);
+          height: min(80vw, 80vh);
+          max-width: 800px;
+          max-height: 800px;
+          background-color: transparent;
+          border-radius: 10px;
+          overflow: hidden;
+          box-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+        
+        .modal-close {
+          position: absolute;
+          top: 15px;
+          right: 15px;
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          background-color: rgba(0, 0, 0, 0.7);
+          border: 2px solid rgba(255, 255, 255, 0.7);
+          color: white;
+          font-size: 24px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          cursor: pointer;
+          z-index: 1001;
+          transition: all 0.3s ease;
+        }
+        
+        .modal-close:hover {
+          background-color: rgba(0, 0, 0, 0.9);
+          border-color: white;
+          transform: scale(1.1);
+        }
+        
+        .modal-image-container {
+          width: 100%;
+          height: 100%;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+        
+        .square-container {
+          position: relative;
+          width: 100%;
+          height: 100%;
+          aspect-ratio: 1 / 1;
+        }
+        
+        .modal-image {
+          object-fit: cover;
+          border-radius: 8px;
+        }
+        
+        @media (max-width: 768px) {
+          .modal-content {
+            width: min(90vw, 90vh);
+            height: min(90vw, 90vh);
+          }
+          
+          .modal-close {
+            top: 10px;
+            right: 10px;
+            width: 35px;
+            height: 35px;
+            font-size: 20px;
           }
         }
       `}</style>
