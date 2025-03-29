@@ -7,6 +7,7 @@ import { useSessionStore } from '@/store/session'
 import { generateSpiritualReading } from '@/utils/openai'
 import OrbAnimation from '../components/OrbAnimation'
 import { B612_Mono } from 'next/font/google'
+import { createUrl } from '@/utils/url'
 
 // Load B612 Mono font
 const b612Mono = B612_Mono({
@@ -361,7 +362,7 @@ export default function Orb2() {
                   loop 
                   muted
                 >
-                  <source src="/face_scan.mp4" type="video/mp4" />
+                  <source src={createUrl('/Face_scan.mp4')} type="video/mp4" />
                   Your browser does not support the video tag.
                 </video>
               </div>
