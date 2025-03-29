@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useSessionStore } from '@/store/session'
 import Image from 'next/image'
 import { createUrl } from '@/utils/url'
+import { saveCommunityEntry, getCommunityEntries } from '@/utils/communityStorage'
 
 export default function Results() {
   const router = useRouter()
@@ -13,6 +14,7 @@ export default function Results() {
   const aiModelImage = useSessionStore((state) => state.aiModelImage)
   const aiCategory = useSessionStore((state) => state.aiModelProvider)
   const [imageLoaded, setImageLoaded] = useState(false)
+  const [imageSaved, setImageSaved] = useState(false)
 
   console.log('Page 6 - Category:', aiCategory) // Debug log
 
@@ -35,6 +37,25 @@ export default function Results() {
       img.onload = () => setImageLoaded(true);
     }
   }, [aiModelImage]);
+
+  // Save the generated image to community storage
+  useEffect(() => {
+    if (aiModelImage && typeof window !== 'undefined' && !imageSaved) {
+      try {
+        // Check if this image URL already exists in community storage
+        const existingEntries = getCommunityEntries();
+        const imageExists = existingEntries.some(entry => entry.imageUrl === aiModelImage);
+        
+        // Only save if the image doesn't already exist
+        if (!imageExists) {
+          saveCommunityEntry(aiModelImage);
+          setImageSaved(true);
+        }
+      } catch (error) {
+        console.error('Failed to save community entry:', error);
+      }
+    }
+  }, [aiModelImage, imageSaved]);
 
   useEffect(() => {
     if (!aiModelImage || !aiResponse) {

@@ -358,66 +358,72 @@ export default function Orb2() {
         <div className="background-image" />
       </div>
 
-      {/* Title */}
-      <div className="title-container">
-        <h1 className="page-title">Conducting a Q4 audit<br />of your facial ROI……</h1>
-      </div>
+      {/* Centered wrapper for title and content */}
+      <div className="centered-wrapper">
+        {/* Group title and content together */}
+        <div className="content-group">
+          {/* Title */}
+          <div className="title-container">
+            <h1 className="page-title">Conducting a Q4 audit<br />of your facial ROI……</h1>
+          </div>
 
-      {/* Display Sections and Photo */}
-      <div className="content-container">
-        <div className="media-section">
-          <div className="media-grid">
-            {uploadedPhotoUrl && (
-              <div className="photo-box">
-                <img 
-                  src={uploadedPhotoUrl} 
-                  alt="Captured photo" 
-                  className="captured-photo"
-                />
-              </div>
-            )}
-            <div className="scan-box">
-              <div className="scan-box-content">
-                <div className="scan-title">
-                  <p className="scan-progress">{visualProgress}%</p>
+          {/* Display Sections and Photo */}
+          <div className="content-container">
+            <div className="media-section">
+              <div className="media-grid">
+                {uploadedPhotoUrl && (
+                  <div className="photo-box">
+                    <img 
+                      src={uploadedPhotoUrl} 
+                      alt="Captured photo" 
+                      className="captured-photo"
+                    />
+                  </div>
+                )}
+                <div className="scan-box">
+                  <div className="scan-box-content">
+                    <div className="scan-title">
+                      <p className="scan-progress">{visualProgress}%</p>
+                    </div>
+                    <video 
+                      className="face-scan-video" 
+                      autoPlay 
+                      loop 
+                      muted
+                    >
+                      <source src={createUrl('/Face_scan.mp4')} type="video/mp4" />
+                      Your browser does not support the video tag.
+                    </video>
+                  </div>
                 </div>
-                <video 
-                  className="face-scan-video" 
-                  autoPlay 
-                  loop 
-                  muted
-                >
-                  <source src={createUrl('/Face_scan.mp4')} type="video/mp4" />
-                  Your browser does not support the video tag.
-                </video>
               </div>
             </div>
-          </div>
-        </div>
 
-        <div className="description-container">
-          <div className="description-box">
-            <div className="description-content">
-              <div className="section-header">
-                <h2 className={`machine-title ${b612Mono.className}`}>MACHINE OBSERVES...</h2>
-              </div>
-              {Object.keys(displaySections).length > 0 ? (
-                Object.entries(displaySections).map(([section, text]) => (
-                  <div key={section} className="section">
-                    <div className={`section-label ${b612Mono.className}`}>{section}</div>
-                    <div className="section-text-container">
-                      <p className={`section-text ${b612Mono.className}`}>{text}</p>
+            <div className="description-container">
+              <div className="description-box">
+                <div className="description-content">
+                  <div className="section-header">
+                    <h2 className={`machine-title ${b612Mono.className}`}>MACHINE OBSERVES...</h2>
+                  </div>
+                  {Object.keys(displaySections).length > 0 ? (
+                    Object.entries(displaySections).map(([section, text]) => (
+                      <div key={section} className="section">
+                        <div className={`section-label ${b612Mono.className}`}>{section}</div>
+                        <div className="section-text-container">
+                          <p className={`section-text ${b612Mono.className}`}>{text}</p>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="section">
+                      <div className={`section-label ${b612Mono.className}`}>ANALYZING</div>
+                      <div className="section-text-container">
+                        <p className={`section-text ${b612Mono.className}`}>Processing your corporate persona...</p>
+                      </div>
                     </div>
-                  </div>
-                ))
-              ) : (
-                <div className="section">
-                  <div className={`section-label ${b612Mono.className}`}>ANALYZING</div>
-                  <div className="section-text-container">
-                    <p className={`section-text ${b612Mono.className}`}>Processing your corporate persona...</p>
-                  </div>
+                  )}
                 </div>
-              )}
+              </div>
             </div>
           </div>
         </div>
@@ -431,7 +437,7 @@ export default function Orb2() {
           overflow: hidden;
           display: flex;
           flex-direction: column;
-          justify-content: center;
+          justify-content: flex-start;
           align-items: center;
         }
 
@@ -453,18 +459,68 @@ export default function Orb2() {
           background-repeat: no-repeat;
         }
 
-        .title-container {
+        .centered-wrapper {
           position: absolute;
-          top: 5%;
+          top: 0;
           left: 50%;
           transform: translateX(-50%);
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          width: 100%;
+          max-width: 1200px;
+          height: 100vh;
+          padding: 0;
+          overflow-y: auto;
+          justify-content: space-around;
+        }
+
+        .title-container {
+          position: relative;
           z-index: 10;
           text-align: center;
           width: 100%;
           max-width: 1200px;
           padding: 0 20px;
-          margin-bottom: 1.5rem; /* Reduced from 3rem */
-          min-height: 50px; /* Reduced from 100px */
+          margin-bottom: 0;
+          min-height: auto;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          margin-top: auto;
+        }
+
+        .content-container {
+          position: relative;
+          z-index: 10;
+          width: 90%;
+          max-width: 1200px;
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+          align-items: center;
+          justify-content: center;
+          margin-top: 0;
+          margin-bottom: auto;
+        }
+
+        .content-group {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 0;
+        }
+
+        .title {
+          font-family: var(--font-michroma);
+          font-size: 1.5rem;
+          color: white;
+          font-weight: 400;
+          letter-spacing: 0.05em;
+          line-height: 1.2;
+          margin-bottom: 1rem;
+          text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
         }
 
         .page-title {
@@ -476,7 +532,7 @@ export default function Orb2() {
           line-height: 1.3;
           text-align: center;
           margin: 0;
-          padding: 0;
+          padding: 0 0 0.5rem 0;
           text-shadow: 0 0 20px rgba(240, 165, 0, 0.5),
                       0 0 40px rgba(240, 165, 0, 0.3),
                       0 0 60px rgba(240, 165, 0, 0.2);
@@ -521,43 +577,11 @@ export default function Orb2() {
           }
         }
 
-        .title {
-          font-family: var(--font-michroma);
-          font-size: 1.5rem;
-          color: white;
-          font-weight: 400;
-          letter-spacing: 0.05em;
-          line-height: 1.2;
-          margin-bottom: 1rem;
-          text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
-        }
-
-        .content-container {
-          position: absolute;
-          top: 17%; /* Reduced from 20% */
-          left: 50%;
-          transform: translateX(-50%);
-          z-index: 10;
-          width: 90%;
-          max-width: 1200px;
-          display: flex;
-          flex-direction: column;
-          gap: 2rem;
-          align-items: center;
-        }
-
-        /* Responsive adjustments for different screen sizes */
-        @media (max-width: 768px) {
-          .content-container {
-            top: 20%; /* Reduced from 25% */
-          }
-        }
-
         .media-section {
           display: flex;
           flex-direction: column;
           align-items: center;
-          justify-content: flex-start;
+          justify-content: center;
           width: 100%;
           max-width: 800px !important; /* Force this to override any other styles */
         }
@@ -664,6 +688,10 @@ export default function Orb2() {
         .description-container {
           flex: 2;
           max-width: 800px;
+          width: 100%;
+          display: flex;
+          justify-content: center;
+          align-items: center;
         }
 
         .description-box {
@@ -674,6 +702,7 @@ export default function Orb2() {
           backdrop-filter: blur(10px);
           max-height: 400px;
           overflow: hidden;
+          width: 100%;
         }
 
         .description-content {
