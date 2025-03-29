@@ -75,8 +75,18 @@ export default function Results() {
     <div className="container">
       <div className="background" />
       
-      <div className="content">
+      <div className="content" style={{ marginTop: '8vh' }}>
         <div className="results-grid">
+          <div className="reading-section">
+            <div className="text-content">
+              <div className="title-container">
+                <h1 className="title-text" style={{ fontSize: '1.56rem', color: '#F0A500', textAlign: 'left' }}>Congratulations!</h1>
+                <h2 className="title-text highlight" style={{ marginTop: '0', textAlign: 'left' }}>You are... {formatCategoryName(aiCategory)}</h2>
+                <p className="analysis-text">You have no idea what's going on, but you're smiling through the panic. Hope you like exposure as payment!</p>
+              </div>
+            </div>
+          </div>
+
           <div className="image-section">
             <div className="image-container">
               {!imageLoaded && (
@@ -98,16 +108,12 @@ export default function Results() {
             </div>
           </div>
 
-          <div className="reading-section">
-            <div className="text-content">
-              <div className="title-container">
-                <h1 className="title-text">CONGRATULATIONS! YOU ARE...</h1>
-                <h2 className="title-text highlight">{formatCategoryName(aiCategory)}</h2>
-              </div>
+          <div className="button-section">
+            <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+              <button onClick={handleDownload} className="download-button">
+                READ FACE AUDIT
+              </button>
             </div>
-            <button onClick={handleDownload} className="download-button">
-              READ FACE AUDIT
-            </button>
           </div>
         </div>
       </div>
@@ -142,21 +148,46 @@ export default function Results() {
           display: flex;
           align-items: center;
           justify-content: center;
-          padding: 2rem;
+          padding: 0.5rem;
+          padding-top: 0;
+          margin-top: 0;
         }
 
         .results-grid {
           display: flex;
+          flex-direction: column;
           width: 100%;
           max-width: 1800px;
-          gap: 8rem;
+          gap: 0.5rem;
+          align-items: center;
+          justify-content: center;
+          margin-top: 0;
+          padding-top: 15vh;
+        }
+
+        .image-section {
+          width: 100%;
+          max-width: 660px;
+          display: flex;
+          flex-direction: column;
           align-items: center;
           justify-content: center;
         }
 
-        .image-section {
-          flex: 1;
-          max-width: 800px;
+        .reading-section {
+          width: 100%;
+          max-width: 660px;
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 2rem;
+        }
+
+        .button-section {
+          width: 100%;
+          display: flex;
+          justify-content: center;
+          margin-top: 4rem;
         }
 
         .image-container {
@@ -165,11 +196,6 @@ export default function Results() {
           position: relative;
           border-radius: 2.5rem;
           overflow: hidden;
-          box-shadow: 
-            0 0 30px rgba(255, 255, 255, 0.2),
-            0 0 60px rgba(255, 255, 255, 0.1),
-            0 0 40px rgba(255, 255, 255, 0.2),
-            inset 0 0 10px rgba(255, 255, 255, 0.1);
         }
 
         .image-loading {
@@ -216,15 +242,6 @@ export default function Results() {
           opacity: 1;
         }
 
-        .reading-section {
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-          gap: 2rem;
-          color: white;
-          max-width: min(55vw, 600px);
-        }
-
         .text-content {
           display: flex;
           flex-direction: column;
@@ -240,12 +257,11 @@ export default function Results() {
         }
 
         .title-text {
-          font-family: var(--font-aboreto);
-          font-size: 2.45rem;
+          font-family: var(--font-michroma);
+          font-size: 1.56rem;
           color: white;
           font-weight: 400;
           letter-spacing: 0.15em;
-          text-transform: uppercase;
           margin: 0;
           line-height: 1.3;
           padding: 0;
@@ -254,136 +270,178 @@ export default function Results() {
 
         .title-text.highlight {
           color: #F0A500;
-          font-size: 2.45rem;
+          font-size: 1.56rem;
+          margin-top: 0;
+        }
+
+        .analysis-text {
+          margin: 0;
+          color: #FFE7C8;
+          font-size: 0.9rem;
+          font-weight: 400;
+          font-style: normal;
+          text-align: left;
+          line-height: 1.4;
+          letter-spacing: 0;
+          font-family: var(--font-b612-mono);
         }
 
         .download-button {
-          background: rgba(0, 0, 0, 0.4);
-          border: 3px solid white;
-          color: white;
-          font-size: min(max(1.2rem, 2vw), 1.6rem);
-          padding: min(max(1rem, 2vh), 1.5rem) min(max(3rem, 5vw), 5rem);
-          border-radius: 100px;
+          background: transparent;
+          border: 2px solid #FFE7C8;
+          color: #FFE7C8;
+          font-family: var(--font-b612-mono);
+          font-size: clamp(1.5rem, 1.5vw, 1.2rem);
+          font-weight: 400;
+          letter-spacing: 0.15em;
+          padding: 1.2rem 3.5rem;
+          border-radius: 25px;
           cursor: pointer;
           transition: all 0.3s ease;
-          letter-spacing: 0.15em;
-          font-weight: 400;
           box-shadow: 
-            0 0 10px rgba(255, 255, 255, 0.5),
-            0 0 20px rgba(255, 255, 255, 0.3),
-            0 0 40px rgba(255, 255, 255, 0.2),
-            inset 0 0 10px rgba(255, 255, 255, 0.1);
-          text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-          text-transform: uppercase;
-          align-self: flex-start;
+            0 0 5px rgba(255, 231, 200, 0.5),
+            0 0 10px rgba(255, 231, 200, 0.3),
+            0 0 15px rgba(255, 231, 200, 0.2);
+          align-self: center;
         }
 
         .download-button:hover {
-          background: rgba(255, 255, 255, 0.1);
+          background: rgba(255, 231, 200, 0.1);
           box-shadow: 
-            0 0 15px rgba(255, 255, 255, 0.7),
-            0 0 30px rgba(255, 255, 255, 0.5),
-            0 0 60px rgba(255, 255, 255, 0.3),
-            inset 0 0 20px rgba(255, 255, 255, 0.2);
-          text-shadow: 0 0 15px rgba(255, 255, 255, 0.7);
-          transform: scale(1.02);
+            0 0 10px rgba(255, 231, 200, 0.6),
+            0 0 20px rgba(255, 231, 200, 0.4),
+            0 0 30px rgba(255, 231, 200, 0.2);
         }
 
         .download-button:active {
           transform: scale(0.98);
         }
 
-        @media (min-width: 768px) and (max-width: 1024px) {
-          .container {
-            background: black;
-          }
-
-          .background {
-            display: none;
-          }
-
+        @media (min-width: 1025px) {
           .results-grid {
-            flex-direction: column;
-            gap: 2rem;
-            max-width: 100%;
-            padding: 2rem;
+            flex-direction: row;
+            gap: 8rem;
           }
 
-          .image-section {
-            max-width: 100%;
-          }
-
-          .image-container {
-            max-width: 600px;
-            margin: 0 auto;
+          .button-section {
+            display: none; /* Hide the button section on desktop */
           }
 
           .reading-section {
-            max-width: 100%;
-            align-items: center;
-            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 2rem;
           }
 
-          .title-container {
-            align-items: center;
-            text-align: center;
-            margin-bottom: 1rem;
+          /* Show the button inside the reading section on desktop */
+          .reading-section::after {
+            content: "";
+            display: block;
+            width: 100%;
           }
 
-          .title-text {
-            text-align: center;
-            font-size: 2.8rem;
-            white-space: nowrap;
-          }
-
-          .title-text.highlight {
-            font-size: 2.8rem;
-            margin-top: 0.5rem;
-          }
-
-          .download-button {
-            align-self: center;
-            font-size: 1.4rem;
-            padding: 1rem 3rem;
-            background: transparent;
-            border: 2px solid white;
-            box-shadow: 
-              0 0 20px rgba(255, 255, 255, 0.3),
-              0 0 40px rgba(255, 255, 255, 0.2),
-              inset 0 0 10px rgba(255, 255, 255, 0.1);
+          .reading-section .download-button-container {
+            display: flex;
+            width: 100%;
+            justify-content: center;
           }
         }
 
-        @media (max-width: 768px) {
+        @media (max-width: 1024px) {
+          .content {
+            padding-top: 0;
+            margin-top: 0;
+            align-items: center;
+          }
+          
           .results-grid {
             flex-direction: column;
-            gap: 2rem;
-          }
-
-          .reading-section {
-            max-width: 100%;
-          }
-
-          .title-text {
-            font-size: 2rem;
-            text-align: center;
-          }
-
-          .title-text.highlight {
-            font-size: 2rem;
-          }
-
-          .title-container {
+            gap: 0.5rem;
+            margin-top: -10.8rem;
+            padding-top: 0;
             align-items: center;
             width: 100%;
           }
 
+          .reading-section {
+            order: -1; /* Move reading section (with titles) above the image */
+            margin-bottom: 0.5rem;
+            width: 100%;
+            max-width: 660px;
+            padding-left: 0;
+          }
+
+          .image-section {
+            width: 100%;
+            max-width: 660px;
+          }
+
+          .title-container {
+            width: 100%;
+            padding-left: 0;
+          }
+
+          .title-text {
+            font-size: 1.56rem;
+            text-align: left;
+          }
+        }
+
+        @media (max-width: 768px) {
+          .content {
+            padding-top: 0;
+            margin-top: 0;
+            align-items: center;
+            padding-left: 0;
+            padding-right: 0;
+          }
+          
+          .results-grid {
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-top: -10.8rem;
+            padding-top: 0;
+            align-items: center;
+            width: 100%;
+          }
+
+          .reading-section {
+            order: -1; /* Move reading section (with titles) above the image */
+            margin-bottom: 0.5rem;
+            max-width: 660px;
+            width: 100%;
+            padding-left: 0;
+          }
+
+          .image-section {
+            width: 100%;
+            max-width: 660px;
+          }
+
+          .title-container {
+            width: 100%;
+            padding-left: 0;
+            align-items: flex-start;
+          }
+
+          .title-text {
+            font-size: 1.56rem;
+            text-align: left;
+          }
+
+          .title-text.highlight {
+            margin-top: 0;
+          }
+
           .text-content {
             gap: 0;
+            width: 100%;
+            align-items: flex-start;
           }
 
           .content {
-            padding: 1rem;
+            padding: 1rem 0;
           }
 
           h1 {
@@ -393,19 +451,6 @@ export default function Results() {
           .highlight {
             font-size: min(max(1.8rem, 6vw), 2.2rem);
             margin-bottom: 1rem;
-          }
-
-          .download-button {
-            font-size: min(max(1rem, 4vw), 1.2rem);
-            padding: min(max(0.8rem, 1.5vh), 1.2rem) min(max(2rem, 4vw), 3rem);
-            border-width: 2px;
-            width: 100%;
-          }
-        }
-
-        @media (max-width: 1024px) {
-          .title-text {
-            font-size: 2.45rem;
           }
         }
       `}</style>
