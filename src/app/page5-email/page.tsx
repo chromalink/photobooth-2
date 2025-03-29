@@ -90,7 +90,7 @@ export default function EmailPage() {
               onClick={() => {
                 resetSession()
                 setAiModelProvider(DEFAULT_AI_PROVIDER)
-                router.push('/page1-home')
+                router.push('/community-grid')
               }}
               className="secondary-button"
               aria-label="Start a new session"
