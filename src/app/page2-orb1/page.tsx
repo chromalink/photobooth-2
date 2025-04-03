@@ -4,7 +4,7 @@ import { useSessionStore } from '@/store/session'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 
-const PHOTO_PROMPT = "Show us a sample of your face"
+const PHOTO_PROMPT = "SHOW US A SAMPLE OF YOUR FACE"
 
 export default function Orb1() {
   const router = useRouter()
@@ -20,6 +20,8 @@ export default function Orb1() {
   const [isUploading, setIsUploading] = useState(false)
   // Update aspect ratio to match Stability AI requirements (896x1152)
   const targetAspectRatio = 896 / 1152
+  // Add state for screen size
+  const [isSmallScreen, setIsSmallScreen] = useState(false)
 
   // Calculate preview size based on portrait ratio
   const getPreviewSize = () => {
@@ -65,6 +67,8 @@ export default function Orb1() {
   useEffect(() => {
     const updatePreviewSize = () => {
       setPreviewSize(getPreviewSize());
+      // Update screen size state
+      setIsSmallScreen(window.innerWidth <= 1024);
     }
     
     updatePreviewSize();
@@ -264,14 +268,17 @@ export default function Orb1() {
           className="relative overflow-hidden"
           style={{ 
             width: '100vh',
-            height: '128vh', // Maintain 896x1152 ratio (1152/896 ≈ 1.28)
+            height: '128vh', // Maintain 896x1152 ratio (1152/896 u2248 1.28)
             position: 'absolute',
             left: '50%',
             transform: 'translateX(-50%)',
             boxShadow: countdown < 6 && countdown > 0
               ? '0 0 20px rgba(255,255,255,0.2), 0 0 60px rgba(255,255,255,0.1)'
               : '0 0 20px rgba(255,255,255,0.2), 0 0 60px rgba(255,255,255,0.1)',
-            transition: 'box-shadow 0.3s ease'
+            transition: 'box-shadow 0.3s ease',
+            // Responsive adjustments for tablet and mobile using state
+            maxHeight: isSmallScreen ? '100vh' : '128vh',
+            maxWidth: isSmallScreen ? '100vw' : '100vh'
           }}
         >
           <video
@@ -284,7 +291,8 @@ export default function Orb1() {
               transform: 'scaleX(-1)',
               width: '100%',
               height: '100%',
-              objectFit: 'cover',
+              // Use contain instead of cover for tablet and mobile to prevent zooming
+              objectFit: isSmallScreen ? 'contain' : 'cover',
               objectPosition: 'center'
             }}
           />
@@ -308,6 +316,7 @@ export default function Orb1() {
               alignItems: 'center',
               justifyContent: 'center',
               fontSize: 'clamp(3rem, 8vh, 7rem)',
+              fontFamily: 'var(--font-b612-mono)',
               color: 'white',
               textShadow: '0 0 10px rgba(255,255,255,0.5)',
               boxShadow: '0 0 30px rgba(255,255,255,0.2), 0 0 80px rgba(255,255,255,0.1)',
@@ -333,15 +342,15 @@ export default function Orb1() {
         <div
           className="text-center leading-tight"
           style={{
-            fontFamily: 'Arapey, serif',
-            fontStyle: 'italic',
-            fontSize: 'clamp(1.8rem, 5vw, 3.5rem)',
+            fontFamily: 'var(--font-b612-mono)',
+            fontSize: 'clamp(1.2rem, 4vw, 2.5rem)',
             maxWidth: '85%',
             margin: '0 auto',
             color: 'white',
             textShadow: '0 0 15px rgba(0,0,0,0.5)',
             opacity: countdown < 6 && countdown > 0 ? '0.8' : '1',
-            transition: 'opacity 0.3s ease'
+            transition: 'opacity 0.3s ease',
+            textTransform: 'uppercase'
           }}
         >
           {currentPrompt}
@@ -354,12 +363,14 @@ export default function Orb1() {
           <div 
             className="text-white relative"
             style={{
-              fontSize: 'clamp(1.5rem, 3vw, 2.5rem)',
+              fontFamily: 'var(--font-b612-mono)',
+              fontSize: 'clamp(1.2rem, 2.5vw, 2rem)',
               textShadow: '0 0 15px rgba(255,255,255,0.5)',
-              animation: 'fadeInOut 2s infinite'
+              animation: 'fadeInOut 2s infinite',
+              textTransform: 'uppercase'
             }}
           >
-            Processing...
+            PROCESSING...
           </div>
         </div>
       )}
@@ -396,6 +407,110 @@ export default function Orb1() {
           0% { opacity: 0.6; }
           50% { opacity: 1; }
           100% { opacity: 0.6; }
+        }
+
+        /* VHS Overlay Effects */
+        @keyframes vhsNoise {
+          0%, 100% { opacity: 0.2; }
+          10% { opacity: 0.1; }
+          20% { opacity: 0.3; }
+          30% { opacity: 0.2; }
+          40% { opacity: 0.3; }
+          50% { opacity: 0.1; }
+          60% { opacity: 0.3; }
+          70% { opacity: 0.2; }
+          80% { opacity: 0.1; }
+          90% { opacity: 0.3; }
+        }
+
+        @keyframes vhsFlicker {
+          0%, 100% { opacity: 1; }
+          33% { opacity: 0.95; }
+          66% { opacity: 0.97; }
+        }
+
+        @keyframes vhsScanlines {
+          0% { background-position: 0 0; }
+          100% { background-position: 0 100%; }
+        }
+      `}</style>
+
+      {/* Enhanced VHS Scanlines Overlay */}
+      <div className="fixed inset-0 pointer-events-none z-20" style={{ 
+        mixBlendMode: 'overlay',
+        backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0, 0, 0, 0.1) 3px, rgba(0, 0, 0, 0.1) 6px), linear-gradient(90deg, rgba(255, 0, 0, 0.1), rgba(0, 255, 0, 0.05), rgba(0, 0, 255, 0.1))',
+        backgroundSize: '100% 6px, 100% 100%',
+        animation: 'vhsNoise 0.2s infinite, vhsFlicker 4s infinite',
+        opacity: 0.25
+      }}></div>
+
+      {/* 90s VHS Color Filter - More saturated and contrasty */}
+      <div className="fixed inset-0 pointer-events-none z-10" style={{ 
+        background: 'linear-gradient(135deg, rgba(0, 160, 170, 0.15), rgba(0, 200, 210, 0.3))',
+        mixBlendMode: 'color',
+        opacity: 0.7
+      }}></div>
+
+      {/* 90s VHS Vignette - More pronounced */}
+      <div className="fixed inset-0 pointer-events-none z-10" style={{ 
+        background: 'radial-gradient(circle at center, rgba(0, 0, 0, 0) 40%, rgba(0, 70, 60, 0.45) 150%)',
+        mixBlendMode: 'multiply',
+        opacity: 0.6
+      }}></div>
+
+      {/* Film Grain Overlay */}
+      <div className="fixed inset-0 pointer-events-none z-15" style={{ 
+        backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.65\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%\' height=\'100%\' filter=\'url(%23noiseFilter)\'/%3E%3C/svg%3E")',
+        mixBlendMode: 'overlay',
+        opacity: 0.15,
+        animation: 'grainShift 0.5s infinite'
+      }}></div>
+
+      {/* VHS Tracking Issues */}
+      <div className="fixed inset-0 pointer-events-none z-25" style={{ 
+        background: 'linear-gradient(to bottom, transparent 0%, transparent 95%, rgba(255, 255, 255, 0.2) 95%, rgba(255, 255, 255, 0.2) 96%, transparent 96%, transparent 100%)',
+        animation: 'trackingShift 8s linear infinite',
+        opacity: 0.3
+      }}></div>
+
+      {/* 90s VHS Corner Brackets */}
+      <div className="fixed inset-0 pointer-events-none z-30 flex items-center justify-center">
+        <div className="w-[98%] h-[96%] relative">
+          {/* Top Left */}
+          <div className="absolute top-0 left-0 w-[30px] h-[30px] border-t-2 border-l-2 border-white opacity-10"></div>
+          {/* Top Right */}
+          <div className="absolute top-0 right-0 w-[30px] h-[30px] border-t-2 border-r-2 border-white opacity-10"></div>
+          {/* Bottom Left */}
+          <div className="absolute bottom-0 left-0 w-[30px] h-[30px] border-b-2 border-l-2 border-white opacity-10"></div>
+          {/* Bottom Right */}
+          <div className="absolute bottom-0 right-0 w-[30px] h-[30px] border-b-2 border-r-2 border-white opacity-10"></div>
+        </div>
+      </div>
+
+      <style jsx global>{`
+        @keyframes grainShift {
+          0%, 100% { transform: translate(0, 0) scale(1.0); }
+          10% { transform: translate(-1%, 1%) scale(1.01); }
+          20% { transform: translate(1%, 1%) scale(0.99); }
+          30% { transform: translate(1%, -1%) scale(1.01); }
+          40% { transform: translate(0%, 1%) scale(0.99); }
+          50% { transform: translate(-1%, -1%) scale(1.01); }
+          60% { transform: translate(0%, 0%) scale(0.99); }
+          70% { transform: translate(1%, 0%) scale(1.01); }
+          80% { transform: translate(-1%, 0%) scale(0.99); }
+          90% { transform: translate(0%, -1%) scale(1.01); }
+        }
+        
+        @keyframes trackingShift {
+          0%, 100% { transform: translateY(0); }
+          5% { transform: translateY(5px); }
+          10% { transform: translateY(0); }
+          15% { transform: translateY(-3px); }
+          20% { transform: translateY(0); }
+          80% { transform: translateY(0); }
+          85% { transform: translateY(10px); }
+          90% { transform: translateY(0); }
+          95% { transform: translateY(-5px); }
         }
       `}</style>
     </div>

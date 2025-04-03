@@ -29,6 +29,19 @@ export default function Results() {
       .join(' ');
   }
 
+  const getCategoryDescription = (category: string): string => {
+    const descriptions: Record<string, string> = {
+      'Synergy Specialist': "You call every meeting a 'touch base' and genuinely believe in the power of icebreakers",
+      'Workflow Wizard': "You have a color-coded spreadsheet for everything, including your weekend plans. People fear your pivot tables",
+      'Executive Oracle': "You don't take meetings, you take 'alignments.' You haven't made eye contact with a lower-level employee in years",
+      'Middle Manager': "You've seen colleagues come and go, but you're still here—steady, reliable, and just coasting at a safe altitude",
+      'Engagement Risk': "Your enthusiasm levels are dangerously low. Please see HR for mandatory morale training",
+      'The Intern': "You have no idea what's going on, but you're smiling through the panic. Hope you like exposure as payment!"
+    };
+    
+    return descriptions[category] || "You have no idea what's going on, but you're smiling through the panic. Hope you like exposure as payment!";
+  };
+
   // Preload the image
   useEffect(() => {
     if (aiModelImage && typeof window !== 'undefined') {
@@ -75,19 +88,19 @@ export default function Results() {
     <div className="container">
       <div className="background" />
       
-      <div className="content" style={{ marginTop: '8vh' }}>
-        <div className="results-grid">
-          <div className="reading-section">
+      <div className="content">
+        <div className="desktop-layout">
+          <div className="title-area">
             <div className="text-content">
               <div className="title-container">
-                <h1 className="title-text" style={{ fontSize: '1.56rem', color: '#F0A500', textAlign: 'left' }}>Congratulations!</h1>
-                <h2 className="title-text highlight" style={{ marginTop: '0', textAlign: 'left' }}>You are... {formatCategoryName(aiCategory)}</h2>
-                <p className="analysis-text">You have no idea what's going on, but you're smiling through the panic. Hope you like exposure as payment!</p>
+                <h1 className="title-text highlight" style={{ fontSize: '1.56rem', color: '#F0A500', textAlign: 'left' }}>Congratulations!</h1>
+                <h2 className="title-text highlight" style={{ marginTop: '0', textAlign: 'left' }}>You are being reassigned to... {formatCategoryName(aiCategory)}</h2>
+                <p className="analysis-text">{getCategoryDescription(formatCategoryName(aiCategory))}</p>
               </div>
             </div>
           </div>
 
-          <div className="image-section">
+          <div className="image-area">
             <div className="image-container">
               {!imageLoaded && (
                 <div className="image-loading">
@@ -108,12 +121,10 @@ export default function Results() {
             </div>
           </div>
 
-          <div className="button-section">
-            <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
-              <button onClick={handleDownload} className="download-button">
-                READ FACE AUDIT
-              </button>
-            </div>
+          <div className="button-area">
+            <button onClick={handleDownload} className="download-button">
+              READ FACE AUDIT
+            </button>
           </div>
         </div>
       </div>
@@ -150,44 +161,35 @@ export default function Results() {
           justify-content: center;
           padding: 0.5rem;
           padding-top: 0;
-          margin-top: 0;
         }
 
-        .results-grid {
-          display: flex;
-          flex-direction: column;
+        .desktop-layout {
           width: 100%;
           max-width: 1800px;
-          gap: 0.5rem;
+          display: flex;
+          flex-direction: column;
           align-items: center;
-          justify-content: center;
-          margin-top: 0;
+          gap: 2rem;
           padding-top: 15vh;
         }
 
-        .image-section {
+        .title-area {
           width: 100%;
           max-width: 660px;
           display: flex;
-          flex-direction: column;
-          align-items: center;
           justify-content: center;
         }
 
-        .reading-section {
+        .image-area {
           width: 100%;
           max-width: 660px;
-          display: flex;
-          flex-direction: column;
-          align-items: flex-start;
-          gap: 2rem;
         }
 
-        .button-section {
+        .button-area {
           width: 100%;
           display: flex;
           justify-content: center;
-          margin-top: 4rem;
+          margin-top: 0rem;
         }
 
         .image-container {
@@ -243,17 +245,20 @@ export default function Results() {
         }
 
         .text-content {
+          width: 100%;
           display: flex;
           flex-direction: column;
-          align-items: flex-start;
-          gap: 2rem;
+          align-items: center;
+          gap: 0.5rem;
         }
 
         .title-container {
-          display: flex;
-          flex-direction: column;
-          align-items: flex-start;
-          gap: 0;
+          width: 100%;
+          max-width: 100%;
+          padding: 0 1rem;
+          box-sizing: border-box;
+          overflow-wrap: break-word;
+          word-wrap: break-word;
         }
 
         .title-text {
@@ -261,21 +266,24 @@ export default function Results() {
           font-size: 1.56rem;
           color: white;
           font-weight: 400;
-          letter-spacing: 0.15em;
-          margin: 0;
+          letter-spacing: 0.05em;
           line-height: 1.3;
+          margin: 0;
           padding: 0;
           text-align: left;
+          max-width: 100%;
         }
 
         .title-text.highlight {
           color: #F0A500;
+          text-shadow: 0 0 8px rgba(255, 165, 0, 0.4), 0 0 16px rgba(255, 140, 0, 0.3), 0 0 24px rgba(255, 120, 0, 0.2);
           font-size: 1.56rem;
           margin-top: 0;
         }
 
         .analysis-text {
           margin: 0;
+          transform: translateY(35%);
           color: #FFE7C8;
           font-size: 0.9rem;
           font-weight: 400;
@@ -293,7 +301,7 @@ export default function Results() {
           font-family: var(--font-b612-mono);
           font-size: clamp(1.5rem, 1.5vw, 1.2rem);
           font-weight: 400;
-          letter-spacing: 0.15em;
+          letter-spacing: 0.05em;
           padding: 1.2rem 3.5rem;
           border-radius: 25px;
           cursor: pointer;
@@ -313,125 +321,44 @@ export default function Results() {
             0 0 30px rgba(255, 231, 200, 0.2);
         }
 
-        .download-button:active {
-          transform: scale(0.98);
-        }
-
         @media (min-width: 1025px) {
-          .results-grid {
-            flex-direction: row;
-            gap: 8rem;
+          .desktop-layout {
+            transform: scale(1.65);
+            transform-origin: center top;
+            margin-top: -63vh;
+            width: 60%;
+            max-width: 750px;
+            margin-left: auto;
+            margin-right: auto;
           }
-
-          .button-section {
-            display: none; /* Hide the button section on desktop */
-          }
-
-          .reading-section {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 2rem;
-          }
-
-          /* Show the button inside the reading section on desktop */
-          .reading-section::after {
-            content: "";
-            display: block;
+          
+          .title-area,
+          .image-area {
             width: 100%;
+            max-width: 100%;
           }
-
-          .reading-section .download-button-container {
-            display: flex;
-            width: 100%;
-            justify-content: center;
+          
+          .title-container {
+            padding: 0;
+          }
+          
+          .container {
+            overflow-x: hidden;
           }
         }
 
         @media (max-width: 1024px) {
-          .content {
+          .desktop-layout {
             padding-top: 0;
-            margin-top: 0;
-            align-items: center;
-          }
-          
-          .results-grid {
-            flex-direction: column;
-            gap: 0.5rem;
             margin-top: -10.8rem;
-            padding-top: 0;
-            align-items: center;
-            width: 100%;
-          }
-
-          .reading-section {
-            order: -1; /* Move reading section (with titles) above the image */
-            margin-bottom: 0.5rem;
-            width: 100%;
-            max-width: 660px;
-            padding-left: 0;
-          }
-
-          .image-section {
-            width: 100%;
-            max-width: 660px;
-          }
-
-          .title-container {
-            width: 100%;
-            padding-left: 0;
-          }
-
-          .title-text {
-            font-size: 1.56rem;
-            text-align: left;
           }
         }
 
         @media (max-width: 768px) {
-          .content {
+          .desktop-layout {
             padding-top: 0;
-            margin-top: 0;
-            align-items: center;
             padding-left: 0;
             padding-right: 0;
-          }
-          
-          .results-grid {
-            flex-direction: column;
-            gap: 0.5rem;
-            margin-top: -10.8rem;
-            padding-top: 0;
-            align-items: center;
-            width: 100%;
-          }
-
-          .reading-section {
-            order: -1; /* Move reading section (with titles) above the image */
-            margin-bottom: 0.5rem;
-            max-width: 660px;
-            width: 100%;
-            padding-left: 0;
-          }
-
-          .image-section {
-            width: 100%;
-            max-width: 660px;
-          }
-
-          .title-container {
-            width: 100%;
-            padding-left: 0;
-            align-items: flex-start;
-          }
-
-          .title-text {
-            font-size: 1.56rem;
-            text-align: left;
-          }
-
-          .title-text.highlight {
-            margin-top: 0;
           }
 
           .text-content {

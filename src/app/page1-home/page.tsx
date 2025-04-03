@@ -144,18 +144,19 @@ export default function Home() {
 
         h1 {
           width: 100%;
-          font-size: clamp(3.0rem, 5vw, 2.8rem);
+          font-size: clamp(2.7rem, 4.5vw, 2.52rem);
           font-weight: 400;
           font-family: var(--font-michroma);
-          letter-spacing: 0.1em;
+          letter-spacing: 0.05em;
           line-height: 1.1em;
           color: #FFB048;
+          text-shadow: 0 0 8px rgba(255, 165, 0, 0.4), 0 0 16px rgba(255, 140, 0, 0.3), 0 0 24px rgba(255, 120, 0, 0.2);
           margin: 0;
           padding: 0;
         }
 
         p {
-          font-size: clamp(1.6rem, 2vw, 1.2rem);
+          font-size: clamp(1.44rem, 1.8vw, 1.08rem);
           font-family: var(--font-b612-mono);
           font-weight: 400;
           font-style: normal;
@@ -173,7 +174,7 @@ export default function Home() {
           font-family: var(--font-b612-mono);
           font-size: clamp(1.5rem, 1.5vw, 1.2rem);
           font-weight: 400;
-          letter-spacing: 0.1em;
+          letter-spacing: 0.05em;
           text-transform: uppercase;
           padding: 1.2rem 3.5rem;
           border-radius: 25px;
@@ -220,6 +221,26 @@ export default function Home() {
             transform: scale(1.3);
             width: min(85%, 1000px);
             height: min(65vh, 800px);
+          }
+        }
+
+        /* For desktop screens */
+        @media screen and (min-width: 1024px) {
+          .responsiveContainer {
+            margin-top: -10vh; /* Move content 10% up */
+          }
+          
+          h1 {
+            font-size: calc(clamp(2.7rem, 4.5vw, 2.52rem) * 1.4); /* Increase size by 40% */
+          }
+          
+          p {
+            font-size: calc(clamp(1.44rem, 1.8vw, 1.08rem) * 1.4); /* Increase size by 40% */
+          }
+          
+          button {
+            font-size: calc(clamp(1.5rem, 1.5vw, 1.2rem) * 1.4); /* Increase size by 40% */
+            padding: 1.68rem 4.9rem; /* Increase padding by 40% */
           }
         }
       `}</style>

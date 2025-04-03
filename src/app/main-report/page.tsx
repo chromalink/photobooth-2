@@ -61,7 +61,7 @@ export default function MainReport() {
           <div className="reading-section">
             <div className="text-content">
               <div className="title-container">
-                <h1 className="title-text">CONGRATULATIONS! YOU ARE...</h1>
+                <h1 className="title-text">CONGRATULATIONS! YOU ARE BEING REASSIGNED TO...</h1>
                 <h2 className="title-text highlight">{formatCategoryName(aiCategory)}</h2>
               </div>
               <div className="reading-container">

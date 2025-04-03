@@ -60,43 +60,38 @@ export default function EmailPage() {
     <main className="main">
       <div className="background" />
       <div className="container">
-        <h1>PERSONALITY<br/>PHOTOMACHINE</h1>
-        
-        <div className="form">
-          <div className="input-group">
-            <input
-              type="text"
-              placeholder="Saida Saetgar"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-            />
-            <input
-              type="email"
-              placeholder="saesd1694@gmail.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            {error && <div className="error">{error}</div>}
-          </div>
-          <div className="button-group">
-            <button 
-              onClick={handleSubmit}
-              disabled={isSending || !fullName.trim() || !email.trim()}
-              className="primary-button"
-            >
-              {isSending ? 'SENDING...' : 'SEND TO EMAIL'}
-            </button>
-            <button 
-              onClick={() => {
-                resetSession()
-                setAiModelProvider(DEFAULT_AI_PROVIDER)
-                router.push('/community-grid')
-              }}
-              className="secondary-button"
-              aria-label="Start a new session"
-            >
-              START AGAIN
-            </button>
+        <div className="content-wrapper">
+          <h1>FACE AUDIT™</h1>
+          
+          <div className="form">
+            <div className="input-group">
+              <input
+                type="text"
+                placeholder="Saida Saetgar"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+              />
+              <input
+                type="email"
+                placeholder="saesd1694@gmail.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              {error && <div className="error">{error}</div>}
+            </div>
+            <div className="button-group">
+              <button 
+                onClick={() => {
+                  resetSession()
+                  setAiModelProvider(DEFAULT_AI_PROVIDER)
+                  router.push('/community-grid')
+                }}
+                className="primary-button"
+                aria-label="Start a new session"
+              >
+                SEND TO EMAIL
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -111,6 +106,7 @@ export default function EmailPage() {
           background: black;
           position: relative;
           overflow: hidden;
+          margin-top: 5vh;
         }
 
         .background {
@@ -130,21 +126,31 @@ export default function EmailPage() {
           display: flex;
           flex-direction: column;
           align-items: center;
+          justify-content: center;
+          transform-origin: center;
+          transition: transform 0.3s ease;
+          transform: scale(1.56); /* Make container 56% bigger (1.3 × 1.2 = 1.56) */
+        }
+
+        .content-wrapper {
+          width: 100%;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
           gap: 3.5rem;
         }
 
         h1 {
-          font-family: var(--font-aboreto);
-          font-size: min(max(2.5rem, 5vw), 4rem);
+          font-family: var(--font-michroma);
+          font-size: clamp(2.7rem, 4.5vw, 2.52rem);
           font-weight: 400;
-          letter-spacing: 0.15em;
-          line-height: 1.2;
-          color: white;
+          letter-spacing: 0.05em;
+          line-height: 1.1em;
+          color: #FFB048;
+          text-shadow: 0 0 8px rgba(255, 165, 0, 0.4), 0 0 16px rgba(255, 140, 0, 0.3), 0 0 24px rgba(255, 120, 0, 0.2);
           text-align: center;
           margin: 0;
-          text-shadow: 
-            0 0 10px rgba(255, 255, 255, 0.5),
-            0 0 20px rgba(255, 255, 255, 0.3);
+          padding: 0;
         }
 
         .form {
@@ -171,30 +177,30 @@ export default function EmailPage() {
         input {
           width: 100%;
           background: rgba(0, 0, 0, 0.3);
-          border: 2px solid rgba(255, 255, 255, 0.3);
-          border-radius: 50px;
+          border: 2px solid rgba(255, 231, 200, 0.3);
+          border-radius: 25px;
           padding: min(max(0.8rem, 1.5vh), 1.2rem) min(max(2rem, 4vw), 3.5rem);
-          color: white;
+          color: rgba(255, 231, 200, 0.7);
+          font-family: var(--font-b612-mono);
           font-size: min(max(0.9rem, 1.5vw), 1.1rem);
           text-align: center;
-          letter-spacing: 0.15em;
+          letter-spacing: 0.05em;
           transition: all 0.3s ease;
           backdrop-filter: blur(5px);
           height: auto;
         }
 
         input::placeholder {
-          color: rgba(255, 255, 255, 0.5);
+          color: rgba(255, 231, 200, 0.4);
+          font-family: var(--font-b612-mono);
           font-size: min(max(0.9rem, 1.5vw), 1.1rem);
           letter-spacing: 0.05em;
         }
 
         input:focus {
           outline: none;
-          border-color: white;
-          box-shadow: 
-            0 0 5px rgba(255, 255, 255, 0.5),
-            0 0 15px rgba(255, 255, 255, 0.3);
+          border-color: rgba(255, 231, 200, 0.6);
+          background: rgba(0, 0, 0, 0.4);
         }
 
         .error {
@@ -205,64 +211,47 @@ export default function EmailPage() {
           letter-spacing: 0.05em;
         }
 
-        .primary-button,
-        .secondary-button {
+        .primary-button, .secondary-button {
           width: 100%;
           background: transparent;
-          border: 2px solid white;
-          color: white;
-          font-size: min(max(0.9rem, 1.5vw), 1.1rem);
-          padding: min(max(0.8rem, 1.5vh), 1.2rem) min(max(2rem, 4vw), 3.5rem);
-          border-radius: 50px;
+          border: 2px solid #FFE7C8;
+          color: #FFE7C8;
+          font-family: var(--font-b612-mono);
+          font-size: clamp(1.5rem, 1.5vw, 1.2rem);
+          font-weight: 400;
+          letter-spacing: 0.05em;
+          text-transform: uppercase;
+          padding: 1.2rem 3.5rem;
+          border-radius: 25px;
           cursor: pointer;
           transition: all 0.3s ease;
-          letter-spacing: 0.15em;
-          font-weight: 400;
-          height: auto;
           box-shadow: 
-            0 0 5px rgba(255, 255, 255, 0.5),
-            0 0 10px rgba(255, 255, 255, 0.3),
-            0 0 20px rgba(255, 255, 255, 0.2),
-            inset 0 0 5px rgba(255, 255, 255, 0.1);
-          text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
-          position: relative;
+            0 0 5px rgba(255, 231, 200, 0.5),
+            0 0 10px rgba(255, 231, 200, 0.3),
+            0 0 15px rgba(255, 231, 200, 0.2);
         }
 
-        .primary-button:hover,
-        .secondary-button:hover {
-          background: rgba(255, 255, 255, 0.1);
+        .primary-button:hover, .secondary-button:hover {
+          background: rgba(255, 231, 200, 0.1);
           box-shadow: 
-            0 0 5px rgba(255, 255, 255, 0.7),
-            0 0 15px rgba(255, 255, 255, 0.5),
-            0 0 30px rgba(255, 255, 255, 0.3),
-            inset 0 0 10px rgba(255, 255, 255, 0.2);
-          text-shadow: 0 0 8px rgba(255, 255, 255, 0.7);
-          transform: scale(1.02);
+            0 0 10px rgba(255, 231, 200, 0.6),
+            0 0 20px rgba(255, 231, 200, 0.4),
+            0 0 30px rgba(255, 231, 200, 0.2);
         }
 
-        .primary-button:active,
-        .secondary-button:active {
+        .primary-button:active, .secondary-button:active {
           transform: scale(0.98);
         }
 
         .primary-button:disabled {
           opacity: 0.5;
           cursor: not-allowed;
-          transform: none;
-        }
-
-        .primary-button:disabled:hover {
-          background: transparent;
-          box-shadow: 
-            0 0 5px rgba(255, 255, 255, 0.5),
-            0 0 10px rgba(255, 255, 255, 0.3),
-            0 0 20px rgba(255, 255, 255, 0.2),
-            inset 0 0 5px rgba(255, 255, 255, 0.1);
-          transform: none;
         }
 
         @media (max-width: 480px) {
           .container {
+            width: 95%;
+            max-width: 100%;
             gap: 2rem;
           }
           
@@ -282,16 +271,29 @@ export default function EmailPage() {
           input {
             font-size: min(max(0.8rem, 3.5vw), 1rem);
             padding: min(max(0.7rem, 1.2vh), 1rem) min(max(1.8rem, 3.5vw), 2.5rem);
+            border-radius: 15px; /* Less rounded corners for smaller screens */
           }
 
           input::placeholder {
             font-size: min(max(0.8rem, 3.5vw), 1rem);
           }
           
-          .primary-button,
-          .secondary-button {
+          .primary-button {
             font-size: min(max(0.8rem, 3.5vw), 1rem);
             padding: min(max(0.7rem, 1.2vh), 1rem) min(max(1.8rem, 3.5vw), 2.5rem);
+            border-radius: 15px; /* Less rounded corners for smaller screens */
+          }
+        }
+
+        @media (min-width: 481px) and (max-width: 768px) {
+          input, .primary-button {
+            border-radius: 18px; /* Slightly less rounded corners for tablet */
+          }
+        }
+
+        @media (min-width: 769px) {
+          input, .primary-button {
+            border-radius: 25px; /* Original border-radius for desktop */
           }
         }
       `}</style>

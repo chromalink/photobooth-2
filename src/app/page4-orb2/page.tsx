@@ -572,8 +572,26 @@ export default function Orb2() {
         @media (min-width: 1025px) {
           /* Desktops and large screens */
           .page-title {
-            font-size: clamp(2.2rem, 3vw, 2.5rem);
+            font-size: clamp(2.64rem, 3.6vw, 3rem);
             color: #F0A500;
+            transform: translateY(-10%);
+          }
+          
+          .centered-wrapper {
+            max-width: 1440px; /* 20% larger than 1200px */
+          }
+          
+          .content-group {
+            transform: translateY(-20%) scale(1.4);
+            transform-origin: center top;
+          }
+          
+          .content-container {
+            max-width: 1440px; /* 20% larger than 1200px */
+          }
+          
+          .media-section {
+            max-width: 960px !important; /* 20% larger than 800px */
           }
         }
 
@@ -630,7 +648,7 @@ export default function Orb2() {
         }
 
         .scan-box {
-          background: rgba(0, 0, 0, 0.7);
+          background: #0A0A0A;
           border: 2px solid rgba(255, 255, 255, 0.15);
           border-radius: clamp(16px, 2vw, 24px);
           padding: 0;
@@ -664,25 +682,31 @@ export default function Orb2() {
           max-height: 70%;
           border-radius: 8px;
           display: block;
+          transform: translateY(-1%) scale(1.4);
+          transform-origin: center center;
+          margin: 0 auto;
         }
 
         .scan-title {
           margin-bottom: 1rem;
+          position: relative;
+          z-index: 10;
+          transform: translateY(-110%);
         }
 
         .scan-progress {
-          font-family: var(--font-aboreto);
+          font-family: var(--font-b612-mono);
           font-size: 1.5rem;
-          color: white;
+          color: #F0A500;
           font-weight: 400;
           letter-spacing: 0.05em;
           line-height: 1;
           text-align: center;
           margin: 0;
           padding: 0;
-          text-shadow: 0 0 20px rgba(255, 255, 255, 0.5),
-                      0 0 40px rgba(255, 255, 255, 0.3),
-                      0 0 60px rgba(255, 255, 255, 0.2);
+          text-shadow: 0 0 20px rgba(240, 165, 0, 0.5),
+                      0 0 40px rgba(240, 165, 0, 0.3),
+                      0 0 60px rgba(240, 165, 0, 0.2);
         }
 
         .description-container {
