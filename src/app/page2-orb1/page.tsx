@@ -36,28 +36,21 @@ export default function Orb1() {
     const vh = window.innerHeight;
     const vw = window.innerWidth;
     
-    // On desktop (wider screens), use width as the base for calculations
-    const isWideScreen = vw > vh;
-    
-    if (isWideScreen) {
-      // Use 95% of viewport width for wide screens
-      const maxWidth = 0.95 * vw;
-      // But ensure the height doesn't exceed 75% of viewport height
-      const maxHeight = 0.75 * vh;
-      
-      // For desktop, we'll prioritize width while maintaining minimum height
+    // For tablets and mobile devices
+    if (vw <= 1024) {
       return {
-        width: `${maxWidth}px`,
-        height: `${Math.min(maxWidth / targetAspectRatio, maxHeight)}px`
+        width: '100vw',
+        height: '100vh'
       };
     }
     
-    // For mobile
-    const previewHeight = 0.6 * vh;
-    const previewWidth = previewHeight * targetAspectRatio;
+    // For desktop (wider screens)
+    const maxWidth = Math.min(0.95 * vw, vh);
+    const height = maxWidth / targetAspectRatio;
+    
     return {
-      width: `${previewWidth}px`,
-      height: `${previewHeight}px`
+      width: `${maxWidth}px`,
+      height: `${height}px`
     };
   }
 
@@ -252,7 +245,7 @@ export default function Orb1() {
     <div className="flex flex-col items-center justify-between min-h-screen bg-black text-white">
       {/* Center webcam preview with enhanced container */}
       <div 
-        className="relative flex items-center justify-center w-full"
+        className="relative flex items-center justify-center w-full h-full"
         style={{ 
           height: '100vh',
           width: '100vw',
@@ -267,18 +260,15 @@ export default function Orb1() {
         <div 
           className="relative overflow-hidden"
           style={{ 
-            width: '100vh',
-            height: '128vh', // Maintain 896x1152 ratio (1152/896 u2248 1.28)
+            width: '100vw',
+            height: '100vh',
             position: 'absolute',
             left: '50%',
             transform: 'translateX(-50%)',
             boxShadow: countdown < 6 && countdown > 0
               ? '0 0 20px rgba(255,255,255,0.2), 0 0 60px rgba(255,255,255,0.1)'
               : '0 0 20px rgba(255,255,255,0.2), 0 0 60px rgba(255,255,255,0.1)',
-            transition: 'box-shadow 0.3s ease',
-            // Responsive adjustments for tablet and mobile using state
-            maxHeight: isSmallScreen ? '100vh' : '128vh',
-            maxWidth: isSmallScreen ? '100vw' : '100vh'
+            transition: 'box-shadow 0.3s ease'
           }}
         >
           <video
@@ -286,13 +276,11 @@ export default function Orb1() {
             autoPlay
             playsInline
             muted
-            className="object-cover"
-            style={{ 
+            style={{
               transform: 'scaleX(-1)',
               width: '100%',
               height: '100%',
-              // Use contain instead of cover for tablet and mobile to prevent zooming
-              objectFit: isSmallScreen ? 'contain' : 'cover',
+              objectFit: 'cover',
               objectPosition: 'center'
             }}
           />
