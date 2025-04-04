@@ -561,6 +561,7 @@ export default function Orb2() {
           /* Tablets and small laptops */
           .title-container {
             max-width: 1400px;
+            margin-bottom: -4rem;
           }
           
           .page-title {
@@ -582,7 +583,7 @@ export default function Orb2() {
           }
           
           .content-group {
-            transform: translateY(-20%) scale(1.4);
+            transform: translateY(-20%);
             transform-origin: center top;
           }
           
@@ -682,7 +683,7 @@ export default function Orb2() {
           max-height: 70%;
           border-radius: 8px;
           display: block;
-          transform: translateY(-1%) scale(1.4);
+          transform: translateY(-1%);
           transform-origin: center center;
           margin: 0 auto;
         }
@@ -827,11 +828,30 @@ export default function Orb2() {
         @media (min-width: 768px) and (max-width: 1024px) {
           .title-container {
             max-width: 1400px;
+            margin-bottom: -4rem;
           }
           
           .page-title {
             font-size: clamp(2.5rem, 4vw, 4.5rem);
             color: #F0A500;
+          }
+        }
+
+        @media (min-width: 768px) and (max-width: 1024px) and (orientation: landscape) {
+          .content-group {
+            margin-bottom: 1rem;
+          }
+        }
+
+        @media (min-width: 1024px) and (max-width: 1366px) {
+          .title-container {
+            margin-bottom: 1rem;
+          }
+        }
+
+        @media (min-width: 820px) and (max-width: 920px) {
+          .title-container {
+            margin-bottom: 1rem;
           }
         }
       `}</style>
