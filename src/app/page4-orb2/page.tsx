@@ -583,7 +583,7 @@ export default function Orb2() {
           }
           
           .content-group {
-            transform: translateY(-20%);
+            transform: scale(1.3) translateY(-20%);
             transform-origin: center top;
           }
           
@@ -852,6 +852,26 @@ export default function Orb2() {
         @media (min-width: 820px) and (max-width: 920px) {
           .title-container {
             margin-bottom: 1rem;
+          }
+        }
+
+        /* iPad Pro 11-inch and 12.9-inch specific styling */
+        @media only screen and (min-width: 1024px) and (max-width: 1024px) and (min-height: 1366px),
+               only screen and (min-width: 834px) and (max-width: 834px) and (min-height: 1194px),
+               only screen and (min-width: 834px) and (max-width: 834px) and (min-height: 1112px) {
+          .content-group {
+            transform: scale(1.2) translateY(-5%);
+            transform-origin: center top;
+            margin: 1.5rem auto 3rem;
+          }
+        }
+
+        /* iPad Mini specific styling */
+        @media only screen and (min-width: 768px) and (max-width: 768px) and (min-height: 1024px),
+               only screen and (min-width: 744px) and (max-width: 744px) and (min-height: 1133px) {
+          .content-group {
+            transform: translateY(-5%);
+            transform-origin: center top;
           }
         }
       `}</style>

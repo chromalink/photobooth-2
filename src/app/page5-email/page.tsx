@@ -291,6 +291,22 @@ export default function EmailPage() {
           }
         }
 
+        /* iPad Air specific styling */
+        @media (min-width: 768px) and (max-width: 834px) and (min-height: 1080px) {
+          .container {
+            transform: scale(1.25); /* 20% smaller than the original 1.56 scale */
+            transform-origin: center center;
+          }
+        }
+
+        /* iPad Mini specific styling */
+        @media (min-width: 744px) and (max-width: 768px) and (min-height: 1024px) {
+          .container {
+            transform: scale(1.25); /* 20% smaller than the original 1.56 scale */
+            transform-origin: center center;
+          }
+        }
+
         @media (min-width: 769px) {
           input, .primary-button {
             border-radius: 25px; /* Original border-radius for desktop */

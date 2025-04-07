@@ -165,6 +165,12 @@ export default function CommunityGrid() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           className="title"
+          style={{ 
+            fontFamily: 'var(--font-b612-mono)', 
+            color: '#FFB048',
+            fontSize: 'min(max(1.525rem, 3.05vw), 4.04rem)', /* Updated as requested */
+            textShadow: '0 0 10px rgba(255, 176, 72, 0.5), 0 0 20px rgba(255, 176, 72, 0.3), 0 0 30px rgba(255, 176, 72, 0.2)'
+          }}
         >
           MEET THE OTHER CO-WORKERS
         </motion.h1>
@@ -265,19 +271,19 @@ export default function CommunityGrid() {
         }
 
         .title {
-          font-family: var(--font-aboreto);
-          font-size: min(max(2.5rem, 5vw), 4rem);
+          font-family: var(--font-b612-mono);
+          font-size: min(max(1.525rem, 3.05vw), 4.04rem); /* Updated as requested */
           font-weight: 400;
           letter-spacing: 0.15em;
           line-height: 1.2;
-          color: white;
+          color: #FFB048;
           text-align: center;
           margin: 0;
           margin-bottom: 1rem;
           text-shadow: 
-            0 0 10px rgba(255, 255, 255, 0.5),
-            0 0 20px rgba(255, 255, 255, 0.3),
-            0 0 30px rgba(255, 255, 255, 0.2);
+            0 0 10px rgba(255, 176, 72, 0.5),
+            0 0 20px rgba(255, 176, 72, 0.3),
+            0 0 30px rgba(255, 176, 72, 0.2);
           position: sticky;
           top: 10px;
           background-color: rgba(0, 0, 0, 0.5);

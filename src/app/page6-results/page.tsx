@@ -347,6 +347,43 @@ export default function Results() {
           }
         }
 
+        /* iPad Pro specific styling - 11" and 12.9" models */
+        @media (min-width: 834px) and (max-width: 1024px) and (min-height: 1112px), 
+               (min-width: 1024px) and (max-width: 1024px) and (min-height: 1366px) {
+          .desktop-layout {
+            transform: scale(1.25); /* 25% bigger */
+            transform-origin: center top;
+            margin-top: -3rem;
+            width: 85%;
+            margin-left: auto;
+            margin-right: auto;
+          }
+          
+          .container {
+            overflow-x: hidden;
+          }
+        }
+
+        /* iPad Air specific styling */
+        @media (min-width: 768px) and (max-width: 834px) and (min-height: 1080px) {
+          .desktop-layout {
+            padding-top: 0;
+            position: relative;
+            top: 10vh; /* Move down 10% of viewport height */
+          }
+        }
+
+        /* iPad Mini specific styling */
+        @media (min-width: 744px) and (max-width: 768px) and (min-height: 1024px) {
+          .desktop-layout {
+            padding-top: 0;
+            position: relative;
+            top: 10vh; /* Move down 10% of viewport height */
+            transform: scale(0.9); /* Reduce scale by 10% */
+            transform-origin: center top;
+          }
+        }
+
         @media (max-width: 1024px) {
           .desktop-layout {
             padding-top: 0;
