@@ -376,11 +376,11 @@ export default function Results() {
         /* iPad Mini specific styling */
         @media (min-width: 744px) and (max-width: 768px) and (min-height: 1024px) {
           .desktop-layout {
-            padding-top: 0;
-            position: relative;
-            top: 10vh; /* Move down 10% of viewport height */
-            transform: scale(0.9); /* Reduce scale by 10% */
-            transform-origin: center top;
+            padding-top: 0 !important;
+            position: relative !important;
+            top: 13vh !important; /* Move down 13% of viewport height */
+            transform: scale(0.9) !important; /* Reduce scale by 10% */
+            transform-origin: center top !important;
           }
         }
 
@@ -396,6 +396,8 @@ export default function Results() {
             padding-top: 0;
             padding-left: 0;
             padding-right: 0;
+            position: relative;
+            top: 5vh; /* Move down 5% of viewport height */
           }
 
           .text-content {

@@ -555,6 +555,7 @@ export default function MainReport() {
           .report-container {
             width: 95%;
             padding: 1rem 0;
+            margin-top: -8vh !important; /* Move up by 8vh */
           }
 
           .reading-container {
@@ -562,26 +563,35 @@ export default function MainReport() {
           }
 
           h1 {
-            font-size: min(max(1.8rem, 6vw), 2.2rem);
+            font-size: min(max(1.44rem, 4.8vw), 1.76rem); /* 20% smaller than original */
           }
 
           .highlight {
-            font-size: min(max(1.8rem, 6vw), 2.2rem);
+            font-size: min(max(1.44rem, 4.8vw), 1.76rem); /* 20% smaller than original */
             margin-bottom: 1rem;
           }
 
           .reading-text {
-            font-size: min(max(1rem, 4.5vw), 1.3rem);
+            font-size: min(max(0.8rem, 3.6vw), 1.04rem); /* 20% smaller than original */
+          }
+
+          .section-text {
+            font-size: 0.8rem; /* 20% smaller */
+            line-height: 1.4;
+          }
+
+          .section-label {
+            font-size: 0.88rem; /* 20% smaller */
           }
 
           .download-button {
-            font-size: min(max(1rem, 4vw), 1.2rem);
+            font-size: min(max(0.8rem, 3.2vw), 0.96rem); /* 20% smaller than original */
             padding: min(max(0.8rem, 1.5vh), 1.2rem) min(max(2rem, 4vw), 3rem);
             border-width: 2px;
             width: 100%;
           }
         }
-
+        
         /* iPad Pro (12.9-inch) */
         @media (min-width: 1024px) and (max-width: 1366px) {
           .category-description {
@@ -627,7 +637,7 @@ export default function MainReport() {
         /* iPad Mini (8.3-inch) */
         @media (min-width: 768px) and (max-width: 819px) {
           .report-container {
-            margin-top: -5vh; /* Move up by 10% (5vh up from the default) */
+            margin-top: 0vh !important; /* Set to 0vh as requested */
           }
           
           .reading-container {
@@ -652,6 +662,14 @@ export default function MainReport() {
           .section-text {
             font-size: 0.99rem;
             line-height: 1.5;
+          }
+          
+          /* Preserve button styling from larger screens */
+          .download-button {
+            border-radius: 32.5px !important; /* Same as desktop */
+            width: auto !important; /* Override mobile full-width */
+            padding: 1.56rem 4.55rem !important; /* Match desktop padding */
+            font-size: clamp(1.56rem, 1.6vw, 1.56rem) !important; /* Match desktop font size */
           }
         }
       `}</style>
