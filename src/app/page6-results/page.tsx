@@ -173,6 +173,13 @@ export default function Results() {
           padding-top: 15vh;
         }
 
+        /* Add media query for tablets */
+        @media (min-width: 768px) and (max-width: 1023px) {
+          .desktop-layout {
+            margin-top: -12rem;
+          }
+        }
+
         .title-area {
           width: 100%;
           max-width: 660px;
