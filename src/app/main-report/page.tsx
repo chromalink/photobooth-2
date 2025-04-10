@@ -267,6 +267,7 @@ export default function MainReport() {
           gap: 2rem;
           color: #FFE7C8;
           font-family: var(--font-b612-mono);
+          margin-top: 5%; /* Added to move the reading box down by 5% */
         }
 
         .divider-container {
