@@ -14,25 +14,25 @@ const ITEMS_PER_PAGE = 12;
 
 // Placeholder images from the public folder
 const PLACEHOLDER_IMAGES = [
-  'ComfyUI_temp_tyadf_00213_.jpg',
-  'ComfyUI_temp_tyadf_00245_.jpg',
-  'ComfyUI_temp_tyadf_00248_.jpg',
-  'ComfyUI_temp_tyadf_00281_.jpg',
-  'ComfyUI_temp_tyadf_00317_.jpg',
-  'ComfyUI_temp_tyadf_00620_.jpg',
-  'ComfyUI_temp_tyadf_00622_.jpg',
-  'ComfyUI_temp_tyadf_00624_.jpg',
-  'ComfyUI_temp_tyadf_00626_.jpg',
-  'ComfyUI_temp_tyadf_00628_.jpg',
-  'ComfyUI_temp_tyadf_00629_.jpg',
-  'ComfyUI_temp_tyadf_00631_.jpg',
-  'ComfyUI_temp_tyadf_00632_.jpg',
-  'ComfyUI_temp_tyadf_00634_.jpg',
-  'ComfyUI_temp_tyadf_00706_.jpg'
+  'ComfyUI_temp_xlvfc_00006_.jpg',
+  'ComfyUI_temp_xlvfc_00014_.jpg',
+  'ComfyUI_temp_xlvfc_00020_.jpg',
+  'ComfyUI_temp_xlvfc_00025_.jpg',
+  'ComfyUI_temp_xlvfc_00029_.jpg',
+  'ComfyUI_temp_xlvfc_00031_.jpg',
+  'ComfyUI_temp_xlvfc_00034_.jpg',
+  'ComfyUI_temp_xlvfc_00040_.jpg',
+  'ComfyUI_temp_xlvfc_00044_.jpg',
+  'ComfyUI_temp_xlvfc_00047_.jpg',
+  'ComfyUI_temp_xlvfc_00055_.jpg',
+  'ComfyUI_temp_xlvfc_00064_.jpg',
+  'ComfyUI_temp_xlvfc_00071_.jpg',
+  'ComfyUI_temp_xlvfc_00088_.jpg',
+  'ComfyUI_temp_xlvfc_00095_.jpg'
 ];
 
 // Default placeholder image in case of empty string
-const DEFAULT_PLACEHOLDER = '/ComfyUI_temp_tyadf_00213_.jpg';
+const DEFAULT_PLACEHOLDER = '/ComfyUI_temp_xlvfc_00006_.jpg';
 
 // Generate a unique key with timestamp and random component
 const generateUniqueKey = (prefix: string, index: number): string => {

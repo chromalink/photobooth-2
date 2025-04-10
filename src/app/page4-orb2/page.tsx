@@ -492,7 +492,7 @@ export default function Orb2() {
 
         .content-container {
           position: relative;
-          z-index: 10;
+          z-index: 5;
           width: 90%;
           max-width: 1200px;
           display: flex;
@@ -557,20 +557,60 @@ export default function Orb2() {
           }
         }
 
-        @media (min-width: 768px) and (max-width: 1024px) {
-          /* Tablets and small laptops */
+        /* iPad Mini specific styles */
+        @media (min-width: 768px) and (max-width: 800px) {
+          .title-container {
+            margin-bottom: -6rem; /* Set margin-bottom to -6rem for iPad Mini */
+          }
+        }
+
+        /* iPad Air specific styles */
+        @media (min-width: 801px) and (max-width: 850px) {
+          .title-container {
+            margin-bottom: -1rem; /* Set margin-bottom to -1rem for iPad Air */
+          }
+        }
+
+        /* Add specific media query for screens around 990px */
+        @media (min-width: 851px) and (max-width: 1023px) {
           .title-container {
             max-width: 1400px;
-            margin-bottom: -4rem;
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 20; /* Increased z-index to ensure title stays on top */
+            transform: translateY(0);
           }
           
           .page-title {
             font-size: clamp(2rem, 4vw, 2.5rem);
             color: #F0A500;
           }
+          
+          .content-group {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem; /* Add gap between title and content */
+          }
         }
 
-        @media (min-width: 1025px) {
+        @media (min-width: 1024px) and (max-width: 1200px) {
+          /* Medium-sized screens */
+          .title-container {
+            z-index: 20;
+            margin-bottom: 1rem;
+          }
+          
+          .page-title {
+            font-size: clamp(2.2rem, 3vw, 2.8rem);
+            color: #F0A500;
+          }
+          
+          .content-group {
+            gap: 2rem;
+          }
+        }
+
+        @media (min-width: 1201px) {
           /* Desktops and large screens */
           .page-title {
             font-size: clamp(2.64rem, 3.6vw, 3rem);
@@ -677,13 +717,13 @@ export default function Orb2() {
         }
 
         .face-scan-video {
-          width: 100%;
-          max-width: 100%;
+          width: 120%; /* Increased from 100% to 120% */
+          max-width: 120%; /* Increased from 100% to 120% */
           height: auto;
-          max-height: 70%;
+          max-height: 84%; /* Increased from 70% to 84% (70% * 1.2) */
           border-radius: 8px;
           display: block;
-          transform: translateY(-1%);
+          transform: translateY(-1%) translateX(-8%); /* Added translateX to center the wider video */
           transform-origin: center center;
           margin: 0 auto;
         }
@@ -692,7 +732,14 @@ export default function Orb2() {
           margin-bottom: 1rem;
           position: relative;
           z-index: 10;
-          transform: translateY(-110%);
+          transform: translateY(0%); /* Changed to 0% as requested */
+        }
+
+        /* Add media query for tablets */
+        @media (min-width: 768px) and (max-width: 1023px) {
+          .scan-title {
+            margin-bottom: 0rem; /* Changed from -1rem to 0rem for tablets */
+          }
         }
 
         .scan-progress {
