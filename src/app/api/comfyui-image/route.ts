@@ -36,7 +36,20 @@ export async function GET(request: NextRequest) {
 
     // Decode the URL if it's encoded
     try {
-      targetUrl = decodeURIComponent(targetUrl);
+      // Try to decode up to 3 times to handle multiple levels of encoding
+      let decodedUrl = targetUrl;
+      for (let i = 0; i < 3; i++) {
+        const prevUrl = decodedUrl;
+        try {
+          decodedUrl = decodeURIComponent(decodedUrl);
+          // If decoding didn't change anything, we're done
+          if (prevUrl === decodedUrl) break;
+        } catch (e) {
+          // If decoding fails at any point, use what we have
+          break;
+        }
+      }
+      targetUrl = decodedUrl;
     } catch (e) {
       console.error('Error decoding URL:', e);
       // If decoding fails, use the URL as is

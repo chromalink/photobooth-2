@@ -28,16 +28,13 @@ export default function MainReport() {
   const getCategoryDescription = (category: string): string => {
     const descriptions: Record<string, string> = {
       'Synergy Specialist': "You call every meeting a 'touch base' and genuinely believe in the power of icebreakers",
-      'Corporate Climber': "You've mastered the art of taking credit for other people's work while looking like a team player",
-      'Buzzword Enthusiast': "You can't complete a sentence without saying 'synergy', 'disrupt', or 'leverage'",
-      'Office Politician': "You've built a career on knowing exactly whose coffee to fetch",
-      'Email Samurai': "You wield the CC field like a weapon and your signature includes an inspirational quote",
-      'Culture Ambassador': "You organize office parties that everyone secretly dreads attending",
-      'LinkedIn Influencer': "Your profile says 'Thought Leader' but your thoughts are mostly recycled motivational quotes",
-      'Jargon Juggernaut': "You don't solve problems, you 'ideate scalable solutions for pain points'",
-      'Meeting Marathoner': "You could have sent an email, but instead you scheduled a pre-meeting for the meeting",
-      'Feedback Fiend': "You begin every criticism with 'I'm just playing devil's advocate here'"
+      'Workflow Wizard': "You have a color-coded spreadsheet for everything, including your weekend plans. People fear your pivot tables",
+      'Executive Oracle': "You don't take meetings, you take 'alignments.' You haven't made eye contact with a lower-level employee in years",
+      'Middle Manager': "You've seen colleagues come and go, but you're still here—steady, reliable, and just coasting at a safe altitude",
+      'Engagement Risk': "Your enthusiasm levels are dangerously low. Please see HR for mandatory morale training",
+      'The Intern': "You have no idea what's going on, but you're smiling through the panic. Hope you like exposure as payment!"
     };
+    
     return descriptions[category] || "You have no idea what's going on, but you're smiling through the panic. Hope you like exposure as payment!";
   };
 
@@ -396,7 +393,7 @@ export default function MainReport() {
           color: #FFC578;
           font-size: 1.3rem;
           font-weight: 400;
-          text-align: center;
+          text-align: left;
           font-family: var(--font-b612-mono);
         }
 
@@ -523,15 +520,9 @@ export default function MainReport() {
             font-size: 1.1rem;
           }
 
-          .section-text-container {
-            width: 70%;
-          }
-
-          .divider-container {
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            margin-bottom: 3rem;
+          .section-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
           }
         }
         
@@ -544,6 +535,10 @@ export default function MainReport() {
             width: 90%;
             max-width: 1200px;
             padding: 3rem 0;
+          }
+          
+          .title-container {
+            line-height: 1.3;
           }
         }
 

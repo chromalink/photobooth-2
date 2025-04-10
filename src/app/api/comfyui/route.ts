@@ -106,17 +106,17 @@ function getCategoryPrompt(category: string): string {
 // Archetype to negative prompt mapping
 function getCategoryNegativePrompt(category: string): string {
   const negativePrompts = {
-    synergy_specialist: "watermark, text, logo, label, getty images, words, URL, nude, yellow teeth, hands,ugly, outdoors, objects blocking face",
+    synergy_specialist: "watermark, text, logo, label, getty images, words, URL, nude, yellow teeth, hands,ugly, outdoors, objects blocking face, wrinkles",
     
-    executive_oracle: "getty images, blurry face, out of focused face, watermark, text, logo, label, stock photo, words, URL, nude, yellow teeth, hands,ugly, outdoors, objects blocking face, hand on face, harsh shadows, hands, , hands on face, ugly, distorted, objects coversing face, objects covering hair , monochrome, neon signs",
+    executive_oracle: "getty images, blurry face, out of focused face, watermark, text, logo, label, stock photo, words, URL, nude, yellow teeth, hands,ugly, outdoors, objects blocking face, hand on face, harsh shadows, hands, , hands on face, ugly, distorted, objects coversing face, objects covering hair , monochrome, neon signs, wrinkles",
     
-    engagement_risk: "watermarks, distortions, stock photos, stock photography, text, nude, getty images, black and white images, watermark, logo, bad anatomy, blurry, low quality, disfigured, extra limbs, unrealistic fire, cartoon fire, anime style",
+    engagement_risk: "watermarks, distortions, stock photos, stock photography, text, nude, getty images, black and white images, watermark, logo, bad anatomy, blurry, low quality, disfigured, extra limbs, unrealistic fire, cartoon fire, anime style, wrinkles",
     
-    workflow_wizard: "watermark, text, logo, label, getty images, words, URL, nude, yellow teeth, hands,ugly, outdoors, objects blocking face, hand on face, harsh shadows, hands, neon glasses, neon lines on face, hands on face, ugly, distorted",
+    workflow_wizard: "watermark, text, logo, label, getty images, words, URL, nude, yellow teeth, hands,ugly, outdoors, objects blocking face, hand on face, harsh shadows, hands, neon glasses, neon lines on face, hands on face, ugly, distorted, wrinkles",
     
-    middle_manager: "watermark, text, logo, label, getty images, words, URL, nude, yellow teeth, hands,ugly, outdoors, objects blocking face, hand on face, harsh shadows, hands, neon glasses, neon lines on face, hands on face, ugly, distorted, objects coversing face, objects covering hair , monochrome, neon signs, out of focus, blurry",
+    middle_manager: "watermark, text, logo, label, getty images, words, URL, nude, yellow teeth, hands,ugly, outdoors, objects blocking face, hand on face, harsh shadows, hands, neon glasses, neon lines on face, hands on face, ugly, distorted, objects coversing face, objects covering hair , monochrome, neon signs, out of focus, blurry, wrinkles",
     
-    the_intern: "ugly, out of focus, eye bags, blurry face, face too close to camera, eyebags "
+    the_intern: "ugly, out of focus, eye bags, blurry face, face too close to camera, eyebags, wrinkles "
   };
   
   return negativePrompts[category as keyof typeof negativePrompts] || negativePrompts.middle_manager;

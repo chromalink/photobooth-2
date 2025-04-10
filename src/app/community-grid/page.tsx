@@ -39,6 +39,113 @@ const generateUniqueKey = (prefix: string, index: number): string => {
   return `${prefix}-${Date.now()}-${index}-${Math.random().toString(36).substring(2, 9)}`;
 };
 
+// Custom loader function to handle nested query parameters
+const imageLoader = ({ src, width, quality }: { src: string, width: number, quality?: number }) => {
+  // If it's a local placeholder image, use Next.js default loader
+  if (src.startsWith('/')) {
+    return `/_next/image?url=${encodeURIComponent(src)}&w=${width}&q=${quality || 75}`;
+  }
+  
+  // For API images, use the API directly without Next.js image optimization
+  return src;
+};
+
+// Function to safely display images with complex URLs
+const getImageComponent = (src: string, alt: string, className: string, priority: boolean = false) => {
+  // Process the URL to ensure it's properly formatted
+  let imageSrc = processImageUrl(src);
+  
+  // If it's a local placeholder image, use Next.js Image component
+  if (imageSrc.startsWith('/') && !imageSrc.startsWith('/api/')) {
+    return (
+      <div className="image-container">
+        <Image 
+          src={imageSrc}
+          alt={alt}
+          fill
+          sizes="(max-width: 480px) 120px, (max-width: 768px) 150px, (max-width: 1024px) 200px, 250px"
+          className={className}
+          priority={priority}
+        />
+      </div>
+    );
+  }
+  
+  // For all non-local images, use a regular img tag to avoid Next.js Image encoding issues
+  return (
+    <div className="image-container">
+      <img 
+        src={imageSrc} 
+        alt={alt} 
+        className={`${className} direct-img`} 
+        loading={priority ? "eager" : "lazy"}
+        onError={(e) => {
+          console.error(`Image load error for: ${imageSrc}`);
+          // Try to reload with a different approach if loading fails
+          const imgElement = e.currentTarget;
+          if (imageSrc.includes('comfyui-image') && !imageSrc.includes('retry=true')) {
+            // Add a retry parameter to prevent infinite loops
+            const retryUrl = `${imageSrc}${imageSrc.includes('?') ? '&' : '?'}retry=true`;
+            console.log(`Retrying with: ${retryUrl}`);
+            imgElement.src = retryUrl;
+          }
+        }}
+      />
+    </div>
+  );
+};
+
+// Helper function to process image URLs
+const processImageUrl = (src: string): string => {
+  if (!src) return '/placeholder-image.jpg';
+  
+  // If it's a local image or already properly formatted API URL, return as is
+  if (src.startsWith('/') && !src.includes('_next/image')) {
+    return src;
+  }
+  
+  // Check if this is a Next.js image URL with encoded ComfyUI URL
+  if (src.includes('_next/image') && src.includes('comfyui-image')) {
+    // This is already a Next.js image URL - extract the original URL
+    const urlMatch = src.match(/url=([^&]+)/);
+    if (urlMatch && urlMatch[1]) {
+      try {
+        // Decode the URL to get the original ComfyUI URL
+        const decodedUrl = decodeURIComponent(urlMatch[1]);
+        // Use the direct API endpoint instead
+        return `/api/comfyui-image?url=${encodeURIComponent(decodedUrl)}`;
+      } catch (e) {
+        console.error('Error processing Next.js image URL:', e);
+        return src;
+      }
+    }
+  } else if (src.includes('runpod.net') || src.includes('comfyui-image')) {
+    // This is a direct ComfyUI URL or our API proxy
+    // If it's not already using our API proxy, convert it
+    if (!src.startsWith('/api/comfyui-image')) {
+      // Extract the original URL if it's already in our API format
+      const urlMatch = src.match(/url=([^&]+)/);
+      if (urlMatch && urlMatch[1]) {
+        try {
+          // Decode the URL once to handle any encoding
+          const decodedUrl = decodeURIComponent(urlMatch[1]);
+          // Create a new API route URL with the decoded ComfyUI URL
+          return `/api/comfyui-image?url=${encodeURIComponent(decodedUrl)}`;
+        } catch (e) {
+          console.error('Error processing ComfyUI URL:', e);
+          return src;
+        }
+      } else {
+        // It's a direct runpod URL without being wrapped in our API
+        return `/api/comfyui-image?url=${encodeURIComponent(src)}`;
+      }
+    }
+  }
+  
+  // For any other URL, return as is
+  return src;
+};
+
 export default function CommunityGrid() {
   const router = useRouter()
   const resetSession = useSessionStore((state) => state.resetSession)
@@ -188,16 +295,12 @@ export default function CommunityGrid() {
                 ref={isLastItem ? lastGridItemRef : null}
                 onClick={() => !item.isPlaceholder && openModal(imageSrc)}
               >
-                <div className="image-container">
-                  <Image 
-                    src={imageSrc}
-                    alt={item.isPlaceholder ? 'Placeholder image' : 'Corporate persona'}
-                    fill
-                    sizes="(max-width: 480px) 120px, (max-width: 768px) 150px, (max-width: 1024px) 200px, 250px"
-                    className={`grid-image ${item.isPlaceholder ? 'placeholder-image' : ''}`}
-                    priority={index < ITEMS_PER_PAGE} // Prioritize loading the first page of images
-                  />
-                </div>
+                {getImageComponent(
+                  imageSrc,
+                  item.isPlaceholder ? 'Placeholder image' : 'Corporate persona',
+                  `grid-image ${item.isPlaceholder ? 'placeholder-image' : ''}`,
+                  index < ITEMS_PER_PAGE
+                )}
                 <div className="grid-item-content">
                   {/* Removed the number span */}
                 </div>
@@ -225,14 +328,7 @@ export default function CommunityGrid() {
             <button className="modal-close" onClick={closeModal}>&times;</button>
             <div className="modal-image-container">
               <div className="square-container">
-                <Image 
-                  src={selectedImage}
-                  alt="Enlarged corporate persona"
-                  fill
-                  sizes="(max-width: 768px) 90vw, 80vw"
-                  className="modal-image"
-                  priority
-                />
+                {getImageComponent(selectedImage, 'Enlarged corporate persona', 'modal-image', true)}
               </div>
             </div>
           </div>
@@ -459,43 +555,64 @@ export default function CommunityGrid() {
         }
 
         .grid-item {
-          aspect-ratio: 1;
-          border-radius: 10px;
-          overflow: hidden;
-          box-shadow: 
-            0 0 10px rgba(255, 255, 255, 0.2),
-            0 0 20px rgba(0, 0, 0, 0.2);
-          transition: transform 0.3s ease, box-shadow 0.3s ease;
-          cursor: pointer;
           position: relative;
-          background-color: transparent;
-        }
-
-        .grid-item:hover {
-          transform: scale(1.05);
-          box-shadow: 
-            0 0 15px rgba(255, 255, 255, 0.3),
-            0 0 30px rgba(0, 0, 0, 0.3);
+          width: 100%;
+          aspect-ratio: 1/1;
+          border-radius: 8px;
+          overflow: hidden;
+          transition: transform 0.3s ease;
+          cursor: pointer;
+          background-color: #f5f5f5;
         }
         
-        .grid-item.placeholder {
-          opacity: 1;
+        .grid-item:hover {
+          transform: translateY(-5px);
         }
-
+        
+        .grid-item-inner {
+          position: relative;
+          width: 100%;
+          height: 100%;
+          border-radius: inherit;
+          overflow: hidden;
+        }
+        
         .image-container {
           position: relative;
           width: 100%;
           height: 100%;
-          background-color: transparent;
-        }
-
-        .grid-image {
-          object-fit: cover;
-          z-index: 1;
+          overflow: hidden;
+          border-radius: inherit;
+          background-color: #f0f0f0; /* Fallback color while loading */
         }
         
-        .placeholder-image {
-          opacity: 1 !important;
+        .direct-img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          position: absolute;
+          top: 0;
+          left: 0;
+          border-radius: inherit;
+          z-index: 1; /* Ensure image is above background */
+        }
+        
+        /* Fix for Next.js Image component */
+        .grid-image {
+          object-fit: cover !important;
+          z-index: 1 !important;
+        }
+        
+        /* Add a specific media query for desktop */
+        @media (min-width: 1024px) { /* Changed from 1025px to 1024px to only target wide desktops */
+          .image-container {
+            min-height: 200px; /* Ensure minimum height on desktop */
+          }
+          
+          .direct-img,
+          .grid-image {
+            min-height: 200px; /* Ensure minimum height on desktop */
+          }
         }
 
         .grid-item-content {
@@ -649,8 +766,8 @@ export default function CommunityGrid() {
           justify-content: center;
           align-items: center;
           cursor: pointer;
-          z-index: 1001;
           transition: all 0.3s ease;
+          z-index: 1001;
         }
         
         .modal-close:hover {
@@ -692,6 +809,24 @@ export default function CommunityGrid() {
             height: 35px;
             font-size: 20px;
           }
+        }
+        
+        .direct-img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          position: absolute;
+          top: 0;
+          left: 0;
+          border-radius: inherit;
+        }
+        
+        .image-container {
+          position: relative;
+          width: 100%;
+          height: 100%;
+          overflow: hidden;
+          border-radius: inherit;
         }
       `}</style>
     </main>
