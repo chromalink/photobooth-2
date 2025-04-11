@@ -115,10 +115,10 @@ export default function MainReport() {
   const sections = splitResponseIntoSections(aiResponse);
 
   return (
-    <div className="container">
+    <div className="container" style={{ overflowY: 'auto', height: 'auto', minHeight: '100vh' }}>
       <div className="background" />
       
-      <div className="content">
+      <div className="content" style={{ overflowY: 'auto', maxHeight: '100vh', height: '100vh', display: 'block' }}>
         <div className="report-container">
           <div className="header-section">
             <div className="text-header">
@@ -170,15 +170,24 @@ export default function MainReport() {
       </div>
 
       <style jsx global>{`
+        html, body {
+          margin: 0;
+          padding: 0;
+          height: 100%;
+          overflow-y: auto !important;
+          background: black;
+        }
+        
         .container {
           width: 100vw;
-          height: 100vh;
+          min-height: 100vh;
           display: flex;
-          align-items: center;
+          align-items: flex-start; /* Changed from center to allow content to start from top */
           justify-content: center;
           background: black;
           position: relative;
-          overflow: hidden;
+          overflow-y: auto !important; /* Force vertical scrolling */
+          overflow-x: hidden;
         }
 
         .background {
@@ -195,13 +204,12 @@ export default function MainReport() {
           position: relative;
           z-index: 1;
           width: 100%;
-          height: 100%;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: flex-start;
+          height: 100vh;
+          display: block;
           padding: 2rem;
-          gap: 2rem;
+          padding-bottom: 5rem;
+          overflow-y: auto !important;
+          -webkit-overflow-scrolling: touch; /* For better scrolling on iOS devices */
         }
 
         .report-container {
@@ -212,9 +220,11 @@ export default function MainReport() {
           width: 100%;
           max-width: 1800px;
           gap: 2rem;
-          transform: scale(1.1);
+          transform: scale(1);
           transform-origin: center top;
-          margin-top: 10vh;
+          margin: 2vh auto 5vh auto; /* Center horizontally with auto margins */
+          max-height: none; /* Remove any max-height limitation */
+          overflow: visible; /* Allow content to be visible */
         }
 
         .header-section {
@@ -294,6 +304,24 @@ export default function MainReport() {
           overflow-y: auto;
           max-height: 60vh;
           box-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
+        }
+
+        .reading-container::-webkit-scrollbar {
+          width: 8px;
+        }
+
+        .reading-container::-webkit-scrollbar-track {
+          background: rgba(0, 0, 0, 0.2);
+          border-radius: 4px;
+        }
+
+        .reading-container::-webkit-scrollbar-thumb {
+          background: rgba(240, 165, 0, 0.5);
+          border-radius: 4px;
+        }
+
+        .reading-container::-webkit-scrollbar-thumb:hover {
+          background: rgba(240, 165, 0, 0.7);
         }
 
         .sections-container {
@@ -666,6 +694,80 @@ export default function MainReport() {
             width: auto !important; /* Override mobile full-width */
             padding: 1.56rem 4.55rem !important; /* Match desktop padding */
             font-size: clamp(1.56rem, 1.6vw, 1.56rem) !important; /* Match desktop font size */
+          }
+        }
+        
+        /* Add responsive behavior for different screen sizes */
+        @media (max-height: 800px) {
+          .report-container {
+            transform: scale(0.9);
+            margin-top: 5vh;
+            gap: 1rem;
+          }
+          
+          .reading-container {
+            max-height: 50vh;
+          }
+        }
+        
+        @media (max-width: 768px) {
+          .header-section {
+            flex-direction: column;
+            gap: 2rem;
+          }
+          
+          .text-header,
+          .image-section {
+            max-width: 100%;
+          }
+          
+          .report-container {
+            transform: scale(1);
+            margin-top: 2vh;
+          }
+          
+          .section {
+            flex-direction: column;
+          }
+          
+          .section-label {
+            width: 100%;
+            margin-bottom: 0.5rem;
+          }
+        }
+        
+        /* Mobile-specific fixes */
+        @media (max-width: 767px) {
+          .container {
+            height: auto !important;
+            overflow-y: auto !important;
+          }
+          
+          .content {
+            height: auto !important;
+            min-height: 100vh !important;
+            overflow-y: auto !important;
+            padding: 1rem;
+          }
+          
+          .report-container {
+            transform: scale(0.95);
+            margin-top: 1vh;
+          }
+          
+          .reading-container {
+            max-height: 70vh;
+            overflow-y: auto !important;
+          }
+          
+          .header-section {
+            flex-direction: column;
+            gap: 1.5rem;
+          }
+          
+          .text-header, .image-section {
+            width: 100%;
+            max-width: 100%;
           }
         }
       `}</style>
