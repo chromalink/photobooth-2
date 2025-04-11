@@ -736,9 +736,16 @@ export default function Orb2() {
         }
 
         /* Add media query for tablets */
-        @media (min-width: 768px) and (max-width: 1023px) {
-          .scan-title {
-            margin-bottom: 0rem; /* Changed from -1rem to 0rem for tablets */
+        @media (min-width: 768px) and (max-width: 1024px) {
+          .title-container {
+            margin-top: -1rem;
+          }
+        }
+
+        /* iPad Mini specific styles */
+        @media (min-width: 768px) and (max-width: 800px) {
+          .title-container {
+            margin-bottom: -6rem; /* Set margin-bottom to -6rem for iPad Mini */
           }
         }
 
