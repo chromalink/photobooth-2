@@ -56,7 +56,7 @@ export default function Home() {
             transition={{ delay: 0.6 }}
             className="buttonWrapper"
           >
-            <button onClick={handleStart}>FIND OUT</button>
+            <button onClick={handleStart}>BEGIN AUDIT</button>
           </motion.div>
         </div>
       </div>

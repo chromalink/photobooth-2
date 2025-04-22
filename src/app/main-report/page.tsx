@@ -556,6 +556,14 @@ export default function MainReport() {
         }
         
         @media (min-width: 1025px) {
+          .report-container {
+            transform: scale(1.15);
+            transform-origin: center top;
+            margin-top: 10vh;
+          }
+        }
+        
+        @media (min-width: 1025px) {
           .category-description {
             transform: translateY(10%);
           }

@@ -295,32 +295,34 @@ export default function Orb2() {
               console.log('Image generation completed:', statusData.upscaledResult.imageUrl);
               
               // Preload the image before navigating
-              const imageUrl = statusData.upscaledResult.imageUrl;
-              
-              if (typeof window !== 'undefined') {
-                const preloadImage = new window.Image();
+              const preloadAndSetImage = async (imageUrl: string) => {
+                const preloadImage = new Image();
                 preloadImage.src = imageUrl;
-                
-                preloadImage.onload = () => {
+
+                preloadImage.onload = async () => {
                   console.log('Image preloaded successfully');
                   setAiModelImage(imageUrl);
                   setVisualProgress(100);
+                  
+                  // Upload to Google Drive before navigating
+                  await uploadImageToDrive(imageUrl);
+                  
                   router.push('/page6-results');
                 };
-                
-                preloadImage.onerror = () => {
+
+                preloadImage.onerror = async () => {
                   console.error('Failed to preload image');
                   setAiModelImage(imageUrl);
                   setVisualProgress(100);
+                  
+                  // Still try to upload to Google Drive even if preloading fails
+                  await uploadImageToDrive(imageUrl);
+                  
                   router.push('/page6-results');
                 };
-              } else {
-                // Fallback for server-side rendering
-                setAiModelImage(imageUrl);
-                setVisualProgress(100);
-                router.push('/page6-results');
-              }
-              
+              };
+
+              await preloadAndSetImage(statusData.upscaledResult.imageUrl);
               break;
             }
           }
@@ -351,6 +353,30 @@ export default function Orb2() {
     processStartedRef.current = true;
     handlePhotoCapture();
   }, [uploadedPhotoUrl, handlePhotoCapture]);
+
+  // Function to upload image to Google Drive
+  const uploadImageToDrive = async (imageUrl: string) => {
+    try {
+      console.log('Attempting to upload image to Google Drive');
+      const response = await fetch('/api/upload-to-drive', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          imageUrl,
+          fileName: `face-audit-${Date.now()}.png`,
+        }),
+      });
+
+      const data = await response.json();
+      console.log('Google Drive upload response:', data);
+      return data.success;
+    } catch (error) {
+      console.error('Error uploading to Google Drive:', error);
+      return false;
+    }
+  };
 
   return (
     <div className="main">
@@ -425,6 +451,13 @@ export default function Orb2() {
                 </div>
               </div>
             </div>
+          </div>
+          
+          {/* Restart Button */}
+          <div className="button-area">
+            <button onClick={() => window.location.reload()} className="restart-button">
+              RESTART ANALYSIS
+            </button>
           </div>
         </div>
       </div>
@@ -510,6 +543,8 @@ export default function Orb2() {
           align-items: center;
           justify-content: center;
           gap: 0;
+          transform: scale(0.9) translateY(5%);
+          transform-origin: center top;
         }
 
         .title {
@@ -599,19 +634,36 @@ export default function Orb2() {
             z-index: 20;
             margin-bottom: 1rem;
           }
-          
-          .page-title {
-            font-size: clamp(2.2rem, 3vw, 2.8rem);
-            color: #F0A500;
-          }
-          
-          .content-group {
-            gap: 2rem;
+        }
+
+        @media (min-width: 820px) and (max-width: 920px) {
+          .title-container {
+            margin-bottom: 1rem;
           }
         }
 
-        @media (min-width: 1201px) {
-          /* Desktops and large screens */
+        /* iPad Pro 11-inch and 12.9-inch specific styling */
+        @media only screen and (min-width: 1024px) and (max-width: 1024px) and (min-height: 1366px),
+               only screen and (min-width: 834px) and (max-width: 834px) and (min-height: 1194px),
+               only screen and (min-width: 834px) and (max-width: 834px) and (min-height: 1112px) {
+          .content-group {
+            transform: scale(1.2) translateY(-5%);
+            transform-origin: center top;
+            margin: 1.5rem auto 3rem;
+          }
+        }
+
+        /* iPad Mini specific styling */
+        @media only screen and (min-width: 768px) and (max-width: 768px) and (min-height: 1024px),
+               only screen and (min-width: 744px) and (max-width: 744px) and (min-height: 1133px) {
+          .content-group {
+            transform: translateY(-5%);
+            transform-origin: center top;
+          }
+        }
+
+        /* Desktop styles */
+        @media (min-width: 1025px) {
           .page-title {
             font-size: clamp(2.64rem, 3.6vw, 3rem);
             color: #F0A500;
@@ -623,7 +675,7 @@ export default function Orb2() {
           }
           
           .content-group {
-            transform: scale(1.3) translateY(-20%);
+            transform: scale(1.35) translateY(-15%);
             transform-origin: center top;
           }
           
@@ -889,6 +941,12 @@ export default function Orb2() {
             font-size: clamp(2.5rem, 4vw, 4.5rem);
             color: #F0A500;
           }
+          
+          .content-group {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem; /* Add gap between title and content */
+          }
         }
 
         @media (min-width: 768px) and (max-width: 1024px) and (orientation: landscape) {
@@ -927,6 +985,41 @@ export default function Orb2() {
             transform: translateY(-5%);
             transform-origin: center top;
           }
+        }
+
+        /* Button area and restart button styling */
+        .button-area {
+          width: 100%;
+          display: flex;
+          justify-content: center;
+          margin-top: 2rem;
+        }
+
+        .restart-button {
+          background: transparent;
+          border: 2px solid #FFE7C8;
+          color: #FFE7C8;
+          font-family: var(--font-b612-mono);
+          font-size: clamp(1.5rem, 1.5vw, 1.2rem);
+          font-weight: 400;
+          letter-spacing: 0.05em;
+          padding: 1.2rem 3.5rem;
+          border-radius: 25px;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          box-shadow: 
+            0 0 5px rgba(255, 231, 200, 0.5),
+            0 0 10px rgba(255, 231, 200, 0.3),
+            0 0 15px rgba(255, 231, 200, 0.2);
+          align-self: center;
+        }
+
+        .restart-button:hover {
+          background: rgba(255, 231, 200, 0.1);
+          box-shadow: 
+            0 0 10px rgba(255, 231, 200, 0.6),
+            0 0 20px rgba(255, 231, 200, 0.4),
+            0 0 30px rgba(255, 231, 200, 0.2);
         }
       `}</style>
     </div>

@@ -61,15 +61,14 @@ export async function GET(request: NextRequest) {
     const appUrl = getBaseUrl();
     console.log('Using app URL for Origin:', appUrl);
 
-    // Fetch with appropriate headers and cache: 'force-cache' for better performance
+    // Fetch with appropriate headers and no caching for large images
     const response = await fetch(targetUrl, {
       headers: {
         'Accept': 'image/*, */*',
         'User-Agent': 'next-server',
         'Origin': appUrl || 'http://localhost:4000'
       },
-      cache: 'force-cache',
-      next: { revalidate: 31536000 } // Cache for a year
+      cache: 'no-store' // Don't cache to avoid the 2MB limit issue
     });
     
     if (!response.ok) {
