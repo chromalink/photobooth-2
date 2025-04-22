@@ -185,7 +185,7 @@ export async function POST(req: NextRequest) {
       console.error('Error uploading to Google Drive:', uploadError);
       return NextResponse.json({ 
         error: 'Failed to upload image to Google Drive',
-        details: uploadError.message
+        details: uploadError instanceof Error ? uploadError.message : 'Unknown error'
       }, { status: 500 });
     }
   } catch (error) {
