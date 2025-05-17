@@ -4,6 +4,7 @@ import { useSessionStore } from '../../store/session'
 import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
+import Image from 'next/image'
 import { DEFAULT_AI_PROVIDER } from '../../config/ai-route-config'
 
 export default function Home() {
@@ -31,6 +32,31 @@ export default function Home() {
 
   return (
     <main className="main">
+      {/* Branding info container */}
+      <div className="branding-info">
+        {/* Logo and social media text centered */}
+        <div className="branding-content">
+          {/* Logo */}
+          <div className="logo-container">
+            <Image 
+              src="/SoulSnap_Logo_LIGHT_Yellow.png" 
+              alt="SoulSnap Logo" 
+              width={150} 
+              height={60} 
+              priority
+            />
+          </div>
+          
+          {/* Social media text */}
+          <div className="social-container">
+            <div className="social-text">
+              <p className="follow-text">DEVELOPED BY</p>
+              <p className="handle-text">@CHROMALINK.CO</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
       <div className="content">
         <div className="responsiveContainer">
           <motion.div 
@@ -198,9 +224,28 @@ export default function Home() {
           transform: scale(0.98);
         }
 
+        /* Landscape 1920x1080 */
         @media screen and (width: 1920px) and (height: 1080px) {
           .responsiveContainer {
             transform: scale(0.97);
+          }
+        }
+        
+        /* Portrait 1080x1920 */
+        @media screen and (width: 1080px) and (height: 1920px) {
+          .responsiveContainer {
+            transform: scale(1.1);
+            margin-top: -5vh;
+          }
+          
+          .branding-info {
+            top: 40px;
+          }
+          
+          .main::before {
+            transform: scale(1); /* No transform scaling */
+            transform-origin: center center;
+            background-size: 315% 100%; /* Custom background scaling */
           }
         }
 
@@ -242,6 +287,76 @@ export default function Home() {
             font-size: calc(clamp(1.5rem, 1.5vw, 1.2rem) * 1.4); /* Increase size by 40% */
             padding: 1.68rem 4.9rem; /* Increase padding by 40% */
           }
+        }
+        
+        .branding-info {
+          position: absolute;
+          top: 50px;
+          left: 50%;
+          transform: translateX(-50%);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          width: 90%;
+          max-width: 1200px;
+          margin: 0 auto;
+          padding: 0 30px;
+        }
+        
+        /* Tablet-specific positioning for branding info */
+        @media screen and (min-width: 768px) and (max-width: 1023px) {
+          .branding-info {
+            top: calc(50px - 3vh); /* Move slightly up from original position */
+            transform: translateX(-50%) scale(0.95); /* Make 5% smaller */
+          }
+        }
+        
+        .branding-content {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 20px;
+          width: 100%;
+        }
+        
+        .logo-container {
+          display: flex;
+          align-items: center;
+        }
+        
+        .social-container {
+          display: flex;
+          align-items: center;
+        }
+        
+        .social-text {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        
+        .follow-text {
+          font-size: 1rem;
+          font-family: var(--font-michroma);
+          font-weight: 400;
+          font-style: normal;
+          letter-spacing: 0.05em;
+          line-height: 1.5;
+          color: #FFE7C8;
+          margin: 0;
+          padding: 0;
+        }
+        
+        .handle-text {
+          font-size: 1rem;
+          font-family: var(--font-michroma);
+          font-weight: 400;
+          font-style: normal;
+          letter-spacing: 0.05em;
+          line-height: 1.5;
+          color: #FFE7C8;
+          margin: 0;
+          padding: 0;
         }
       `}</style>
     </main>

@@ -3,6 +3,7 @@
 import { useSessionStore } from '@/store/session'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import Image from 'next/image'
 import { DEFAULT_AI_PROVIDER } from '@/config/ai-route-config'
 
 export default function EmailPage() {
@@ -18,17 +19,81 @@ export default function EmailPage() {
   const setAiModelProvider = useSessionStore((state) => state.setAiModelProvider)
   const router = useRouter()
 
+  // Add a small fallback test image as base64 string - a simple orange square matching the app's color scheme
+  const FALLBACK_IMAGE = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAYAAABw4pVUAAABhGlDQ1BJQ0MgcHJvZmlsZQAAKJF9kT1Iw0AcxV9TpSIVBzuIOGSoThZERRy1CkWoEGqFVh1MbvqhNGlIUlwcBdeCgx+LVQcXZ10dXAVB8APE0clJ0UVK/F9SaBHjwXE/3t173L0DhGaVqWbPOKBqlpFOxMVcflUMvCKIEEIQQUhipp7MLGbhOb7u4ePrXZRneZ/7cwwoBZMBPpF4jumGRbxBPLNp6Zz3iSOsJCnE58QTBl2Q+JHrsstvnEsOCzwzYmbS88QRYrHUxXIXs7KhEk8RRxVVo3wh57LCeYuzWq2z9j35C0MFfWWZ6zRHkMASkkhBhIw6KqjCQox2jRQTaTqPe/iHHX+KXDK5KmDkWEANKiTHD/4Hv7s1i1NTblIwDgRebPtjDAjsAs2abX8f23bjBAg8A1da219tAjOfpDe6WvQIGNgGLq67mrwHXO4AkSddMiRH8tMUCgXg/Yy+KQcM3wL9a25vnX2cPgBZ6mr5Bjg4BMaKlL3u8e6+7t7+PdPu7wdDnnKwUItd+QAAAAlwSFlzAAAuIwAALiMBeKU/dgAAAAd0SU1FB+UGBQwTLDKQUFUAAAAZdEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIEdJTVBXgQ4XAAAAFElEQVR42u3BAQEAAACCIP+vbkhAAQAA8GLjRAABjd8FkQAAAABJRU5ErkJggg==';
+
   const handleSubmit = async () => {
     if (!fullName.trim() || !email.trim()) {
-      setError('Please fill in both name and email')
-      return
+      setError('Please fill in both name and email');
+      return;
     }
 
-    setIsSending(true)
-    setError('')
+    setIsSending(true);
+    setError('');
 
     try {
-      const response = await fetch('/api/email', {
+      // Debug: Log all possible image sources
+      console.log('DEBUG - Available image sources:', {
+        aiModelImage: aiModelImage ? `Present (${aiModelImage.length} chars)` : 'Not present',
+        comfyUIImage: useSessionStore.getState().comfyUIImage ? `Present (${useSessionStore.getState().comfyUIImage?.length || 0} chars)` : 'Not present',
+        processedImageUrl: useSessionStore.getState().processedImageUrl ? `Present (${useSessionStore.getState().processedImageUrl?.length || 0} chars)` : 'Not present',
+        uploadedPhotoUrl: useSessionStore.getState().uploadedPhotoUrl ? `Present (${useSessionStore.getState().uploadedPhotoUrl?.length || 0} chars)` : 'Not present',
+        capturedPhoto: useSessionStore.getState().capturedPhoto ? `Present (${useSessionStore.getState().capturedPhoto?.length || 0} chars)` : 'Not present',
+      });
+
+      // Get all possible image sources from the session store
+      let imageUrl = aiModelImage || 
+                   useSessionStore.getState().comfyUIImage || 
+                   useSessionStore.getState().processedImageUrl || 
+                   useSessionStore.getState().uploadedPhotoUrl || 
+                   useSessionStore.getState().capturedPhoto;
+      
+      // Debug: Log the selected image URL before processing
+      if (imageUrl) {
+        console.log('DEBUG - Selected image URL type:', {
+          isDataUrl: imageUrl.startsWith('data:'),
+          isHttpUrl: imageUrl.startsWith('http'),
+          isRelativeUrl: imageUrl.startsWith('/'),
+          urlStart: imageUrl.substring(0, 50) + '...'
+        });
+      } else {
+        console.log('DEBUG - No image URL found, will use fallback');
+        imageUrl = FALLBACK_IMAGE;
+      }
+      
+      // If the URL is a comfyui-image proxy URL, extract the actual image URL
+      if (imageUrl && imageUrl.includes('/api/comfyui-image') && imageUrl.includes('url=')) {
+        try {
+          // Extract the actual image URL from the query parameter
+          const urlMatch = imageUrl.match(/url=([^&]+)/);
+          if (urlMatch && urlMatch[1]) {
+            const extractedUrl = decodeURIComponent(urlMatch[1]);
+            console.log('DEBUG - Extracted actual image URL from proxy:', extractedUrl.substring(0, 50) + '...');
+            imageUrl = extractedUrl;
+          }
+        } catch (err) {
+          console.error('Error extracting URL from proxy:', err);
+        }
+      }
+      
+      // Ensure the URL is absolute if it's a relative URL
+      if (imageUrl && imageUrl.startsWith('/') && typeof window !== 'undefined') {
+        imageUrl = `${window.location.origin}${imageUrl}`;
+        console.log('DEBUG - Converted relative URL to absolute URL:', imageUrl.substring(0, 50) + '...');
+      }
+      
+      // Log a safe version of the data (don't log the full image URL)
+      console.log('Submitting email request with:', {
+        fullName,
+        email,
+        aiResponse: aiResponse ? `AI response (${aiResponse.length} chars)` : 'No reading available',
+        imageUrlLength: imageUrl?.length || 0,
+        imageUrlStart: imageUrl ? `${imageUrl.substring(0, 30)}...` : 'No image URL',
+        isUsingFallback: imageUrl === FALLBACK_IMAGE
+      });
+
+      // Send email
+      const emailResponse = await fetch('/api/email', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -36,29 +101,88 @@ export default function EmailPage() {
         body: JSON.stringify({
           fullName,
           email,
-          aiResponse,
-          imageUrl: aiModelImage,
+          aiResponse: aiResponse || 'No reading available',
+          imageUrl: imageUrl, // Send the actual image URL, not the log message
         }),
-      })
+      });
 
-      if (!response.ok) {
-        throw new Error('Failed to send email')
+      if (!emailResponse.ok) {
+        const errorData = await emailResponse.json();
+        console.error('Email API error:', errorData);
+        throw new Error(errorData.error || 'Failed to send email');
+      }
+      
+      // Save user data to Google Sheets
+      try {
+        console.log('Saving user data to Google Sheets...');
+        const sheetsResponse = await fetch('/api/save-to-sheets', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            fullName,
+            email
+          }),
+        });
+        
+        if (!sheetsResponse.ok) {
+          // Log the error but don't throw - we don't want to block the user experience
+          // if Google Sheets saving fails
+          const errorData = await sheetsResponse.json();
+          console.error('Google Sheets API error:', errorData);
+        } else {
+          console.log('Successfully saved user data to Google Sheets');
+        }
+      } catch (sheetsError) {
+        // Log the error but continue with the flow
+        console.error('Error saving to Google Sheets:', sheetsError);
       }
 
-      setUserEmail(email)
-      setUserName(fullName)
-      router.push('/page6-results')
+      setUserEmail(email);
+      setUserName(fullName);
+      
+      resetSession();
+      setAiModelProvider(DEFAULT_AI_PROVIDER);
+      
+      router.push('/community-grid');
     } catch (err) {
-      console.error('Error sending email:', err)
-      setError('Failed to send email. Please try again.')
+      console.error('Error sending email:', err);
+      setError('Failed to send email. Please try again.');
     } finally {
-      setIsSending(false)
+      setIsSending(false);
     }
-  }
+  };
 
   return (
     <main className="main">
       <div className="background" />
+      
+      {/* Branding info container */}
+      <div className="branding-info">
+        {/* Logo and social media text centered */}
+        <div className="branding-content">
+          {/* Logo */}
+          <div className="logo-container">
+            <Image 
+              src="/SoulSnap_Logo_LIGHT_Yellow.png" 
+              alt="SoulSnap Logo" 
+              width={150} 
+              height={60} 
+              priority
+            />
+          </div>
+          
+          {/* Social media text */}
+          <div className="social-container">
+            <div className="social-text">
+              <p className="follow-text">DEVELOPED BY</p>
+              <p className="handle-text">@CHROMALINK.CO</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
       <div className="container">
         <div className="content-wrapper">
           <h1>FACE AUDIT™</h1>
@@ -81,15 +205,12 @@ export default function EmailPage() {
             </div>
             <div className="button-group">
               <button 
-                onClick={() => {
-                  resetSession()
-                  setAiModelProvider(DEFAULT_AI_PROVIDER)
-                  router.push('/community-grid')
-                }}
+                onClick={handleSubmit}
                 className="primary-button"
-                aria-label="Start a new session"
+                disabled={isSending}
+                aria-label="Send email"
               >
-                SEND TO EMAIL
+                {isSending ? 'SENDING...' : 'SEND TO EMAIL'}
               </button>
             </div>
           </div>
@@ -106,7 +227,7 @@ export default function EmailPage() {
           background: black;
           position: relative;
           overflow: hidden;
-          margin-top: 5vh;
+          margin-top: 0; /* Remove the margin that was causing the cutoff */
         }
 
         .background {
@@ -244,8 +365,72 @@ export default function EmailPage() {
         }
 
         .primary-button:disabled {
-          opacity: 0.5;
+          opacity: 0.6;
           cursor: not-allowed;
+        }
+        
+        /* Branding info styles */
+        .branding-info {
+          position: absolute;
+          top: 50px;
+          left: 50%;
+          transform: translateX(-50%);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          width: 90%;
+          max-width: 1200px;
+          margin: 0 auto;
+          padding: 0 30px;
+          z-index: 10;
+        }
+        
+        .branding-content {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 20px;
+          width: 100%;
+        }
+        
+        .logo-container {
+          display: flex;
+          align-items: center;
+        }
+        
+        .social-container {
+          display: flex;
+          align-items: center;
+        }
+        
+        .social-text {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        
+        .follow-text {
+          font-size: 1rem;
+          font-family: var(--font-michroma);
+          font-weight: 400;
+          font-style: normal;
+          letter-spacing: 0.05em;
+          line-height: 1.5;
+          color: #FFE7C8;
+          margin: 0;
+          padding: 0;
+        }
+        
+        .handle-text {
+          font-size: 1rem;
+          font-family: var(--font-michroma);
+          font-weight: 400;
+          font-style: normal;
+          letter-spacing: 0.05em;
+          line-height: 1.5;
+          color: #FFE7C8;
+          margin: 0;
+          padding: 0;
         }
 
         @media (max-width: 480px) {

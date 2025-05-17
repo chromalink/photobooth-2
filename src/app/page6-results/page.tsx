@@ -55,17 +55,20 @@ export default function Results() {
   useEffect(() => {
     if (aiModelImage && typeof window !== 'undefined' && !imageSaved) {
       try {
-        // Check if this image URL already exists in community storage
-        const existingEntries = getCommunityEntries();
-        const imageExists = existingEntries.some(entry => entry.imageUrl === aiModelImage);
+        // The saveCommunityEntry function is now synchronous and handles duplicates internally
+        const result = saveCommunityEntry(aiModelImage);
         
-        // Only save if the image doesn't already exist
-        if (!imageExists) {
-          saveCommunityEntry(aiModelImage);
-          setImageSaved(true);
+        if (result) {
+          console.log('Successfully saved image to community storage');
+        } else {
+          console.log('Community entry was not saved, but continuing without error');
         }
       } catch (error) {
+        // This should not happen with the updated function, but keeping as a safeguard
         console.error('Failed to save community entry:', error);
+      } finally {
+        // Mark as saved regardless of the result to prevent repeated attempts
+        setImageSaved(true);
       }
     }
   }, [aiModelImage, imageSaved]);
@@ -87,6 +90,31 @@ export default function Results() {
   return (
     <div className="container">
       <div className="background" />
+      
+      {/* Branding info container */}
+      <div className="branding-info">
+        {/* Logo and social media text centered */}
+        <div className="branding-content">
+          {/* Logo */}
+          <div className="logo-container">
+            <Image 
+              src="/SoulSnap_Logo_LIGHT_Yellow.png" 
+              alt="SoulSnap Logo" 
+              width={150} 
+              height={60} 
+              priority
+            />
+          </div>
+          
+          {/* Social media text */}
+          <div className="social-container">
+            <div className="social-text">
+              <p className="follow-text">DEVELOPED BY</p>
+              <p className="handle-text">@CHROMALINK.CO</p>
+            </div>
+          </div>
+        </div>
+      </div>
       
       <div className="content">
         <div className="desktop-layout">
@@ -140,6 +168,8 @@ export default function Results() {
           position: relative;
           overflow: hidden;
         }
+        
+
 
         .background {
           position: fixed;
@@ -291,7 +321,7 @@ export default function Results() {
         .analysis-text {
           margin: 0;
           transform: translateY(35%);
-          color: #FFE7C8;
+          color: #FFC578;
           font-size: 0.9rem;
           font-weight: 400;
           font-style: normal;
@@ -299,6 +329,28 @@ export default function Results() {
           line-height: 1.4;
           letter-spacing: 0;
           font-family: var(--font-b612-mono);
+        }
+
+        @keyframes glowing {
+          0% {
+            box-shadow: 
+              0 0 5px rgba(255, 231, 200, 0.5),
+              0 0 10px rgba(255, 231, 200, 0.3),
+              0 0 15px rgba(255, 231, 200, 0.2);
+          }
+          50% {
+            box-shadow: 
+              0 0 15px rgba(255, 231, 200, 0.8),
+              0 0 25px rgba(255, 231, 200, 0.6),
+              0 0 35px rgba(255, 231, 200, 0.4);
+            border-color: rgba(255, 231, 200, 0.9);
+          }
+          100% {
+            box-shadow: 
+              0 0 5px rgba(255, 231, 200, 0.5),
+              0 0 10px rgba(255, 231, 200, 0.3),
+              0 0 15px rgba(255, 231, 200, 0.2);
+          }
         }
 
         .download-button {
@@ -318,14 +370,87 @@ export default function Results() {
             0 0 10px rgba(255, 231, 200, 0.3),
             0 0 15px rgba(255, 231, 200, 0.2);
           align-self: center;
+          animation: glowing 2s ease-in-out infinite;
         }
 
         .download-button:hover {
           background: rgba(255, 231, 200, 0.1);
           box-shadow: 
-            0 0 10px rgba(255, 231, 200, 0.6),
-            0 0 20px rgba(255, 231, 200, 0.4),
-            0 0 30px rgba(255, 231, 200, 0.2);
+            0 0 20px rgba(255, 231, 200, 0.8),
+            0 0 30px rgba(255, 231, 200, 0.6),
+            0 0 40px rgba(255, 231, 200, 0.4);
+          animation: none;
+        }
+
+        /* Branding info styles */
+        .branding-info {
+          position: absolute;
+          top: 50px;
+          left: 50%;
+          transform: translateX(-50%);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          width: 90%;
+          max-width: 1200px;
+          margin: 0 auto;
+          padding: 0 30px;
+          z-index: 10;
+        }
+        
+        /* Tablet-specific positioning for branding info */
+        @media screen and (min-width: 768px) and (max-width: 1023px) {
+          .branding-info {
+            top: calc(50px - 3vh); /* Move slightly up from original position */
+          }
+        }
+        
+        .branding-content {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 20px;
+          width: 100%;
+        }
+        
+        .logo-container {
+          display: flex;
+          align-items: center;
+        }
+        
+        .social-container {
+          display: flex;
+          align-items: center;
+        }
+        
+        .social-text {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        
+        .follow-text {
+          font-size: 1rem;
+          font-family: var(--font-michroma);
+          font-weight: 400;
+          font-style: normal;
+          letter-spacing: 0.05em;
+          line-height: 1.5;
+          color: #FFE7C8;
+          margin: 0;
+          padding: 0;
+        }
+        
+        .handle-text {
+          font-size: 1rem;
+          font-family: var(--font-michroma);
+          font-weight: 400;
+          font-style: normal;
+          letter-spacing: 0.05em;
+          line-height: 1.5;
+          color: #FFE7C8;
+          margin: 0;
+          padding: 0;
         }
 
         @media (min-width: 1025px) {
@@ -394,7 +519,7 @@ export default function Results() {
         @media (max-width: 1024px) {
           .desktop-layout {
             padding-top: 0;
-            margin-top: -10.8rem;
+            margin-top: -13rem;
           }
         }
 

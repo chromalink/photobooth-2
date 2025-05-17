@@ -4,12 +4,12 @@ import { useSessionStore } from '@/store/session'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 
-const PHOTO_PROMPT = "SHOW US A SAMPLE OF YOUR FACE"
+const PHOTO_PROMPT = "Keep it real to get more accurate personality reading"
 
 export default function Orb1() {
   const router = useRouter()
   //Countdown starting number 'useState'
-  const [countdown, setCountdown] = useState(10)
+  const [countdown, setCountdown] = useState(5)
   const [shouldNavigate, setShouldNavigate] = useState(false)
   const [currentPrompt, setCurrentPrompt] = useState('')
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -253,18 +253,21 @@ export default function Orb1() {
           position: 'fixed',
           top: 0,
           left: 0,
-          zIndex: 0
+          zIndex: 0,
+          backgroundColor: '#000000'
         }}
       >
         {/* Video container */}
         <div 
           className="relative overflow-hidden"
           style={{ 
-            width: '100vw',
-            height: '100vh',
+            width: '100vmin',
+            height: '100vmin',
             position: 'absolute',
             left: '50%',
-            transform: 'translateX(-50%)',
+            top: '50%',
+            transform: 'translate(-50%, -50%)',
+            borderRadius: '8px',
             boxShadow: countdown < 6 && countdown > 0
               ? '0 0 20px rgba(255,255,255,0.2), 0 0 60px rgba(255,255,255,0.1)'
               : '0 0 20px rgba(255,255,255,0.2), 0 0 60px rgba(255,255,255,0.1)',
@@ -323,7 +326,7 @@ export default function Orb1() {
       <div 
         className="fixed top-0 left-0 w-full z-10"
         style={{
-          padding: '4vh 5vw',
+          padding: isSmallScreen ? '4vh 5vw' : '9vh 5vw', 
           background: 'linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%)'
         }}
       >

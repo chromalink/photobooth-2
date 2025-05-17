@@ -66,6 +66,8 @@ const getImageComponent = (src: string, alt: string, className: string, priority
           sizes="(max-width: 480px) 120px, (max-width: 768px) 150px, (max-width: 1024px) 200px, 250px"
           className={className}
           priority={priority}
+          quality={90} // Higher quality for placeholder images
+          unoptimized={false} // Allow Next.js optimization
         />
       </div>
     );
@@ -155,6 +157,7 @@ export default function CommunityGrid() {
   const [page, setPage] = useState<number>(0);
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [loading, setLoading] = useState<boolean>(false);
+  const [is1080x1920, setIs1080x1920] = useState<boolean>(false);
   const observer = useRef<IntersectionObserver | null>(null);
   
   // State for modal
@@ -422,10 +425,10 @@ export default function CommunityGrid() {
         /* Desktop and large tablets */
         @media (max-width: 1200px) and (min-width: 1025px) {
           .grid {
-            grid-template-columns: repeat(3, 1fr); /* 3 pictures per row for narrower desktop */
-            width: min(100%, 1000px); /* Increased from 800px to accommodate larger images */
+            grid-template-columns: repeat(2, 1fr); /* Changed from 3 to 2 pictures per row */
+            width: min(100%, 1000px);
             max-height: calc(100vh - 310px);
-            gap: 2rem; /* Increased gap for larger images */
+            gap: 2rem;
           }
           
           .main {
@@ -444,6 +447,22 @@ export default function CommunityGrid() {
           }
         }
 
+        /* Specific 1080x1920 resolution */
+        @media screen and (width: 1080px) and (height: 1920px) {
+          .grid {
+            max-height: calc(100vh - 440px) !important; /* As requested with !important */
+          }
+          
+          .main .bottom-button-container {
+            bottom: 150px !important; /* With !important to override any other styles */
+            position: fixed !important;
+          }
+          
+          .start-again-button {
+            transform: scale(1.5) !important; /* Make button 50% bigger */
+          }
+        }
+        
         /* Regular tablet styles - separate from narrow desktop */
         @media (max-width: 1024px) and (min-width: 769px) {
           .grid {

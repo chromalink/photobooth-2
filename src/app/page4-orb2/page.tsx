@@ -8,6 +8,7 @@ import { generateSpiritualReading } from '@/utils/openai'
 import OrbAnimation from '../components/OrbAnimation'
 import { B612_Mono } from 'next/font/google'
 import { createUrl } from '@/utils/url'
+import Image from 'next/image'
 
 // Load B612 Mono font
 const b612Mono = B612_Mono({
@@ -16,9 +17,10 @@ const b612Mono = B612_Mono({
   display: 'swap',
 })
 
-// Mutex locks
+// Mutex locks and abort controller for cancellation
 let isPolling = false;
 let isProcessingPhoto = false;
+let currentAbortController: AbortController | null = null;
 
 export default function Orb2() {
   const router = useRouter()
@@ -28,6 +30,9 @@ export default function Orb2() {
   const [visualProgress, setVisualProgress] = useState(0)
   const processStartedRef = useRef(false)
   const [displaySections, setDisplaySections] = useState<{[key: string]: string}>({})
+  const [visibleSections, setVisibleSections] = useState<string[]>([])
+  const [readingGenerated, setReadingGenerated] = useState(false)
+  const [fullSections, setFullSections] = useState<{[key: string]: string}>({})
   const { uploadedPhotoUrl, setAiResponse, setAiModelImage, setAiName, setAiModelProvider } = useSessionStore()
 
   const extractDisplaySections = (text: string) => {
@@ -120,32 +125,56 @@ export default function Orb2() {
     }
   }, [setIsProcessing, setHasStartedProcessing]) 
 
+  // Effect to handle sequential display of sections
   useEffect(() => {
-    const testSections = {
+    if (!readingGenerated || Object.keys(fullSections).length === 0) return;
+    
+    // Reset visible sections when new reading is generated
+    setVisibleSections([]);
+    
+    // Get all section keys
+    const sectionKeys = Object.keys(fullSections);
+    
+    // Function to add sections one by one
+    const addSectionsSequentially = () => {
+      let currentIndex = 0;
+      
+      // Add first section immediately
+      setVisibleSections([sectionKeys[0]]);
+      
+      // Add remaining sections with 8-second intervals
+      const intervalId = setInterval(() => {
+        currentIndex++;
+        
+        if (currentIndex < sectionKeys.length) {
+          setVisibleSections(prev => [...prev, sectionKeys[currentIndex]]);
+        } else {
+          // Clear interval when all sections are displayed
+          clearInterval(intervalId);
+        }
+      }, 8000); // 8 seconds interval
+      
+      // Cleanup function
+      return () => clearInterval(intervalId);
+    };
+    
+    const cleanup = addSectionsSequentially();
+    return cleanup;
+  }, [readingGenerated, fullSections]);
+  
+  // Initial setup effect
+  useEffect(() => {
+    const initialSections = {
       'Facial Expression': 'Analyzing...',
       'Body Language': 'Analyzing...',
       'Clothing': 'Analyzing...',
       'Hair Style': 'Analyzing...'
     };
     
-    console.log('Setting initial test sections:', testSections);
-    setDisplaySections(testSections);
+    console.log('Setting initial sections:', initialSections);
+    setDisplaySections(initialSections);
     setIsProcessing(true);
     setVisualProgress(75); // Set to 75% complete
-    
-    const testText = `I don't know who this is, but let's dive into the corporate crystal ball:
-
-**Facial Expression**: Expressionless with a hint of existential dread, like an unenthusiastic participant in a team-building exercise.
-
-**Body Language**: Slightly slouched, the posture of someone who's just learned they have another meeting.
-
-**Clothing**: Dark, understated top; the fabric of choice for those navigating the shadows of office life.
-
-**Hair Style**: Long, slightly unkempt, like a rebellious spirit caught in the corporate machine.`;
-
-    const extractedSections = extractDisplaySections(testText);
-    console.log('Test extraction result:', extractedSections);
-    
   }, []);
 
   const handlePhotoCapture = useCallback(async () => {
@@ -154,91 +183,95 @@ export default function Orb2() {
       return;
     }
     
+    // Create a new abort controller for this process
+    if (currentAbortController) {
+      // Cancel any previous ongoing requests
+      currentAbortController.abort();
+    }
+    currentAbortController = new AbortController();
+    const signal = currentAbortController.signal;
+    
     try {
       isProcessingPhoto = true;
       
-      setVisualProgress(0);
+      // Start with higher visual progress to make it feel faster
+      setVisualProgress(25);
       setIsProcessing(true);
       setHasStartedProcessing(true);
       setError(''); // Clear any previous error
-      setDisplaySections({});
+      
+      // Set initial placeholder sections immediately for better UX
+      setDisplaySections({
+        'Facial Expression': 'Analyzing...',
+        'Body Language': 'Analyzing...',
+        'Clothing': 'Analyzing...',
+        'Hair Style': 'Analyzing...'
+      });
       
       console.log('Starting AI processes...');
       
       const requestHash = Date.now().toString();
+      setVisualProgress(40); // Increment progress quickly
       
-      let readingData = null;
-      let readingAttempts = 0;
-      const MAX_READING_ATTEMPTS = 5;
+      // Make the API request with abort signal
+      const generateReadingResponse = await fetch('/api/generate-reading', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          image: uploadedPhotoUrl.split(',')[1],
+          hash: requestHash
+        }),
+        signal // Add the abort signal to allow cancellation
+      });
+
+      setVisualProgress(60); // Increment progress after request is sent
       
-      while (readingAttempts < MAX_READING_ATTEMPTS) {
-        const generateReadingResponse = await fetch('/api/generate-reading', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            image: uploadedPhotoUrl.split(',')[1],
-            hash: requestHash
-          })
-        });
+      if (!generateReadingResponse.ok) {
+        const errorText = await generateReadingResponse.text();
+        console.error('Generate reading API error:', errorText);
+        throw new Error('Failed to generate reading: ' + errorText);
+      }
 
-        if (generateReadingResponse.status === 429) {
-          console.log('Server busy, retrying in 2 seconds...');
-          await new Promise(resolve => setTimeout(resolve, 2000));
-          readingAttempts++;
-          continue;
-        }
-
-        if (!generateReadingResponse.ok) {
-          const errorText = await generateReadingResponse.text();
-          console.error('Generate reading API error:', errorText);
-          throw new Error('Failed to generate reading: ' + errorText);
-        }
-
-        readingData = await generateReadingResponse.json();
-        console.log('Received reading data:', readingData); // Debug log
+      const readingData = await generateReadingResponse.json();
+      console.log('Received reading data:', readingData);
+      
+      // Process the reading data
+      if (readingData.description) {
+        console.log('Processing description:', readingData.description);
+        const sections = extractDisplaySections(readingData.description);
         
-        if (readingData.description) {
-          console.log('Processing description:', readingData.description); // Debug log
-          const sections = extractDisplaySections(readingData.description);
+        if (Object.values(sections).some(value => value)) {
+          // Store the full sections but don't display them yet
+          setFullSections(sections);
+          // Initially show 'Analyzing...' for all sections
+          setDisplaySections({
+            'Facial Expression': 'Analyzing...',
+            'Body Language': 'Analyzing...',
+            'Clothing': 'Analyzing...',
+            'Hair Style': 'Analyzing...'
+          });
+          setVisualProgress(80); // Increment progress after sections are displayed
           
-          if (Object.values(sections).some(value => value)) {
-            setDisplaySections(sections);
-          } else {
-            console.log('No sections extracted, using fallback data');
-            setDisplaySections({
-              'Facial Expression': 'Analyzing...',
-              'Body Language': 'Analyzing...',
-              'Clothing': 'Analyzing...',
-              'Hair Style': 'Analyzing...'
-            });
-          }
-        } else {
-          console.log('No description in reading data'); // Debug log
+          // Set reading as generated to trigger sequential display
+          setReadingGenerated(true);
         }
-
-        if (!readingData.category || !readingData.name || !readingData.reading) {
-          if (readingData.error === 'Processing') {
-            console.log('Still processing, retrying in 2 seconds...');
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            readingAttempts++;
-            continue;
-          }
-          console.error('Invalid generate reading response:', readingData);
-          throw new Error('Invalid reading response');
-        }
-
-        break;
+      } else {
+        console.log('No description in reading data');
       }
 
-      if (!readingData) {
-        throw new Error('Failed to get reading after multiple attempts');
+      // Validate the response
+      if (!readingData.category || !readingData.name || !readingData.reading) {
+        console.error('Invalid generate reading response:', readingData);
+        throw new Error('Invalid reading response');
       }
 
+      // Update the session store with the reading data
       setAiName(readingData.name);
       setAiResponse(readingData.reading);
       setAiModelProvider(readingData.category);
-
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Move to 90% progress immediately after setting the data
+      setVisualProgress(90);
 
       const comfyResponse = await fetch('/api/comfyui', {
         method: 'POST',
@@ -249,7 +282,8 @@ export default function Orb2() {
         body: JSON.stringify({
           image: uploadedPhotoUrl.split(',')[1],
           hash: requestHash
-        })
+        }),
+        signal // Add the abort signal to allow cancellation
       });
 
       if (!comfyResponse.ok) {
@@ -282,7 +316,9 @@ export default function Orb2() {
         while (pollAttempts < MAX_POLL_ATTEMPTS) {
           console.log(`Polling attempt ${pollAttempts + 1}/${MAX_POLL_ATTEMPTS}...`);
           
-          const statusResponse = await fetch(`/api/comfyui-status?promptId=${imageResponse.upscaledResult.promptId}`);
+          const statusResponse = await fetch(`/api/comfyui-status?promptId=${imageResponse.upscaledResult.promptId}`, {
+            signal // Add the abort signal to allow cancellation
+          });
           if (!statusResponse.ok) {
             throw new Error('Failed to check image status');
           }
@@ -296,30 +332,88 @@ export default function Orb2() {
               
               // Preload the image before navigating
               const preloadAndSetImage = async (imageUrl: string) => {
-                const preloadImage = new Image();
+                // Use the browser's built-in Image constructor, not Next.js Image component
+                const preloadImage = new window.Image();
                 preloadImage.src = imageUrl;
 
-                preloadImage.onload = async () => {
-                  console.log('Image preloaded successfully');
-                  setAiModelImage(imageUrl);
-                  setVisualProgress(100);
-                  
-                  // Upload to Google Drive before navigating
-                  await uploadImageToDrive(imageUrl);
-                  
-                  router.push('/page6-results');
+                const fetchAndConvertToDataUrl = async (url: string) => {
+                  try {
+                    console.log('Fetching image to convert to data URL:', url.substring(0, 50) + '...');
+                    const response = await fetch(url);
+                    if (!response.ok) {
+                      throw new Error(`Failed to fetch image: ${response.status} ${response.statusText}`);
+                    }
+                    
+                    const blob = await response.blob();
+                    return new Promise<string>((resolve, reject) => {
+                      const reader = new FileReader();
+                      reader.onloadend = () => resolve(reader.result as string);
+                      reader.onerror = reject;
+                      reader.readAsDataURL(blob);
+                    });
+                  } catch (error) {
+                    console.error('Error converting image to data URL:', error);
+                    return null;
+                  }
                 };
 
-                preloadImage.onerror = async () => {
-                  console.error('Failed to preload image');
-                  setAiModelImage(imageUrl);
+                try {
+                  // Convert the image URL to a data URL for better email attachment handling
+                  let dataUrl: string | null = null;
+                  
+                  if (imageUrl.startsWith('data:')) {
+                    console.log('Image is already a data URL');
+                    dataUrl = imageUrl;
+                  } else {
+                    console.log('Converting image to data URL...');
+                    dataUrl = await fetchAndConvertToDataUrl(imageUrl);
+                  }
+                  
+                  if (dataUrl) {
+                    console.log('Successfully converted image to data URL, length:', dataUrl.length);
+                    setAiModelImage(dataUrl);
+                  } else {
+                    // Fallback to using the original URL if conversion fails
+                    console.log('Using original image URL as fallback');
+                    const fullImageUrl = imageUrl.startsWith('/') 
+                      ? `${window.location.origin}${imageUrl}` 
+                      : imageUrl;
+                    setAiModelImage(fullImageUrl);
+                  }
+                  
                   setVisualProgress(100);
                   
-                  // Still try to upload to Google Drive even if preloading fails
-                  await uploadImageToDrive(imageUrl);
+                  // Try to upload to Google Drive before navigating, but don't block navigation if it fails
+                  try {
+                    await uploadImageToDrive(imageUrl);
+                  } catch (error) {
+                    console.error('Google Drive upload failed but continuing navigation:', error);
+                  }
                   
+                  // Small delay to ensure state is updated before navigation
+                  await new Promise(resolve => setTimeout(resolve, 500));
                   router.push('/page6-results');
-                };
+                } catch (error) {
+                  console.error('Error in preloadAndSetImage:', error);
+                  // Even on error, use the full URL
+                  const fullImageUrl = imageUrl.startsWith('/') 
+                    ? `${window.location.origin}${imageUrl}` 
+                    : imageUrl;
+                  console.log('Setting AI model image with full URL (after error):', fullImageUrl);
+                  setAiModelImage(fullImageUrl);
+                  setVisualProgress(100);
+                  
+                  // Try to upload to Google Drive before navigating, but don't block navigation if it fails
+                  try {
+                    await uploadImageToDrive(imageUrl);
+                  } catch (error) {
+                    console.error('Google Drive upload failed but continuing navigation:', error);
+                  }
+                  
+                  // Small delay to ensure state is updated before navigation
+                  await new Promise(resolve => setTimeout(resolve, 500));
+                  router.push('/page6-results');
+                }
               };
 
               await preloadAndSetImage(statusData.upscaledResult.imageUrl);
@@ -380,6 +474,31 @@ export default function Orb2() {
 
   return (
     <div className="main">
+      {/* Branding info container */}
+      <div className="branding-info">
+        {/* Logo and social media text centered */}
+        <div className="branding-content">
+          {/* Logo */}
+          <div className="logo-container">
+            <Image 
+              src="/SoulSnap_Logo_LIGHT_Yellow.png" 
+              alt="SoulSnap Logo" 
+              width={150} 
+              height={60} 
+              priority
+            />
+          </div>
+          
+          {/* Social media text */}
+          <div className="social-container">
+            <div className="social-text">
+              <p className="follow-text">DEVELOPED BY</p>
+              <p className="handle-text">@CHROMALINK.CO</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
       <div className="background-container">
         <div className="background-image" />
       </div>
@@ -432,14 +551,28 @@ export default function Orb2() {
                     <h2 className={`machine-title ${b612Mono.className}`}>MACHINE OBSERVES...</h2>
                   </div>
                   {Object.keys(displaySections).length > 0 ? (
-                    Object.entries(displaySections).map(([section, text]) => (
-                      <div key={section} className="section">
-                        <div className={`section-label ${b612Mono.className}`}>{section}</div>
-                        <div className="section-text-container">
-                          <p className={`section-text ${b612Mono.className}`}>{text}</p>
+                    Object.entries(displaySections).map(([section, text]) => {
+                      // If reading is generated, check if this section should be visible
+                      const sectionContent = readingGenerated && fullSections[section] && visibleSections.includes(section) 
+                        ? fullSections[section] // Show the actual content if section is visible
+                        : readingGenerated && !visibleSections.includes(section) 
+                          ? '' // Hide content completely if reading is generated but section not visible yet
+                          : text; // Show 'Analyzing...' if reading is not generated yet
+                      
+                      // Only render the section if it has content or reading is not generated yet
+                      return (
+                        <div key={section} className={`section ${readingGenerated && !visibleSections.includes(section) ? 'hidden-section' : ''}`}>
+                          <div className={`section-label ${b612Mono.className}`}>{section}</div>
+                          <div className="section-text-container">
+                            <p className={`section-text ${b612Mono.className}`}>
+                              {readingGenerated && !visibleSections.includes(section) 
+                                ? 'Analyzing...' // Show 'Analyzing...' for sections not yet visible
+                                : sectionContent}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    ))
+                      );
+                    })
                   ) : (
                     <div className="section">
                       <div className={`section-label ${b612Mono.className}`}>ANALYZING</div>
@@ -455,8 +588,38 @@ export default function Orb2() {
           
           {/* Restart Button */}
           <div className="button-area">
-            <button onClick={() => window.location.reload()} className="restart-button">
-              RESTART ANALYSIS
+            <button 
+              onClick={() => {
+                // Cancel any ongoing fetch requests
+                if (currentAbortController) {
+                  console.log('Cancelling ongoing requests...');
+                  currentAbortController.abort();
+                  currentAbortController = null;
+                }
+                
+                // Reset processing flags
+                isProcessingPhoto = false;
+                isPolling = false;
+                
+                // Stop any ongoing processing
+                setIsProcessing(false);
+                setHasStartedProcessing(false);
+                setReadingGenerated(false);
+                setVisibleSections([]);
+                setFullSections({});
+                setError('');
+                
+                // Reset relevant session state
+                setAiResponse('');
+                setAiName('');
+                setAiModelImage('');
+                
+                // Navigate back to page 2
+                router.push('/page2-orb1');
+              }} 
+              className="restart-button"
+            >
+              RETAKE PHOTO
             </button>
           </div>
         </div>
@@ -489,7 +652,78 @@ export default function Orb2() {
           background-image: url('/grid_2.jpg');
           background-size: cover;
           background-position: center;
-          background-repeat: no-repeat;
+          opacity: 0.5;
+        }
+        
+        /* Branding info styles */
+        .branding-info {
+          position: absolute;
+          top: 50px;
+          left: 50%;
+          transform: translateX(-50%);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          width: 90%;
+          max-width: 1200px;
+          margin: 0 auto;
+          padding: 0 30px;
+          z-index: 10;
+        }
+        
+        /* Tablet-specific positioning for branding info */
+        @media screen and (min-width: 768px) and (max-width: 1023px) {
+          .branding-info {
+            top: calc(50px - 3vh); /* Move slightly up from original position */
+          }
+        }
+        
+        .branding-content {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 20px;
+          width: 100%;
+        }
+        
+        .logo-container {
+          display: flex;
+          align-items: center;
+        }
+        
+        .social-container {
+          display: flex;
+          align-items: center;
+        }
+        
+        .social-text {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        
+        .follow-text {
+          font-size: 1rem;
+          font-family: var(--font-michroma);
+          font-weight: 400;
+          font-style: normal;
+          letter-spacing: 0.05em;
+          line-height: 1.5;
+          color: #FFE7C8;
+          margin: 0;
+          padding: 0;
+        }
+        
+        .handle-text {
+          font-size: 1rem;
+          font-family: var(--font-michroma);
+          font-weight: 400;
+          font-style: normal;
+          letter-spacing: 0.05em;
+          line-height: 1.5;
+          color: #FFE7C8;
+          margin: 0;
+          padding: 0;
         }
 
         .centered-wrapper {
@@ -675,7 +909,7 @@ export default function Orb2() {
           }
           
           .content-group {
-            transform: scale(1.35) translateY(-15%);
+            transform: scale(1.35) translateY(-13%);
             transform-origin: center top;
           }
           
@@ -859,9 +1093,14 @@ export default function Orb2() {
         .section {
           display: flex;
           margin-bottom: 1rem;
-          color: white;
+          color: #FFE7C8;
           line-height: 1.4;
           text-align: left;
+          transition: opacity 0.5s ease-in-out;
+        }
+        
+        .hidden-section {
+          opacity: 0.3;
         }
 
         .section-label {
@@ -883,7 +1122,7 @@ export default function Orb2() {
 
         .section-text {
           margin: 0;
-          color: white;
+          color: #FFE7C8;
           font-size: 0.9rem; /* 80% smaller than 1.8rem */
           font-weight: 400;
           font-style: normal;

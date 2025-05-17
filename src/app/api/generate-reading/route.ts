@@ -168,7 +168,7 @@ async function getPersonDescription(imageFile: File): Promise<string> {
         messages: [
           {
             role: "system",
-            content: `You are an unhinged satirical oracle with a gift for decoding workplace energy and drama. Describe their Facial Expression, Body Language, Clothing, and Hair Style with a satirical playful dramatic conversational tone—each in 15 words or fewer. Identify their most alarming red flags (potential for drama) and accentuated corporate personality in each point. Then, indirectly assign them exactly one of these archetypes: Synergy Specialist ("You call every meeting a 'touch base' and genuinely believe in the power of icebreakers." Detected If: Big, open smile, animated hands, light/bright clothing, soft/voluminous hair). Workflow Wizard ("You have a color-coded spreadsheet for everything. People fear your pivot tables." Detected If: Mildly serious, still posture, neutral tones, tidy hair). Executive Oracle ("You don't take meetings, you take 'alignments.'" Detected If: Intense gaze, upright stance, dark colors, sleek hair, big phone). Middle Manager ("Knows Just Enough to Be Dangerous" Detected If: Slightly strained smile, neutral stance, muted blues/khakis, convenient haircut).  Engagement Risk ("Your enthusiasm levels are dangerously low." Detected If: No smile, arms crossed, dark/slightly disheveled clothing, messy hair). The Intern ("Eager, Overwhelmed, and Underpaid" Detected If: Nervous smile, wide eyes, overdressed/underdressed, slightly off hair). Then tell me: are they male or female? Keep the reading exactly 200 words`
+            content: `You are an unhinged satirical oracle with a gift for decoding workplace energy and drama. Describe their Facial Expression, Body Language, Clothing, and Hair Style with a satirical playful dramatic conversational tone—each in 15 words or fewer. Identify their most alarming red flags (potential for drama) and accentuated corporate personality in each point. Then, indirectly assign them exactly one of these archetypes:Synergy Specialist ("You call every meeting a 'touch base' and genuinely believe in the power of icebreakers."Detected If: Teeth are showing in a big, big open smile, animated hands or playful stance, light/bright clothing, soft or fluffy hair.)Workflow Wizard"You have a color-coded spreadsheet for everything. People fear your pivot tables."Detected If: Serious or slightly shy expression, stiff posture, turtleneck or classic office attire, big glasses, grayscale tones, nerdy or reserved energy, or a general air of quiet precision.Executive Oracle ("You don't take meetings, you take 'alignments.'"Detected If: Intense gaze, straight confident posture, dark structured clothing, sleek hair, and commanding facial features.)Middle Manager ("Knows Just Enough to Be Dangerous"Detected If: Slightly strained smile, tired vibe, muted blues or khakis, frizzy or messy hair, convenient haircut.)Engagement Risk ("Your enthusiasm levels are dangerously low."Detected If: No smile, messy or greasy hair, wrinkled or dirty clothes, bored or checked-out expression.)The Intern ("Eager, Overwhelmed, and Underpaid"Detected If: Nervous smile, raised eyebrows, wide eyes, awkward or try-hard clothing, slightly off or dorky hair.)`
           },
           {
             role: "user",
@@ -266,7 +266,7 @@ IMPORTANT: The response MUST start with "Archetype:" followed by exactly one of 
       response = oracleResponse.choices[0].message.content?.trim() || "";
       console.log('Raw OpenAI response:', response); // Debug log
       
-      // Check if the response starts with "Archetype:" and contains one of the valid archetypes
+      // Check if the response contains one of the valid archetypes
       const validArchetypes = [
         "Synergy Specialist", 
         "Workflow Wizard", 
@@ -276,10 +276,29 @@ IMPORTANT: The response MUST start with "Archetype:" followed by exactly one of 
         "The Intern"
       ];
       
-      const hasValidFormat = response.startsWith("Archetype:") && 
-        validArchetypes.some(archetype => 
-          response.toLowerCase().includes(archetype.toLowerCase())
-        );
+      // Check if response contains any of the valid archetypes
+      const containsValidArchetype = validArchetypes.some(archetype => 
+        response.toLowerCase().includes(archetype.toLowerCase())
+      );
+      
+      // If the response doesn't start with "Archetype:" but contains valid content, add the prefix
+      if (!response.startsWith("Archetype:") && containsValidArchetype) {
+        // Try to determine which archetype is mentioned
+        let detectedArchetype = "Middle Manager"; // Default
+        for (const archetype of validArchetypes) {
+          if (response.toLowerCase().includes(archetype.toLowerCase())) {
+            detectedArchetype = archetype;
+            break;
+          }
+        }
+        
+        // Add the missing prefix
+        response = `Archetype: ${detectedArchetype}\n${response}`;
+        console.log("Added missing Archetype prefix to response");
+      }
+      
+      // Final check for valid format
+      const hasValidFormat = response.startsWith("Archetype:") && containsValidArchetype;
       
       if (hasValidFormat) {
         console.log("Valid oracle reading received");
@@ -290,6 +309,20 @@ IMPORTANT: The response MUST start with "Archetype:" followed by exactly one of 
         
         if (retryCount >= maxRetries) {
           console.error("Maximum retries reached for oracle reading");
+          // If we've reached max retries, force a valid format with the detected archetype
+          // or default to Middle Manager if no valid archetype was found
+          let detectedArchetype = "Middle Manager";
+          for (const archetype of validArchetypes) {
+            if (response.toLowerCase().includes(archetype.toLowerCase())) {
+              detectedArchetype = archetype;
+              break;
+            }
+          }
+          
+          // Create a valid response with the detected archetype
+          response = `Archetype: ${detectedArchetype}\n${response}`;
+          console.log("Forced valid format with detected archetype after max retries");
+          break;
         } else {
           // Wait a bit before retrying (exponential backoff)
           await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, retryCount)));
@@ -325,10 +358,27 @@ function extractCategory(oracleReading: string): string | null {
     'the intern': 'the_intern'
   };
 
+  // If the input is empty or undefined, return a default
+  if (!oracleReading) {
+    console.log('Oracle reading is empty, defaulting to middle_manager');
+    return 'middle_manager';
+  }
+
   // Extract everything after "Archetype:" until newline or end
-  const archetypeMatch = oracleReading?.match(/^Archetype:\s*(.+?)(?=\n|$)/im);
+  const archetypeMatch = oracleReading.match(/^Archetype:\s*(.+?)(?=\n|$)/im);
   const rawArchetype = archetypeMatch?.[1]?.trim() || "";
   console.log('Raw extracted archetype:', rawArchetype);
+
+  // If no archetype found in the expected format, try to find any of the known archetypes in the text
+  if (!rawArchetype) {
+    console.log('No archetype found in expected format, searching in full text');
+    for (const [key, value] of Object.entries(archetypeMap)) {
+      if (oracleReading.toLowerCase().includes(key)) {
+        console.log(`Found archetype '${key}' in text, mapping to '${value}'`);
+        return value;
+      }
+    }
+  }
 
   // Normalize the extracted archetype
   const normalizedInput = rawArchetype.toLowerCase().replace(/[™]/g, '').trim();
@@ -340,6 +390,14 @@ function extractCategory(oracleReading: string): string | null {
 
   if (mappedArchetype) {
     return mappedArchetype;
+  }
+
+  // If we still don't have a match, try partial matching
+  for (const [key, value] of Object.entries(archetypeMap)) {
+    if (normalizedInput.includes(key) || key.includes(normalizedInput)) {
+      console.log(`Partial match found: '${key}' maps to '${value}'`);
+      return value;
+    }
   }
 
   console.log('No valid match found, defaulting to middle_manager');

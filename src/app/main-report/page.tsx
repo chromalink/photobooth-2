@@ -118,6 +118,31 @@ export default function MainReport() {
     <div className="container" style={{ overflowY: 'auto', height: 'auto', minHeight: '100vh' }}>
       <div className="background" />
       
+      {/* Branding info container */}
+      <div className="branding-info">
+        {/* Logo and social media text centered */}
+        <div className="branding-content">
+          {/* Logo */}
+          <div className="logo-container">
+            <Image 
+              src="/SoulSnap_Logo_LIGHT_Yellow.png" 
+              alt="SoulSnap Logo" 
+              width={150} 
+              height={60} 
+              priority
+            />
+          </div>
+          
+          {/* Social media text */}
+          <div className="social-container">
+            <div className="social-text">
+              <p className="follow-text">DEVELOPED BY</p>
+              <p className="handle-text">@CHROMALINK.CO</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
       <div className="content" style={{ overflowY: 'auto', maxHeight: '100vh', height: '100vh', display: 'block' }}>
         <div className="report-container">
           <div className="header-section">
@@ -188,6 +213,70 @@ export default function MainReport() {
           position: relative;
           overflow-y: auto !important; /* Force vertical scrolling */
           overflow-x: hidden;
+        }
+        
+        /* Branding info styles */
+        .branding-info {
+          position: absolute;
+          top: 50px;
+          left: 50%;
+          transform: translateX(-50%);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          width: 90%;
+          max-width: 1200px;
+          margin: 0 auto;
+          padding: 0 30px;
+          z-index: 10;
+        }
+        
+        .branding-content {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 20px;
+          width: 100%;
+        }
+        
+        .logo-container {
+          display: flex;
+          align-items: center;
+        }
+        
+        .social-container {
+          display: flex;
+          align-items: center;
+        }
+        
+        .social-text {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        
+        .follow-text {
+          font-size: 1rem;
+          font-family: var(--font-michroma);
+          font-weight: 400;
+          font-style: normal;
+          letter-spacing: 0.05em;
+          line-height: 1.5;
+          color: #FFE7C8;
+          margin: 0;
+          padding: 0;
+        }
+        
+        .handle-text {
+          font-size: 1rem;
+          font-family: var(--font-michroma);
+          font-weight: 400;
+          font-style: normal;
+          letter-spacing: 0.05em;
+          line-height: 1.5;
+          color: #FFE7C8;
+          margin: 0;
+          padding: 0;
         }
 
         .background {
@@ -367,6 +456,17 @@ export default function MainReport() {
           line-height: 1.6;
           white-space: pre-line;
           text-align: left;
+        }
+        
+        /* Specific 1080x1920 resolution */
+        @media screen and (width: 1080px) and (height: 1920px) {
+          .section-text {
+            font-size: 1.4rem !important; /* Larger font size for 1080x1920 resolution */
+          }
+          
+          .category-description {
+            font-size: 1.4rem !important; /* Larger font size for 1080x1920 resolution */
+          }
         }
 
         .text-content {
