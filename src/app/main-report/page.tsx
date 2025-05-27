@@ -537,10 +537,34 @@ export default function MainReport() {
             transform: scale(1) !important; /* Ensure report container is at normal scale */
             transform-origin: center top !important;
           }
+          
+          .download-button {
+            background: transparent !important;
+            border: 2px solid #FFE7C8 !important;
+            color: #FFE7C8 !important;
+            font-family: var(--font-b612-mono) !important;
+            font-size: clamp(1.95rem, 1.95vw, 1.56rem) !important;
+            font-weight: 400 !important;
+            letter-spacing: 0.05em !important;
+            padding: 1.56rem 4.55rem !important;
+            border-radius: 32.5px !important;
+            width: auto !important;
+            transform: scale(0.9) !important; /* Make download button 10% smaller */
+            transform-origin: center center !important;
+            box-shadow: 
+              0 0 5px rgba(255, 231, 200, 0.5),
+              0 0 10px rgba(255, 231, 200, 0.3),
+              0 0 15px rgba(255, 231, 200, 0.2) !important;
+          }
         }
         
         /* More flexible media query for similar resolutions around 712x1150-1192 */
         @media screen and (min-width: 700px) and (max-width: 730px) and (min-height: 1100px) and (max-height: 1200px) {
+          .download-button {
+            transform: scale(0.9) !important; /* Make download button 10% smaller */
+            transform-origin: center center !important;
+          }
+          
           .header-section {
             display: flex;
             flex-direction: row !important; /* Force side-by-side layout */
@@ -586,6 +610,23 @@ export default function MainReport() {
           
           .divider-container {
             margin-top: 3vh !important; /* Set to 3vh vertical margin for consistency */
+          }
+          
+          .download-button {
+            background: transparent !important;
+            border: 2px solid #FFE7C8 !important;
+            color: #FFE7C8 !important;
+            font-family: var(--font-b612-mono) !important;
+            font-size: clamp(1.95rem, 1.95vw, 1.56rem) !important;
+            font-weight: 400 !important;
+            letter-spacing: 0.05em !important;
+            padding: 1.56rem 4.55rem !important;
+            border-radius: 32.5px !important;
+            width: auto !important;
+            box-shadow: 
+              0 0 5px rgba(255, 231, 200, 0.5),
+              0 0 10px rgba(255, 231, 200, 0.3),
+              0 0 15px rgba(255, 231, 200, 0.2) !important;
           }
         }
         

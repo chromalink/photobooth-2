@@ -625,6 +625,17 @@ export default function Results() {
             margin-bottom: 1rem;
           }
         }
+
+        /* Responsive styling for resolutions between 712x1150px and 720x1200px */
+        @media screen and (min-width: 712px) and (max-width: 720px) and (min-height: 1150px) and (max-height: 1200px) {
+          .branding-info {
+            display: none !important; /* Hide branding info section for this specific resolution range */
+          }
+          
+          .desktop-layout {
+            margin-top: -18rem !important; /* Adjust margin-top from -15rem to -18rem */
+          }
+        }
       `}</style>
     </div>
   )
