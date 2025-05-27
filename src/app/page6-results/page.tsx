@@ -635,6 +635,10 @@ export default function Results() {
           .desktop-layout {
             margin-top: -18rem !important; /* Adjust margin-top from -15rem to -18rem */
           }
+          
+          .highlight {
+            margin-bottom: 0rem !important; /* Change margin-bottom from 1rem to 0rem */
+          }
         }
       `}</style>
     </div>
