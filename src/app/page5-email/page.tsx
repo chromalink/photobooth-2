@@ -492,6 +492,14 @@ export default function EmailPage() {
           }
         }
 
+        /* Responsive styling for resolutions between 712x1150px and 720x1200px */
+        @media screen and (min-width: 712px) and (max-width: 720px) and (min-height: 1150px) and (max-height: 1200px) {
+          .container {
+            transform: scale(1.15) !important; /* Reduced scale for specific resolution range */
+            transform-origin: center center;
+          }
+        }
+
         @media (min-width: 769px) {
           input, .primary-button {
             border-radius: 25px; /* Original border-radius for desktop */
