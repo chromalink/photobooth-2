@@ -408,8 +408,8 @@ export default function Results() {
         /* Specific media query for 712x1192 pixel threshold */
         @media screen and (min-width: 700px) and (max-width: 730px) and (min-height: 1180px) and (max-height: 1200px) {
           .branding-info {
-            top: calc(50px - 1vh); /* Move 1% up */
-            transform: translateX(-50%) scale(0.95); /* Make 5% smaller */
+            top: calc(50px - 3vh); /* Move 3% up */
+            transform: translateX(-50%) scale(0.65); /* Make 35% smaller */
           }
         }
         
@@ -573,6 +573,7 @@ export default function Results() {
             padding-right: 0;
             position: relative;
             top: 11vh !important; /* Set to 11vh for this specific resolution */
+            margin-top: -15rem !important; /* Changed from -13rem to -15rem */
           }
         }
         
