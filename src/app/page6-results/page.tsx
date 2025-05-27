@@ -405,8 +405,16 @@ export default function Results() {
           }
         }
         
-        /* Specific media query for 712x1192 pixel threshold */
-        @media screen and (min-width: 700px) and (max-width: 730px) and (min-height: 1180px) and (max-height: 1200px) {
+        /* More flexible media query for similar resolutions around 712x1150-1192 */
+        @media screen and (min-width: 700px) and (max-width: 730px) and (min-height: 1100px) and (max-height: 1200px) {
+          .branding-info {
+            top: calc(50px - 3vh); /* Move 3% up */
+            transform: translateX(-50%) scale(0.65); /* Make 35% smaller */
+          }
+        }
+        
+        /* Additional responsive approach using aspect ratio */
+        @media screen and (min-width: 690px) and (max-width: 740px) and (min-aspect-ratio: 0.59/1) and (max-aspect-ratio: 0.62/1) {
           .branding-info {
             top: calc(50px - 3vh); /* Move 3% up */
             transform: translateX(-50%) scale(0.65); /* Make 35% smaller */

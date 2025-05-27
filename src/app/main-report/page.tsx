@@ -479,6 +479,8 @@ export default function MainReport() {
             gap: 1rem !important;
             margin-top: 17rem !important; /* Changed from 2rem to 17rem */
             margin-bottom: 1rem !important;
+            transform: scale(1.05) !important; /* Make 5% bigger */
+            transform-origin: center center !important;
           }
           
           .text-header {
