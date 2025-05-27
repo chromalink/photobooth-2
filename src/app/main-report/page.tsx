@@ -469,6 +469,76 @@ export default function MainReport() {
           }
         }
         
+        /* Specific media query for 712x1192 pixel resolution */
+        @media screen and (width: 712px) and (height: 1192px) {
+          .section-text {
+            font-size: 1rem !important; /* Set paragraph text font size to 1rem */
+          }
+          
+          .section-label {
+            font-size: 1.1rem !important; /* Set label text font size to 1.1rem */
+            padding-right: 0.5rem !important; /* Reduce padding between label and text from 1rem to 0.5rem */
+          }
+          
+          .sections-container {
+            gap: 1rem !important; /* Reduce gap from 1.5rem to 1rem */
+          }
+          
+          .section {
+            margin-bottom: 0.5rem !important; /* Reduce bottom margin from 1rem to 0.5rem */
+            gap: 0.5rem !important; /* Add explicit gap property to control spacing */
+          }
+          
+          .reading-container {
+            transform: scale(1.05) !important; /* Make reading section 5% bigger */
+            transform-origin: center top !important; /* Scale from the top center */
+          }
+          
+          .divider-container {
+            margin-top: 3vh !important; /* Set to 3vh vertical margin for consistency */
+          }
+          
+          .report-container {
+            transform: scale(1) !important; /* Ensure report container is at normal scale */
+            transform-origin: center top !important;
+          }
+        }
+        
+        /* Flexible media query for 720px width and heights between 1150px and 1200px */
+        @media screen and (width: 720px) and (min-height: 1150px) and (max-height: 1200px), screen and (width: 720px) and (height: 1200px) {
+          .section-text {
+            font-size: 1rem !important; /* Set paragraph text font size to 1rem */
+          }
+          
+          .section-label {
+            font-size: 1.1rem !important; /* Set label text font size to 1.1rem */
+            padding-right: 0.5rem !important; /* Reduce padding between label and text from 1rem to 0.5rem */
+          }
+          
+          .sections-container {
+            gap: 1rem !important; /* Reduce gap from 1.5rem to 1rem */
+          }
+          
+          .section {
+            margin-bottom: 0.5rem !important; /* Reduce bottom margin from 1rem to 0.5rem */
+            gap: 0.5rem !important; /* Add explicit gap property to control spacing */
+          }
+          
+          .reading-container {
+            transform: scale(1.05) !important; /* Make reading section 5% bigger */
+            transform-origin: center top !important; /* Scale from the top center */
+          }
+          
+          .divider-container {
+            margin-top: 3vh !important; /* Set to 3vh vertical margin for consistency */
+          }
+          
+          .report-container {
+            transform: scale(1) !important; /* Ensure report container is at normal scale */
+            transform-origin: center top !important;
+          }
+        }
+        
         /* More flexible media query for similar resolutions around 712x1150-1192 */
         @media screen and (min-width: 700px) and (max-width: 730px) and (min-height: 1100px) and (max-height: 1200px) {
           .header-section {
@@ -477,7 +547,7 @@ export default function MainReport() {
             align-items: center !important;
             justify-content: space-between !important;
             gap: 1rem !important;
-            margin-top: 17rem !important; /* Changed from 2rem to 17rem */
+            margin-top: calc(17rem - 2vh) !important; /* Moved 2% up from previous 17rem (additional 1% as requested) */
             margin-bottom: 1rem !important;
             transform: scale(1.05) !important; /* Make 5% bigger */
             transform-origin: center center !important;
@@ -515,7 +585,7 @@ export default function MainReport() {
           }
           
           .divider-container {
-            margin-top: 0 !important; /* Remove top margin from divider */
+            margin-top: 3vh !important; /* Set to 3vh vertical margin for consistency */
           }
         }
         
@@ -527,7 +597,7 @@ export default function MainReport() {
             align-items: center !important;
             justify-content: space-between !important;
             gap: 1rem !important;
-            margin-top: 17rem !important; /* Changed from 2rem to 17rem */
+            margin-top: calc(17rem - 2vh) !important; /* Moved 2% up from previous 17rem (additional 1% as requested) */
             margin-bottom: 1rem !important;
             transform: scale(1.05) !important; /* Make 5% bigger */
             transform-origin: center center !important;
@@ -565,7 +635,7 @@ export default function MainReport() {
           }
           
           .divider-container {
-            margin-top: 0 !important; /* Remove top margin from divider */
+            margin-top: 1vh !important; /* Add 1% vertical height margin to move dividers down */
           }
         }
 
@@ -941,6 +1011,56 @@ export default function MainReport() {
           .section-label {
             width: 100%;
             margin-bottom: 0.5rem;
+          }
+        }
+        
+        /* Specific media query for 720px by 2000px resolution */
+        @media screen and (width: 720px) and (height: 2000px) {
+          .header-section {
+            display: flex;
+            flex-direction: row !important; /* Force side-by-side layout */
+            align-items: center !important;
+            justify-content: space-between !important;
+            gap: 1rem !important;
+            margin-top: calc(17rem - 2vh) !important; /* Move up by 2% of viewport height */
+            margin-bottom: 1rem !important;
+            transform: scale(1.05) !important; /* Make 5% bigger */
+            transform-origin: center center !important;
+          }
+          
+          .text-header {
+            flex: 1 !important;
+            max-width: 50% !important; /* Take up half the width */
+            margin-top: 0 !important;
+            order: 1 !important; /* Put text on the left */
+          }
+          
+          .image-section {
+            flex: 1 !important;
+            max-width: 45% !important; /* Take up slightly less than half the width */
+            order: 2 !important; /* Put image on the right */
+          }
+          
+          .title-text {
+            font-size: min(max(1.3rem, 5vw), 1.5rem) !important; /* Smaller font size for title */
+          }
+          
+          .category-description {
+            font-size: 0.9rem !important; /* Smaller font size for description */
+            margin-top: 0.5rem !important;
+          }
+          
+          .report-container {
+            margin-top: 0 !important; /* Remove top margin */
+            padding-top: 1rem !important; /* Add some padding at the top */
+          }
+          
+          .reading-section {
+            margin-top: 1rem !important; /* Reduce space before reading section */
+          }
+          
+          .divider-container {
+            margin-top: 1vh !important; /* Add 1% vertical height margin to move dividers down */
           }
         }
         
