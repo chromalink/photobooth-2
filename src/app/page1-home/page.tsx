@@ -227,7 +227,12 @@ export default function Home() {
         /* Landscape 1920x1080 */
         @media screen and (width: 1920px) and (height: 1080px) {
           .responsiveContainer {
-            transform: scale(0.97);
+            transform: scale(1.1);
+            margin-top: -5vh;
+          }
+          
+          .branding-info {
+            top: 50px; /* Maintain original position for large screens */
           }
         }
         
@@ -239,7 +244,7 @@ export default function Home() {
           }
           
           .branding-info {
-            top: 40px;
+            top: 20px; /* Updated to match main branding-info position */
           }
           
           .main::before {
@@ -253,11 +258,19 @@ export default function Home() {
           .responsiveContainer {
             transform: scale(0.85);
           }
+          
+          .branding-info {
+            top: 50px; /* Maintain original position for large screens */
+          }
         }
 
         @media screen and (width: 1366px) and (height: 768px) {
           .responsiveContainer {
             transform: scale(0.75);
+          }
+          
+          .branding-info {
+            top: 50px; /* Maintain original position for large screens */
           }
         }
 
@@ -266,6 +279,10 @@ export default function Home() {
             transform: scale(1.3);
             width: min(85%, 1000px);
             height: min(65vh, 800px);
+          }
+          
+          .branding-info {
+            top: 50px; /* Maintain original position for large screens */
           }
         }
 
@@ -287,11 +304,16 @@ export default function Home() {
             font-size: calc(clamp(1.5rem, 1.5vw, 1.2rem) * 1.4); /* Increase size by 40% */
             padding: 1.68rem 4.9rem; /* Increase padding by 40% */
           }
+          
+          /* Restore original branding-info position for desktop */
+          .branding-info {
+            top: 50px;
+          }
         }
         
         .branding-info {
           position: absolute;
-          top: 50px;
+          top: 50px; /* Set back to original 50px for desktop */
           left: 50%;
           transform: translateX(-50%);
           display: flex;
@@ -306,8 +328,22 @@ export default function Home() {
         /* Tablet-specific positioning for branding info */
         @media screen and (min-width: 768px) and (max-width: 1023px) {
           .branding-info {
-            top: calc(50px - 3vh); /* Move slightly up from original position */
+            top: calc(20px - 3vh); /* Move slightly up from new base position of 20px */
             transform: translateX(-50%) scale(0.95); /* Make 5% smaller */
+          }
+        }
+        
+        /* Specific media query for 712x1192 pixel threshold */
+        @media screen and (min-width: 700px) and (max-width: 730px) and (min-height: 1180px) and (max-height: 1200px) {
+          .branding-info {
+            top: 20px !important; /* Force 20px for this specific resolution */
+          }
+        }
+        
+        /* Mobile devices */
+        @media screen and (max-width: 767px) {
+          .branding-info {
+            top: 20px; /* Set to 20px for mobile devices */
           }
         }
         
