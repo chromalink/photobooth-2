@@ -1148,7 +1148,7 @@ export default function Orb2() {
 
         @media screen and (max-width: 768px) {
           .content-container {
-            top: 10%;
+            top: 3%; /* Changed from 10% to 3% */
           }
 
           .media-section {
@@ -1156,6 +1156,13 @@ export default function Orb2() {
           }
         }
 
+        /* Specific media query for 712x1192 pixel threshold */
+        @media screen and (min-width: 700px) and (max-width: 730px) and (min-height: 1180px) and (max-height: 1200px) {
+          .content-container {
+            top: 3% !important; /* Force 3% for this specific resolution */
+          }
+        }
+        
         @media screen and (max-width: 480px) {
           .content-container {
             top: 10%;
@@ -1231,7 +1238,7 @@ export default function Orb2() {
           width: 100%;
           display: flex;
           justify-content: center;
-          margin-top: 2rem;
+          margin-top: 4rem; /* Changed from 2rem to 4rem */
         }
 
         .restart-button {

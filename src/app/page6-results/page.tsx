@@ -405,6 +405,14 @@ export default function Results() {
           }
         }
         
+        /* Specific media query for 712x1192 pixel threshold */
+        @media screen and (min-width: 700px) and (max-width: 730px) and (min-height: 1180px) and (max-height: 1200px) {
+          .branding-info {
+            top: calc(50px - 1vh); /* Move 1% up */
+            transform: translateX(-50%) scale(0.95); /* Make 5% smaller */
+          }
+        }
+        
         .branding-content {
           display: flex;
           align-items: center;
@@ -523,6 +531,63 @@ export default function Results() {
           }
         }
 
+        /* Enhanced responsive positioning for various screen sizes */
+        /* Small mobile devices */
+        @media screen and (max-width: 480px) {
+          .desktop-layout {
+            padding-top: 0;
+            padding-left: 0;
+            padding-right: 0;
+            position: relative;
+            top: 3vh; /* Less space for very small screens */
+          }
+        }
+        
+        /* Medium mobile devices */
+        @media screen and (min-width: 481px) and (max-width: 600px) {
+          .desktop-layout {
+            padding-top: 0;
+            padding-left: 0;
+            padding-right: 0;
+            position: relative;
+            top: 4vh; /* Slightly more space for medium screens */
+          }
+        }
+        
+        /* Large mobile devices */
+        @media screen and (min-width: 601px) and (max-width: 699px) {
+          .desktop-layout {
+            padding-top: 0;
+            padding-left: 0;
+            padding-right: 0;
+            position: relative;
+            top: 6vh; /* More space for larger mobile screens */
+          }
+        }
+        
+        /* Specific media query for 712x1192 pixel threshold and similar sizes */
+        @media screen and (min-width: 700px) and (max-width: 730px) and (min-height: 1100px) and (max-height: 1200px) {
+          .desktop-layout {
+            padding-top: 0;
+            padding-left: 0;
+            padding-right: 0;
+            position: relative;
+            top: 11vh !important; /* Set to 11vh for this specific resolution */
+          }
+        }
+        
+        /* General approach for screens around 700-750px width with variable heights */
+        @media screen and (min-width: 700px) and (max-width: 750px) {
+          .desktop-layout {
+            padding-top: 0;
+            padding-left: 0;
+            padding-right: 0;
+            position: relative;
+            /* Fluid calculation that adjusts based on viewport height */
+            top: calc(5vh + min(6vh, 30px)); /* Base 5vh plus up to 6vh or 30px extra */
+          }
+        }
+        
         @media (max-width: 768px) {
           .desktop-layout {
             padding-top: 0;
