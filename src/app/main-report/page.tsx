@@ -366,7 +366,7 @@ export default function MainReport() {
           gap: 2rem;
           color: #FFE7C8;
           font-family: var(--font-b612-mono);
-          margin-top: 5%; /* Added to move the reading box down by 5% */
+          margin-top: 1%; /* Changed from 5% to 1% to reduce space above reading section */
         }
 
         .divider-container {
@@ -375,6 +375,7 @@ export default function MainReport() {
           flex-direction: column;
           align-items: center;
           gap: 8px;
+          margin-top: 1%; /* Added to move the divider down by 1% */
         }
 
         .divider-line {
