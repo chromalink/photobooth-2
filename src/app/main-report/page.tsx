@@ -469,8 +469,58 @@ export default function MainReport() {
           }
         }
         
-        /* Specific media query for 712x1192 pixel threshold */
-        @media screen and (min-width: 700px) and (max-width: 730px) and (min-height: 1180px) and (max-height: 1200px) {
+        /* More flexible media query for similar resolutions around 712x1150-1192 */
+        @media screen and (min-width: 700px) and (max-width: 730px) and (min-height: 1100px) and (max-height: 1200px) {
+          .header-section {
+            display: flex;
+            flex-direction: row !important; /* Force side-by-side layout */
+            align-items: center !important;
+            justify-content: space-between !important;
+            gap: 1rem !important;
+            margin-top: 17rem !important; /* Changed from 2rem to 17rem */
+            margin-bottom: 1rem !important;
+            transform: scale(1.05) !important; /* Make 5% bigger */
+            transform-origin: center center !important;
+          }
+          
+          .text-header {
+            flex: 1 !important;
+            max-width: 50% !important; /* Take up half the width */
+            margin-top: 0 !important;
+            order: 1 !important; /* Put text on the left */
+          }
+          
+          .image-section {
+            flex: 1 !important;
+            max-width: 45% !important; /* Take up slightly less than half the width */
+            order: 2 !important; /* Put image on the right */
+          }
+          
+          .title-text {
+            font-size: min(max(1.3rem, 5vw), 1.5rem) !important; /* Smaller font size for title */
+          }
+          
+          .category-description {
+            font-size: 0.9rem !important; /* Smaller font size for description */
+            margin-top: 0.5rem !important;
+          }
+          
+          .report-container {
+            margin-top: 0 !important; /* Remove top margin */
+            padding-top: 1rem !important; /* Add some padding at the top */
+          }
+          
+          .reading-section {
+            margin-top: 1rem !important; /* Reduce space before reading section */
+          }
+          
+          .divider-container {
+            margin-top: 0 !important; /* Remove top margin from divider */
+          }
+        }
+        
+        /* Additional responsive approach using aspect ratio */
+        @media screen and (min-width: 690px) and (max-width: 740px) and (min-aspect-ratio: 0.59/1) and (max-aspect-ratio: 0.62/1) {
           .header-section {
             display: flex;
             flex-direction: row !important; /* Force side-by-side layout */
