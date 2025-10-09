@@ -191,13 +191,13 @@ export default function EmailPage() {
             <div className="input-group">
               <input
                 type="text"
-                placeholder="Saida Saetgar"
+                placeholder="Name"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
               />
               <input
                 type="email"
-                placeholder="saesd1694@gmail.com"
+                placeholder="Email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
@@ -211,6 +211,17 @@ export default function EmailPage() {
                 aria-label="Send email"
               >
                 {isSending ? 'SENDING...' : 'SEND TO EMAIL'}
+              </button>
+              <button 
+                onClick={() => {
+                  resetSession();
+                  setAiModelProvider(DEFAULT_AI_PROVIDER);
+                  router.push('/community-grid');
+                }}
+                className="primary-button"
+                aria-label="Skip to community grid"
+              >
+                SKIP DOWNLOAD
               </button>
             </div>
           </div>
