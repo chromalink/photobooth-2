@@ -576,7 +576,8 @@ export default function CommunityGrid() {
         .grid-item {
           position: relative;
           width: 100%;
-          aspect-ratio: 1/1;
+          height: 0;
+          padding-bottom: 100%; /* Creates 1:1 aspect ratio */
           border-radius: 8px;
           overflow: hidden;
           transition: transform 0.3s ease;
@@ -589,7 +590,9 @@ export default function CommunityGrid() {
         }
         
         .grid-item-inner {
-          position: relative;
+          position: absolute;
+          top: 0;
+          left: 0;
           width: 100%;
           height: 100%;
           border-radius: inherit;
@@ -597,7 +600,9 @@ export default function CommunityGrid() {
         }
         
         .image-container {
-          position: relative;
+          position: absolute;
+          top: 0;
+          left: 0;
           width: 100%;
           height: 100%;
           overflow: hidden;
