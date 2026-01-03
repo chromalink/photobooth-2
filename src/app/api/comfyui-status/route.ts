@@ -16,6 +16,8 @@ async function getHistory(apiEndpoint: string, promptId: string) {
   return response.json();
 }
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   const headers = {
     'Access-Control-Allow-Origin': '*',
