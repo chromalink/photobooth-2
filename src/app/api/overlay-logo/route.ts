@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import sharp from 'sharp';
+import Jimp from 'jimp';
 import path from 'path';
 import fs from 'fs';
 
@@ -78,61 +78,39 @@ export async function POST(req: NextRequest) {
     
     const logoBuffer = fs.readFileSync(logoPath);
     
-    // Get image metadata to determine dimensions
-    const imageMetadata = await sharp(imageBuffer).metadata();
-    const imageWidth = imageMetadata.width || 1024;
-    const imageHeight = imageMetadata.height || 1024;
+    // Load images with Jimp
+    const image = await Jimp.read(imageBuffer);
+    const logo = await Jimp.read(logoBuffer);
+    
+    const imageWidth = image.getWidth();
+    const imageHeight = image.getHeight();
     
     // Calculate logo dimensions (80% of image width)
     const logoWidth = Math.floor(imageWidth * 0.8);
     
-    // Resize logo while maintaining aspect ratio and apply 80% opacity
-    const resizedLogo = await sharp(logoBuffer)
-      .resize(logoWidth, null, {
-        fit: 'contain',
-        withoutEnlargement: true
-      })
-      .ensureAlpha()
-      .composite([{
-        input: Buffer.from([255, 255, 255, Math.floor(255 * 0.8)]),
-        raw: {
-          width: 1,
-          height: 1,
-          channels: 4
-        },
-        tile: true,
-        blend: 'dest-in'
-      }])
-      .toBuffer();
+    // Resize logo while maintaining aspect ratio
+    logo.scaleToFit(logoWidth, Jimp.AUTO);
     
-    // Get resized logo dimensions
-    const logoMetadata = await sharp(resizedLogo).metadata();
-    const logoHeight = logoMetadata.height || logoWidth;
+    // Apply 80% opacity to logo
+    logo.opacity(0.8);
+    
+    const logoHeight = logo.getHeight();
     
     // Calculate position for center horizontally, extending beyond bottom with -1% margin
     const left = Math.floor((imageWidth - logoWidth) / 2);
     const top = Math.floor(imageHeight - logoHeight + (imageHeight * 0.01));
     
-    // Composite the logo onto the image and compress to reduce size
-    // Resize to max 1024px width if larger, then compress to JPEG
-    let compositeImage = sharp(imageBuffer)
-      .composite([{
-        input: resizedLogo,
-        top: top,
-        left: left
-      }]);
+    // Composite the logo onto the image
+    image.composite(logo, left, top);
     
     // If image is larger than 1024px, resize it
     if (imageWidth > 1024) {
-      compositeImage = compositeImage.resize(1024, null, {
-        fit: 'inside',
-        withoutEnlargement: false
-      });
+      image.scaleToFit(1024, Jimp.AUTO);
     }
     
-    const outputBuffer = await compositeImage
-      .jpeg({ quality: 85, mozjpeg: true })
-      .toBuffer();
+    // Set JPEG quality to 85 and get buffer
+    image.quality(85);
+    const outputBuffer = await image.getBufferAsync(Jimp.MIME_JPEG);
     
     // Convert to base64 data URL
     const base64Image = outputBuffer.toString('base64');

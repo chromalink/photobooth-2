@@ -56,15 +56,7 @@ const nextConfig = {
   // Disable static generation for API routes
   experimental: {
     // This setting ensures API routes are not statically generated
-    serverComponentsExternalPackages: ['@sendgrid/mail', 'sharp'],
-    // Exclude sharp from output file tracing to prevent stack overflow
-    outputFileTracingExcludes: {
-      '*': [
-        'node_modules/sharp/**/*',
-        'node_modules/@img/**/*',
-        '**/node_modules/sharp/**/*'
-      ]
-    }
+    serverComponentsExternalPackages: ['@sendgrid/mail']
   }
 }
 
