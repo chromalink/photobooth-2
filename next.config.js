@@ -57,7 +57,14 @@ const nextConfig = {
   output: 'standalone',
   experimental: {
     // This setting ensures API routes are not statically generated
-    serverComponentsExternalPackages: ['@sendgrid/mail']
+    serverComponentsExternalPackages: ['@sendgrid/mail', 'sharp']
+  },
+  // Exclude sharp from build traces to prevent Vercel deployment issues
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      config.externals.push('sharp');
+    }
+    return config;
   }
 }
 
