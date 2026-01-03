@@ -358,15 +358,43 @@ export default function Orb2() {
                 };
 
                 try {
-                  // Convert the image URL to a data URL for better email attachment handling
+                  // First, overlay the logo on the image
+                  console.log('Overlaying logo on ComfyUI image for display...');
+                  let imageWithLogo = imageUrl;
+                  
+                  try {
+                    const overlayResponse = await fetch('/api/overlay-logo', {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                      },
+                      body: JSON.stringify({
+                        imageUrl,
+                      }),
+                    });
+
+                    if (overlayResponse.ok) {
+                      const overlayData = await overlayResponse.json();
+                      if (overlayData.success) {
+                        imageWithLogo = overlayData.imageUrl;
+                        console.log('Logo overlay applied successfully for display');
+                      }
+                    } else {
+                      console.error('Failed to overlay logo for display, using original image');
+                    }
+                  } catch (overlayError) {
+                    console.error('Error overlaying logo for display:', overlayError);
+                  }
+                  
+                  // Convert the image with logo to a data URL for better email attachment handling
                   let dataUrl: string | null = null;
                   
-                  if (imageUrl.startsWith('data:')) {
+                  if (imageWithLogo.startsWith('data:')) {
                     console.log('Image is already a data URL');
-                    dataUrl = imageUrl;
+                    dataUrl = imageWithLogo;
                   } else {
                     console.log('Converting image to data URL...');
-                    dataUrl = await fetchAndConvertToDataUrl(imageUrl);
+                    dataUrl = await fetchAndConvertToDataUrl(imageWithLogo);
                   }
                   
                   if (dataUrl) {
@@ -375,9 +403,9 @@ export default function Orb2() {
                   } else {
                     // Fallback to using the original URL if conversion fails
                     console.log('Using original image URL as fallback');
-                    const fullImageUrl = imageUrl.startsWith('/') 
-                      ? `${window.location.origin}${imageUrl}` 
-                      : imageUrl;
+                    const fullImageUrl = imageWithLogo.startsWith('/') 
+                      ? `${window.location.origin}${imageWithLogo}` 
+                      : imageWithLogo;
                     setAiModelImage(fullImageUrl);
                   }
                   
@@ -451,14 +479,37 @@ export default function Orb2() {
   // Function to upload image to Google Drive
   const uploadImageToDrive = async (imageUrl: string) => {
     try {
-      console.log('Attempting to upload image to Google Drive');
-      const response = await fetch('/api/upload-to-drive', {
+      console.log('Attempting to overlay logo on image');
+      
+      // First, overlay the CES logo on the image
+      const overlayResponse = await fetch('/api/overlay-logo', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           imageUrl,
+        }),
+      });
+
+      if (!overlayResponse.ok) {
+        console.error('Failed to overlay logo, uploading original image');
+        // If overlay fails, continue with original image
+      }
+
+      const overlayData = await overlayResponse.json();
+      const imageWithLogo = overlayData.success ? overlayData.imageUrl : imageUrl;
+      
+      console.log('Logo overlay completed, now uploading to Google Drive');
+      
+      // Now upload the image with logo to Google Drive
+      const response = await fetch('/api/upload-to-drive', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          imageUrl: imageWithLogo,
           fileName: `face-audit-${Date.now()}.png`,
         }),
       });
