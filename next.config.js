@@ -59,7 +59,11 @@ const nextConfig = {
     serverComponentsExternalPackages: ['@sendgrid/mail', 'sharp'],
     // Exclude sharp from output file tracing to prevent stack overflow
     outputFileTracingExcludes: {
-      '*': ['node_modules/sharp/**/*']
+      '*': [
+        'node_modules/sharp/**/*',
+        'node_modules/@img/**/*',
+        '**/node_modules/sharp/**/*'
+      ]
     }
   }
 }
